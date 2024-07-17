@@ -2,7 +2,7 @@
   <q-item>
     <q-btn
       dense
-      label="Nueva Clasificacion"
+      label="Nuevo tipo de equipo"
       color="primary"
       @click="showAdd = true"
       icon="add_circle"
@@ -13,7 +13,7 @@
       <q-table
         flat
         bordered
-        title="Clasificaciones de construccion"
+        title="Tipos de equipo"
         :rows="rows"
         :columns="columns"
         row-key="name"
@@ -65,7 +65,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="add" />
+          <tipo-equipo-form ref="add" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -95,7 +95,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="edit" :classConst="selectedItem" />
+          <tipo-equipo-form ref="edit" :tipoEquipo="selectedItem" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -109,7 +109,7 @@ import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
-import ClassConstForm from "src/components/catalogos/ClassConstForm.vue";
+import TipoEquipoForm from "src/components/catalogos/TipoEquipoForm.vue";
 
 const rows = ref([]);
 const selectedItem = ref(null);
@@ -132,12 +132,7 @@ const openEdit = (item) => {
 };
 
 const getRows = async () => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("GET", null, "/api/intranet/tipoEquipo", "");
   rows.value = res;
 };
 
@@ -153,14 +148,9 @@ const postItem = async () => {
     return;
   }
   const final = {
-    ...add.value.formClassConst,
+    ...add.value.formTipoEquipo,
   };
-  let res = await sendRequest(
-    "POST",
-    final,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("POST", final, "/api/intranet/tipoEquipo", "");
   showAdd.value = false;
   getRows();
 };
@@ -177,12 +167,12 @@ const putItem = async () => {
     return;
   }
   const final = {
-    ...edit.value.formClassConst,
+    ...edit.value.formTipoEquipo,
   };
   let res = await sendRequest(
     "PUT",
     final,
-    "/api/intranet/construction-classification/" + final.id,
+    "/api/intranet/tipoEquipo/" + final.id,
     ""
   );
   showEdit.value = false;
@@ -193,7 +183,7 @@ const destroyItem = async () => {
   let res = await sendRequest(
     "DELETE",
     null,
-    "/api/intranet/construction-classification/" + selectedItem.value.id,
+    "/api/intranet/tipoEquipo/" + selectedItem.value.id,
     ""
   );
   selectedItem.value = null;

@@ -22,16 +22,15 @@
       >
         <template v-slot:body-cell-name="props">
           <q-td>
-            <q-item>
+            <q-item dense>
               <q-item-section avatar>
-                <q-item>
-                  <q-btn
-                    color="primary"
-                    flat
-                    icon="more_vert"
-                    @click="openEdit(props.row)"
-                  />
-                </q-item>
+                <q-btn
+                  dense
+                  color="primary"
+                  flat
+                  icon="edit_square"
+                  @click="openEdit(props.row)"
+                />
               </q-item-section>
               <q-item-section>
                 <q-item-label>
@@ -122,10 +121,8 @@ const edit = ref(null);
 const columns = [
   {
     name: "name",
-    label: "Nombre",
     align: "left",
     field: "name",
-    sortable: true,
   },
 ];
 

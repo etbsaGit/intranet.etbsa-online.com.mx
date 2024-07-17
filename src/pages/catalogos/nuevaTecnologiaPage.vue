@@ -2,7 +2,7 @@
   <q-item>
     <q-btn
       dense
-      label="Nueva Clasificacion"
+      label="Agrgear Nueva tecnologia"
       color="primary"
       @click="showAdd = true"
       icon="add_circle"
@@ -13,7 +13,7 @@
       <q-table
         flat
         bordered
-        title="Clasificaciones de construccion"
+        title="Nuevas Tecnologias"
         :rows="rows"
         :columns="columns"
         row-key="name"
@@ -65,7 +65,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="add" />
+          <nueva-tecnologia-form ref="add" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -95,7 +95,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="edit" :classConst="selectedItem" />
+          <nueva-tecnologia-form ref="edit" :nuevaTecnologia="selectedItem" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -109,7 +109,7 @@ import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
-import ClassConstForm from "src/components/catalogos/ClassConstForm.vue";
+import NuevaTecnologiaForm from "src/components/catalogos/NuevaTecnologiaForm.vue";
 
 const rows = ref([]);
 const selectedItem = ref(null);
@@ -132,12 +132,7 @@ const openEdit = (item) => {
 };
 
 const getRows = async () => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("GET", null, "/api/intranet/nuevaTecnologia", "");
   rows.value = res;
 };
 
@@ -153,12 +148,12 @@ const postItem = async () => {
     return;
   }
   const final = {
-    ...add.value.formClassConst,
+    ...add.value.formNuevaTecnologia,
   };
   let res = await sendRequest(
     "POST",
     final,
-    "/api/intranet/construction-classification",
+    "/api/intranet/nuevaTecnologia",
     ""
   );
   showAdd.value = false;
@@ -177,12 +172,12 @@ const putItem = async () => {
     return;
   }
   const final = {
-    ...edit.value.formClassConst,
+    ...edit.value.formNuevaTecnologia,
   };
   let res = await sendRequest(
     "PUT",
     final,
-    "/api/intranet/construction-classification/" + final.id,
+    "/api/intranet/nuevaTecnologia/" + final.id,
     ""
   );
   showEdit.value = false;
@@ -193,7 +188,7 @@ const destroyItem = async () => {
   let res = await sendRequest(
     "DELETE",
     null,
-    "/api/intranet/construction-classification/" + selectedItem.value.id,
+    "/api/intranet/nuevaTecnologia/" + selectedItem.value.id,
     ""
   );
   selectedItem.value = null;

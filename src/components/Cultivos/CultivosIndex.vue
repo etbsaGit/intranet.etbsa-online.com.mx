@@ -1,48 +1,46 @@
 <template>
-  <q-item>
-    <q-btn
-      dense
-      label="Nueva Clasificacion"
-      color="primary"
-      @click="showAdd = true"
-      icon="add_circle"
-    />
-  </q-item>
-  <q-item>
-    <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Clasificaciones de construccion"
-        :rows="rows"
-        :columns="columns"
-        row-key="name"
-        dense
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-name="props">
-          <q-td>
-            <q-item dense>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="primary"
-                  flat
-                  icon="edit_square"
-                  @click="openEdit(props.row)"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>
-                  {{ props.row.name }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-td>
-        </template>
-      </q-table>
-    </q-item-section>
-  </q-item>
+  <q-list bordered separator dense style="border-radius: 10px">
+    <q-item align="center">
+      <q-item-section avatar>
+        <q-item-label><strong>Editar</strong></q-item-label>
+      </q-item-section>
+      <q-item-section>
+        <q-item-label><strong>Cultivo</strong></q-item-label>
+      </q-item-section>
+      <q-item-section>
+        <q-item-label><strong>Finalidad del cultivo</strong></q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item align="center" v-for="(cultivo, index) in rows" :key="index">
+      <q-item-section avatar>
+        <q-btn
+          dense
+          color="primary"
+          flat
+          icon="edit_square"
+          @click="openEdit(cultivo)"
+        />
+      </q-item-section>
+      <q-item-section>
+        {{ cultivo.cultivo.name }}
+      </q-item-section>
+      <q-item-section>
+        {{ cultivo.tipo_cultivo.name }}
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-btn
+          dense
+          flat
+          label="Agregar cultivo"
+          color="primary"
+          icon="add_circle"
+          @click="showAdd = true"
+        />
+      </q-item-section>
+    </q-item>
+  </q-list>
 
   <q-dialog
     v-model="showAdd"
@@ -65,7 +63,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="add" />
+          <cultivos-form ref="add" :cliente="cliente" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -95,7 +93,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="edit" :classConst="selectedItem" />
+          <cultivos-form ref="edit" :cultivo="selectedItem" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -109,7 +107,9 @@ import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
-import ClassConstForm from "src/components/catalogos/ClassConstForm.vue";
+import CultivosForm from "src/components/Cultivos/CultivosForm.vue";
+
+const { cliente } = defineProps(["cliente"]);
 
 const rows = ref([]);
 const selectedItem = ref(null);
@@ -118,24 +118,16 @@ const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
 
-const columns = [
-  {
-    name: "name",
-    align: "left",
-    field: "name",
-  },
-];
-
 const openEdit = (item) => {
   selectedItem.value = item;
   showEdit.value = true;
 };
 
-const getRows = async () => {
+const getRows = async (id) => {
   let res = await sendRequest(
     "GET",
     null,
-    "/api/intranet/construction-classification",
+    "/api/intranet/clienteCultivo/cliente/" + id,
     ""
   );
   rows.value = res;
@@ -153,16 +145,16 @@ const postItem = async () => {
     return;
   }
   const final = {
-    ...add.value.formClassConst,
+    ...add.value.formCultivo,
   };
   let res = await sendRequest(
     "POST",
     final,
-    "/api/intranet/construction-classification",
+    "/api/intranet/clienteCultivo",
     ""
   );
   showAdd.value = false;
-  getRows();
+  getRows(cliente.id);
 };
 
 const putItem = async () => {
@@ -177,31 +169,31 @@ const putItem = async () => {
     return;
   }
   const final = {
-    ...edit.value.formClassConst,
+    ...edit.value.formCultivo,
   };
   let res = await sendRequest(
     "PUT",
     final,
-    "/api/intranet/construction-classification/" + final.id,
+    "/api/intranet/clienteCultivo/" + final.id,
     ""
   );
   showEdit.value = false;
-  getRows();
+  getRows(cliente.id);
 };
 
 const destroyItem = async () => {
   let res = await sendRequest(
     "DELETE",
     null,
-    "/api/intranet/construction-classification/" + selectedItem.value.id,
+    "/api/intranet/clienteCultivo/" + selectedItem.value.id,
     ""
   );
   selectedItem.value = null;
   showEdit.value = false;
-  getRows();
+  getRows(cliente.id);
 };
 
 onMounted(() => {
-  getRows();
+  getRows(cliente.id);
 });
 </script>

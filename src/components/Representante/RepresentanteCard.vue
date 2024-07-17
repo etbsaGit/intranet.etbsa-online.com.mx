@@ -1,48 +1,77 @@
 <template>
-  <q-item>
-    <q-btn
-      dense
-      label="Nueva Clasificacion"
-      color="primary"
-      @click="showAdd = true"
-      icon="add_circle"
-    />
-  </q-item>
-  <q-item>
+  <q-item v-if="row == null">
     <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Clasificaciones de construccion"
-        :rows="rows"
-        :columns="columns"
-        row-key="name"
+      <q-btn
         dense
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-name="props">
-          <q-td>
-            <q-item dense>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="primary"
-                  flat
-                  icon="edit_square"
-                  @click="openEdit(props.row)"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>
-                  {{ props.row.name }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-td>
-        </template>
-      </q-table>
+        label="Agregar representante"
+        color="primary"
+        icon="add_circle"
+        @click="showAdd = true"
+      />
     </q-item-section>
   </q-item>
+
+  <q-card flat bordered v-else>
+    <q-item>
+      <q-item-section class="text-h6">
+        <q-item-label>
+          <strong class="text-teal">Nombre:</strong>
+          {{ row.nombre }}
+        </q-item-label>
+        <q-item-label>
+          <strong class="text-teal">RFC:</strong>
+          {{ row.rfc }}
+        </q-item-label>
+      </q-item-section>
+      <q-item-section side>
+        <q-btn dense color="primary" label="Editar" @click="openEdit(row)" />
+      </q-item-section>
+    </q-item>
+
+    <q-separator />
+
+    <q-item align="center">
+      <q-item-section>
+        <q-item-label>
+          <strong>Email:</strong>
+          {{ row.email }}
+        </q-item-label>
+        <q-item-label>
+          <strong>Telefono:</strong>
+          {{ row.telefono }}
+        </q-item-label>
+      </q-item-section>
+      <q-separator vertical />
+      <q-item-section>
+        <q-item>
+          <q-item-section>
+            <q-item-label>
+              <strong>Estado:</strong>
+              {{ row.state_entity.name }}
+            </q-item-label>
+            <q-item-label>
+              <strong>Ciudad:</strong>
+              {{ row.town.name }}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>
+              <strong>Colonia:</strong>
+              {{ row.colonia }}
+            </q-item-label>
+            <q-item-label>
+              <strong>Calle:</strong>
+              {{ row.calle }}
+            </q-item-label>
+            <q-item-label>
+              <strong>Codigo postal:</strong>
+              {{ row.codigo_postal }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-item-section>
+    </q-item>
+  </q-card>
 
   <q-dialog
     v-model="showAdd"
@@ -65,7 +94,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="add" />
+          <representante-form ref="add" :cliente="cliente" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -95,7 +124,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="edit" :classConst="selectedItem" />
+          <representante-form ref="edit" :representante="selectedItem" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -109,36 +138,30 @@ import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
-import ClassConstForm from "src/components/catalogos/ClassConstForm.vue";
+import RepresentanteForm from "src/components/Representante/RepresentanteForm.vue";
 
-const rows = ref([]);
+const { cliente } = defineProps(["cliente"]);
+
+const row = ref(null);
 const selectedItem = ref(null);
 const showAdd = ref(false);
 const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
 
-const columns = [
-  {
-    name: "name",
-    align: "left",
-    field: "name",
-  },
-];
-
 const openEdit = (item) => {
   selectedItem.value = item;
   showEdit.value = true;
 };
 
-const getRows = async () => {
+const getRow = async (id) => {
   let res = await sendRequest(
     "GET",
     null,
-    "/api/intranet/construction-classification",
+    "/api/intranet/representante/cliente/" + id,
     ""
   );
-  rows.value = res;
+  row.value = res;
 };
 
 const postItem = async () => {
@@ -153,16 +176,11 @@ const postItem = async () => {
     return;
   }
   const final = {
-    ...add.value.formClassConst,
+    ...add.value.formRepresentante,
   };
-  let res = await sendRequest(
-    "POST",
-    final,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("POST", final, "/api/intranet/representante", "");
   showAdd.value = false;
-  getRows();
+  getRow(cliente.id);
 };
 
 const putItem = async () => {
@@ -177,31 +195,32 @@ const putItem = async () => {
     return;
   }
   const final = {
-    ...edit.value.formClassConst,
+    ...edit.value.formRepresentante,
   };
   let res = await sendRequest(
     "PUT",
     final,
-    "/api/intranet/construction-classification/" + final.id,
+    "/api/intranet/representante/" + final.id,
     ""
   );
   showEdit.value = false;
-  getRows();
+  getRow(cliente.id);
 };
 
 const destroyItem = async () => {
   let res = await sendRequest(
     "DELETE",
     null,
-    "/api/intranet/construction-classification/" + selectedItem.value.id,
+    "/api/intranet/representante/" + selectedItem.value.id,
     ""
   );
   selectedItem.value = null;
   showEdit.value = false;
-  getRows();
+  row.value = null;
+  getRow(cliente.id);
 };
 
 onMounted(() => {
-  getRows();
+  getRow(cliente.id);
 });
 </script>

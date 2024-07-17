@@ -2,7 +2,7 @@
   <q-item>
     <q-btn
       dense
-      label="Nueva Clasificacion"
+      label="Nueva marca"
       color="primary"
       @click="showAdd = true"
       icon="add_circle"
@@ -13,7 +13,7 @@
       <q-table
         flat
         bordered
-        title="Clasificaciones de construccion"
+        title="Marcas"
         :rows="rows"
         :columns="columns"
         row-key="name"
@@ -65,7 +65,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="add" />
+          <marca-form ref="add" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -95,7 +95,7 @@
       <q-separator />
       <q-item>
         <q-item-section>
-          <class-const-form ref="edit" :classConst="selectedItem" />
+          <marca-form ref="edit" :marca="selectedItem" />
         </q-item-section>
       </q-item>
     </q-card>
@@ -109,7 +109,7 @@ import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
-import ClassConstForm from "src/components/catalogos/ClassConstForm.vue";
+import MarcaForm from "src/components/catalogos/MarcaForm.vue";
 
 const rows = ref([]);
 const selectedItem = ref(null);
@@ -132,12 +132,7 @@ const openEdit = (item) => {
 };
 
 const getRows = async () => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("GET", null, "/api/intranet/marca", "");
   rows.value = res;
 };
 
@@ -153,14 +148,9 @@ const postItem = async () => {
     return;
   }
   const final = {
-    ...add.value.formClassConst,
+    ...add.value.formMarca,
   };
-  let res = await sendRequest(
-    "POST",
-    final,
-    "/api/intranet/construction-classification",
-    ""
-  );
+  let res = await sendRequest("POST", final, "/api/intranet/marca", "");
   showAdd.value = false;
   getRows();
 };
@@ -177,12 +167,12 @@ const putItem = async () => {
     return;
   }
   const final = {
-    ...edit.value.formClassConst,
+    ...edit.value.formMarca,
   };
   let res = await sendRequest(
     "PUT",
     final,
-    "/api/intranet/construction-classification/" + final.id,
+    "/api/intranet/marca/" + final.id,
     ""
   );
   showEdit.value = false;
@@ -193,7 +183,7 @@ const destroyItem = async () => {
   let res = await sendRequest(
     "DELETE",
     null,
-    "/api/intranet/construction-classification/" + selectedItem.value.id,
+    "/api/intranet/marca/" + selectedItem.value.id,
     ""
   );
   selectedItem.value = null;

@@ -2,13 +2,13 @@ import { auth, guest, admin, rrhh, encuestador, servicio } from "./middleware";
 
 const routes = [
   {
-    path: "",
+    path: "/login",
     component: () => import("/src/layouts/DefaultLayout.vue"),
     meta: {
       middlewares: [guest],
     },
     children: [
-      { path: "/login", component: () => import("pages/auth/LoginPage.vue") },
+      { path: "", component: () => import("pages/auth/LoginPage.vue") },
     ],
   },
   {
@@ -18,7 +18,7 @@ const routes = [
       middlewares: [auth],
     },
     children: [
-      { path: "/home", component: () => import("pages/HomePage.vue") },
+      { path: "", component: () => import("pages/HomePage.vue") },
       {
         path: "/catalogos",
         component: () => import("src/pages/catalogos/indexPage.vue"),

@@ -60,17 +60,27 @@ export const useAuthStore = defineStore("auth", {
         });
     },
     async logout() {
+      // Primero, elimina los datos del almacenamiento local
+      LocalStorage.remove("auth");
+      localStorage.clear();
+
+      // Configura el encabezado de autorización para la solicitud de cierre de sesión
       axios.defaults.headers.common[
         "Authorization"
       ] = `Bearer ${this.authToken}`;
-      await axios.post("/api/auth/logout");
+
+      // Opcionalmente, limpia los datos de autenticación en la aplicación
       this.authToken = null;
       this.authUser = null;
 
-      LocalStorage.remove("auth");
-      this.router.push("/login");
-      localStorage.clear();
-      location.reload();
+      try {
+        // Realiza la solicitud de cierre de sesión
+        await axios.post("/api/auth/logout");
+      } catch (error) {
+      } finally {
+        // Recarga la página independientemente del resultado de la solicitud
+        location.reload();
+      }
     },
   },
   persist: true,

@@ -264,23 +264,6 @@
       <q-item>
         <q-item-section>
           <q-select
-            v-model="filterForm.technological_capability_id"
-            :options="technologicalCapabilities"
-            label="Capacidad tecnologica"
-            option-value="id"
-            option-label="name"
-            option-disable="inactive"
-            emit-value
-            map-options
-            transition-show="jump-up"
-            transition-hide="jump-up"
-            outlined
-            dense
-            clearable
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-select
             v-model="filterForm.tactic_id"
             :options="tactics"
             label="Tacticas John Deere"
@@ -347,7 +330,6 @@ const filterForm = ref({
   town_id: null,
   classification_id: null,
   segmentation_id: null,
-  technological_capability_id: null,
   tactic_id: null,
   construction_classification_id: null,
 });
@@ -356,7 +338,6 @@ const states = ref([]);
 const towns = ref([]);
 const classifications = ref([]);
 const segmentations = ref([]);
-const technologicalCapabilities = ref([]);
 const tactics = ref([]);
 const constructionClassifications = ref([]);
 
@@ -422,7 +403,6 @@ const clearFilters = () => {
   filterForm.value.town_id = null;
   filterForm.value.classification_id = null;
   filterForm.value.segmentation_id = null;
-  filterForm.value.technological_capability_id = null;
   filterForm.value.tactic_id = null;
   filterForm.value.construction_classification_id = null;
   current_page.value = 1;
@@ -435,7 +415,6 @@ const getOptions = async () => {
   states.value = res.states;
   classifications.value = res.classifications;
   segmentations.value = res.segmentations;
-  technologicalCapabilities.value = res.technologicalCapabilities;
   tactics.value = res.tactics;
   constructionClassifications.value = res.constructionClassifications;
 };

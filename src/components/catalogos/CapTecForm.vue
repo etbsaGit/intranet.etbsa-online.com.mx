@@ -12,6 +12,18 @@
         />
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section>
+        <q-input
+          v-model="formCapTec.level"
+          filled
+          dense
+          label="Nivel"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
   </q-form>
 </template>
 
@@ -25,6 +37,7 @@ const myForm = ref(null);
 const formCapTec = ref({
   id: CapTec ? CapTec.id : null,
   name: CapTec ? CapTec.name : null,
+  level: CapTec ? CapTec.level : null,
 });
 
 const validate = async () => {

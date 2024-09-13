@@ -10,6 +10,7 @@ export function show_notify(msj, icon, color, focus = "") {
     message: msj,
     icon: icon,
     color: color,
+    position: "bottom-right",
   });
 }
 

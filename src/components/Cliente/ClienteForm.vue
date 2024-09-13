@@ -229,23 +229,6 @@
     <q-item>
       <q-item-section>
         <q-select
-          v-model="formCliente.technological_capability_id"
-          :options="technologicalCapabilities"
-          label="Capacidad tecnologica"
-          option-value="id"
-          option-label="name"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          clearable
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-select
           v-model="formCliente.tactic_id"
           :options="tactics"
           label="Tacticas John Deere"
@@ -293,7 +276,6 @@ const states = ref([]);
 const towns = ref([]);
 const classifications = ref([]);
 const segmentations = ref([]);
-const technologicalCapabilities = ref([]);
 const tactics = ref([]);
 const constructionClassifications = ref([]);
 
@@ -316,9 +298,7 @@ const formCliente = ref({
   codigo_postal: cliente ? cliente.codigo_postal : null,
   classification_id: cliente ? cliente.classification_id : null,
   segmentation_id: cliente ? cliente.segmentation_id : null,
-  technological_capability_id: cliente
-    ? cliente.technological_capability_id
-    : null,
+
   tactic_id: cliente ? cliente.tactic_id : null,
   construction_classification_id: cliente
     ? cliente.construction_classification_id
@@ -330,7 +310,6 @@ const getOptions = async () => {
   states.value = res.states;
   classifications.value = res.classifications;
   segmentations.value = res.segmentations;
-  technologicalCapabilities.value = res.technologicalCapabilities;
   tactics.value = res.tactics;
   constructionClassifications.value = res.constructionClassifications;
 };

@@ -21,6 +21,11 @@
           icon="satellite_alt"
           label="Tecnologias"
         />
+        <q-tab
+          name="classTech"
+          icon="satellite"
+          label="Adopción de tecnología"
+        />
         <q-tab name="distribucion" icon="pin_drop" label="Distribucion" />
         <q-tab name="cultivos" icon="eco" label="Cultivos" />
         <q-tab name="riegos" icon="shower" label="Riegos" />
@@ -95,6 +100,19 @@
             :key="currentCliente"
           />
         </q-tab-panel>
+        <q-tab-panel name="classTech">
+          <q-item dense>
+            <q-item-section>
+              <q-item-label class="text-h6">
+                Adopción de tecnología
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+          <clasificacion-tecnologica-index
+            :cliente="currentCliente"
+            :key="currentCliente"
+          />
+        </q-tab-panel>
         <q-tab-panel name="distribucion">
           <q-item dense>
             <q-item-section>
@@ -151,6 +169,7 @@ import DistribucionIndex from "src/components/Distribucion/DistribucionIndex.vue
 import CultivosIndex from "src/components/Cultivos/CultivosIndex.vue";
 import RiegosIndex from "src/components/Riegos/RiegosIndex.vue";
 import AbastecimientosIndex from "src/components/Abastecimientos/AbastecimientosIndex.vue";
+import ClasificacionTecnologicaIndex from "src/components/ClasificacionTecnologica/ClasificacionTecnologicaIndex.vue";
 
 const { cliente } = defineProps(["cliente"]);
 

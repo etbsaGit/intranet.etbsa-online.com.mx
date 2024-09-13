@@ -36,6 +36,9 @@
                 <q-item-label>
                   {{ props.row.name }}
                 </q-item-label>
+                <q-item-label caption>
+                  {{ props.row.level }}
+                </q-item-label>
               </q-item-section>
             </q-item>
           </q-td>

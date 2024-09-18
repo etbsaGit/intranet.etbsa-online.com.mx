@@ -9,6 +9,7 @@
         indicator-color="teal"
       >
         <q-tab name="info" icon="person" label="Informacion" />
+        <q-tab name="docs" icon="folder" label="Documentos" />
         <q-tab name="referencia" icon="3p" label="Referencias" />
         <q-tab
           name="representante"
@@ -60,6 +61,15 @@
             :cliente="currentCliente"
             :key="currentCliente"
           />
+        </q-tab-panel>
+
+        <q-tab-panel name="docs">
+          <q-item dense>
+            <q-item-section>
+              <q-item-label class="text-h6"> Documentos </q-item-label>
+            </q-item-section>
+          </q-item>
+          <cliente-docs-index :cliente="currentCliente" :key="currentCliente" />
         </q-tab-panel>
 
         <q-tab-panel name="referencia">
@@ -170,6 +180,7 @@ import CultivosIndex from "src/components/Cultivos/CultivosIndex.vue";
 import RiegosIndex from "src/components/Riegos/RiegosIndex.vue";
 import AbastecimientosIndex from "src/components/Abastecimientos/AbastecimientosIndex.vue";
 import ClasificacionTecnologicaIndex from "src/components/ClasificacionTecnologica/ClasificacionTecnologicaIndex.vue";
+import ClienteDocsIndex from "src/components/ClienteDocs/ClienteDocsIndex.vue";
 
 const { cliente } = defineProps(["cliente"]);
 

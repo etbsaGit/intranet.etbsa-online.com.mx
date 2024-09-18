@@ -14,6 +14,15 @@ export function show_notify(msj, icon, color, focus = "") {
   });
 }
 
+export function dataIncomplete() {
+  Notify.create({
+    color: "red-5",
+    textColor: "white",
+    icon: "warning",
+    message: "Por favor completa todos los campos obligatorios",
+  });
+}
+
 const sleep = (miliseconds) => {
   return new Promise((resolve) => setTimeout(resolve, miliseconds));
 };

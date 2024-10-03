@@ -28,7 +28,37 @@ export function admin(/* { to, from, next } */ { to, next }) {
   }
 
   if (!checkRole("Admin")) {
-    return next("/perfil");
+    return next("/");
+  }
+
+  return next();
+}
+
+export function clientes(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.clientes")) {
+    return next("/");
+  }
+
+  return next();
+}
+
+export function sales(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.sales")) {
+    return next("/");
   }
 
   return next();
@@ -44,7 +74,7 @@ export function rrhh({ to, next }) {
 
   if (!checkRole("RRHH")) {
     if (!checkRole("Jefe")) {
-      return next("/perfil");
+      return next("/");
     }
     return next();
   }
@@ -64,7 +94,7 @@ export function servicio({ to, next }) {
     return next();
   }
   auth.returnUrl = to.fullPath;
-  return next("/perfil");
+  return next("/");
 }
 
 export function encuestador(/* { to, from, next } */ { to, next }) {
@@ -77,5 +107,5 @@ export function encuestador(/* { to, from, next } */ { to, next }) {
     return next();
   }
   auth.returnUrl = to.fullPath;
-  return next("/perfil");
+  return next("/");
 }

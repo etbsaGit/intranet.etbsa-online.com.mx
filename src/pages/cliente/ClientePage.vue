@@ -131,7 +131,12 @@
           <q-item-label class="text-h6">{{ selectedItem.nombre }}</q-item-label>
         </q-item-section>
         <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup @click="getRows" />
+          <q-btn
+            label="Cerrar"
+            color="red"
+            v-close-popup
+            @click="getRows(current_page)"
+          />
         </q-item-section>
       </q-item>
       <q-separator />
@@ -302,7 +307,7 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { sendRequest, dataIncomplete } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
 import { useQuasar } from "quasar";
 
@@ -457,12 +462,7 @@ const getRows = async (page = 1) => {
 const postItem = async () => {
   const add_valid = await add.value.validate();
   if (!add_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
+    dataIncomplete();
     return;
   }
   const final = {

@@ -1,7 +1,22 @@
 <template>
   <q-list bordered padding class="rounded-borders text-primary">
     <q-item
-      v-if="checkRole('Empleado')"
+      v-if="checkRole('Intranet.sales')"
+      clickable
+      v-ripple
+      to="/sale"
+      :active="link === 'sale'"
+      @click="link = 'sale'"
+      active-class="my-menu-link"
+    >
+      <q-item-section avatar>
+        <q-icon name="point_of_sale" />
+      </q-item-section>
+
+      <q-item-section>Pedidos</q-item-section>
+    </q-item>
+    <q-item
+      v-if="checkRole('Intranet.clientes')"
       clickable
       v-ripple
       to="/cliente"
@@ -16,7 +31,7 @@
       <q-item-section>Clientes</q-item-section>
     </q-item>
     <q-item
-      v-if="checkRole('Empleado')"
+      v-if="checkRole('Admin')"
       clickable
       v-ripple
       to="/catalogos"

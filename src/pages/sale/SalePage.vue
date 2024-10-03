@@ -255,6 +255,55 @@
           />
         </q-item-section>
       </q-item>
+      <q-item v-if="checkRole('Admin')">
+        <q-item-section>
+          <q-select
+            v-model="filterForm.empleado_id"
+            :options="filterEmpleados"
+            label="Vendedor"
+            option-value="id"
+            option-label="apellidoCompleto"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            outlined
+            dense
+            clearable
+            options-dense
+            use-input
+            @filter="filterFnE"
+            input-debounce="0"
+            behavior="menu"
+            hint
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No result </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </q-item-section>
+        <q-item-section>
+          <q-select
+            v-model="filterForm.sucursal_id"
+            :options="sucursales"
+            label="Sucursal"
+            option-value="id"
+            option-label="nombre"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            clearable
+            outlined
+            dense
+            hint
+          />
+        </q-item-section>
+      </q-item>
     </q-card>
   </q-dialog>
 
@@ -372,12 +421,17 @@ const filterForm = ref({
   search: null,
   cliente_id: null,
   status_id: null,
+  sucursal_id: null,
+  empleado_id: null,
   validate: null,
 });
 
 const clientes = ref([]);
 const filterClientes = ref(null);
 const statuses = ref([]);
+const empleados = ref([]);
+const filterEmpleados = ref(null);
+const sucursales = ref([]);
 
 const columns = [
   {
@@ -468,6 +522,8 @@ const clearFilters = () => {
   filterForm.value.search = null;
   filterForm.value.cliente_id = null;
   filterForm.value.status_id = null;
+  filterForm.value.sucursal_id = null;
+  filterForm.value.empleado_id = null;
   filterForm.value.validate = null;
   current_page.value = 1;
   getRows();
@@ -477,6 +533,8 @@ const getOptions = async () => {
   let res = await sendRequest("GET", null, "/api/intranet/sale/options", "");
   clientes.value = res.clientes;
   statuses.value = res.statuses;
+  empleados.value = res.empleados;
+  sucursales.value = res.sucursales;
 };
 
 const getRows = async (page = 1) => {
@@ -574,6 +632,22 @@ const filterFn = (val, update) => {
     const needle = val.toLowerCase();
     filterClientes.value = clientes.value.filter(
       (customer) => customer.nombre.toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
+
+const filterFnE = (val, update) => {
+  if (val === "") {
+    update(() => {
+      filterEmpleados.value = empleados.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterEmpleados.value = empleados.value.filter(
+      (empleado) => empleado.apellidoCompleto.toLowerCase().indexOf(needle) > -1
     );
   });
 };

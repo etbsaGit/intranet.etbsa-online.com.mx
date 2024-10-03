@@ -151,16 +151,7 @@
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
-      <q-item-section>
-        <q-input
-          v-model="formSale.folio"
-          outlined
-          dense
-          label="Folio"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
-      </q-item-section>
+
       <q-item-section>
         <q-input
           v-model="formSale.economic"
@@ -171,6 +162,24 @@
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
+      <q-item-section>
+        <q-select
+          v-model="formSale.status_id"
+          :options="statuses"
+          label="Tipo de pedido"
+          option-value="id"
+          option-label="nombre"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          clearable
+          outlined
+          dense
+          :rules="[(val) => val !== null || 'Obligatorio']"
+        />
+      </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
@@ -179,6 +188,16 @@
           outlined
           dense
           label="Factura"
+          lazy-rules
+          hint
+        />
+      </q-item-section>
+      <q-item-section>
+        <q-input
+          v-model="formSale.folio"
+          outlined
+          dense
+          label="Folio"
           lazy-rules
           hint
         />
@@ -197,11 +216,42 @@
           input-class="text-right"
         />
       </q-item-section>
+    </q-item>
+    <q-item>
       <q-item-section>
         <q-select
-          v-model="formSale.status_id"
-          :options="statuses"
-          label="Tipo de pedido"
+          v-model="formSale.empleado_id"
+          :options="filterEmpleados"
+          label="Vendedor"
+          option-value="id"
+          option-label="apellidoCompleto"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          outlined
+          dense
+          clearable
+          options-dense
+          use-input
+          @filter="filterFnE"
+          input-debounce="0"
+          behavior="menu"
+          :rules="[(val) => val !== null || 'Obligatorio']"
+        >
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey"> No result </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </q-item-section>
+      <q-item-section>
+        <q-select
+          v-model="formSale.sucursal_id"
+          :options="sucursales"
+          label="Sucursal"
           option-value="id"
           option-label="nombre"
           option-disable="inactive"
@@ -263,7 +313,6 @@
     transition-show="slide-up"
     transition-hide="slide-down"
     persistent
-    full-width
   >
     <q-card>
       <q-item class="text-white bg-primary">
@@ -291,6 +340,7 @@
 import { ref, onMounted, watch } from "vue";
 import { sendRequest } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format";
+import { checkRole } from "src/boot/functions";
 
 import ClienteForm from "src/components/Cliente/ClienteForm.vue";
 import ReferenciaForm from "src/components/Referencia/ReferenciaForm.vue";
@@ -306,6 +356,9 @@ const refe = ref(null);
 const clientes = ref([]);
 const referencias = ref([]);
 const statuses = ref([]);
+const empleados = ref([]);
+const filterEmpleados = ref(null);
+const sucursales = ref([]);
 const filterClientes = ref(null);
 const selectedCliente = ref(null);
 const selectedRefe = ref(null);
@@ -326,12 +379,16 @@ const formSale = ref({
   cliente_id: sale ? sale.cliente_id : null,
   status_id: sale ? sale.status_id : null,
   referencia_id: sale ? sale.referencia_id : null,
+  empleado_id: sale ? sale.empleado_id : null,
+  sucursal_id: sale ? sale.sucursal_id : null,
 });
 
 const getOptions = async () => {
   let res = await sendRequest("GET", null, "/api/intranet/sale/options", "");
   clientes.value = res.clientes;
   statuses.value = res.statuses;
+  empleados.value = res.empleados;
+  sucursales.value = res.sucursales;
 };
 
 const updateRefe = (id) => {
@@ -364,6 +421,22 @@ const filterFn = (val, update) => {
     const needle = val.toLowerCase();
     filterClientes.value = clientes.value.filter(
       (customer) => customer.nombre.toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
+
+const filterFnE = (val, update) => {
+  if (val === "") {
+    update(() => {
+      filterEmpleados.value = empleados.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterEmpleados.value = empleados.value.filter(
+      (empleado) => empleado.apellidoCompleto.toLowerCase().indexOf(needle) > -1
     );
   });
 };

@@ -151,7 +151,6 @@
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
-
       <q-item-section>
         <q-input
           v-model="formSale.economic"
@@ -278,6 +277,63 @@
         />
       </q-item-section>
     </q-item>
+    <q-item>
+      <q-item-section>
+        <q-toggle
+          :color="formSale.cancellation == 1 ? 'red' : 'green'"
+          keep-color
+          v-model="formSale.cancellation"
+          label="Cancelada"
+          checked-icon="close"
+          unchecked-icon="check"
+          indeterminate-icon="error"
+          :true-value="1"
+          :false-value="0"
+        />
+      </q-item-section>
+      <q-item-section>
+        <q-input
+          v-if="formSale.cancellation == 1"
+          dense
+          outlined
+          v-model="formSale.cancellation_date"
+          label="Fecha de cancelacion"
+          :rules="[(val) => val !== null || 'Obligatorio']"
+          readonly=""
+        >
+          <template v-slot:append>
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy
+                cover
+                transition-show="scale"
+                transition-hide="scale"
+              >
+                <q-date
+                  minimal
+                  v-model="formSale.cancellation_date"
+                  mask="YYYY-MM-DD"
+                >
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="Close" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
+          </template>
+        </q-input>
+      </q-item-section>
+      <q-item-section>
+        <q-input
+          v-if="formSale.cancellation == 1"
+          v-model="formSale.cancellation_folio"
+          outlined
+          dense
+          label="Folio de cancelacion"
+          lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
   </q-form>
 
   <q-dialog
@@ -381,6 +437,9 @@ const formSale = ref({
   referencia_id: sale ? sale.referencia_id : null,
   empleado_id: sale ? sale.empleado_id : null,
   sucursal_id: sale ? sale.sucursal_id : null,
+  cancellation_date: sale ? sale.cancellation_date : null,
+  cancellation_folio: sale ? sale.cancellation_folio : null,
+  cancellation: sale ? sale.cancellation : 0,
 });
 
 const getOptions = async () => {

@@ -85,7 +85,7 @@
         </template>
         <template v-slot:body-cell-cliente="props">
           <q-td>
-            <q-item dense>
+            <q-item dense class="q-pa-none">
               <q-item-section>
                 <q-item-label>
                   {{ props.row.cliente.nombre }}
@@ -100,6 +100,26 @@
         <template v-slot:body-cell-status="props">
           <q-td>
             {{ props.row.status.nombre }}
+          </q-td>
+        </template>
+        <template v-slot:body-cell-folio="props">
+          <q-td>
+            <q-item dense class="q-pa-none">
+              <q-item-section>
+                <q-chip
+                  v-if="props.row.folio"
+                  color="green-3"
+                  text-color="black"
+                  :label="props.row.folio"
+                />
+                <q-chip
+                  v-if="props.row.cancellation_folio"
+                  color="red-3"
+                  text-color="black"
+                  :label="props.row.cancellation_folio"
+                />
+              </q-item-section>
+            </q-item>
           </q-td>
         </template>
         <template v-slot:body-cell-validated="props">
@@ -125,9 +145,21 @@
         </template>
         <template v-slot:body-cell-date="props">
           <q-td>
-            <q-chip color="primary" text-color="white" icon="event">
-              {{ props.row.date }}
-            </q-chip>
+            <q-item dense class="q-pa-none">
+              <q-item-section>
+                <q-chip color="green-3" text-color="black" icon="event">
+                  {{ props.row.date }}
+                </q-chip>
+                <q-chip
+                  v-if="props.row.cancellation_date"
+                  color="red-3"
+                  text-color="black"
+                  icon="event"
+                >
+                  {{ props.row.date }}
+                </q-chip>
+              </q-item-section>
+            </q-item>
           </q-td>
         </template>
       </q-table>
@@ -206,6 +238,18 @@
             </template>
           </q-input>
         </q-item-section>
+        <q-item-section side>
+          <q-toggle
+            :color="filterForm.cancellation == 1 ? 'red' : 'green'"
+            keep-color
+            v-model="filterForm.cancellation"
+            label="Canceladas"
+            checked-icon="close"
+            unchecked-icon="check"
+            :true-value="1"
+            :false-value="0"
+          />
+        </q-item-section>
       </q-item>
 
       <q-item>
@@ -283,6 +327,23 @@
                 <q-item-section class="text-grey"> No result </q-item-section>
               </q-item>
             </template>
+            <!-- Esto es para editar como quieres que se vean las opciones -->
+            <!-- <template v-slot:option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section avatar>
+                  <q-avatar v-if="scope.opt.picture">
+                    <img :src="scope.opt.picture" />
+                  </q-avatar>
+                  <q-avatar v-else color="primary" text-color="white">
+                    {{ scope.opt.nombre.charAt(0).toUpperCase()
+                    }}{{ scope.opt.apellido_paterno.charAt(0).toUpperCase() }}
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  {{ scope.opt.apellidoCompleto }}
+                </q-item-section>
+              </q-item>
+            </template> -->
           </q-select>
         </q-item-section>
         <q-item-section>
@@ -419,6 +480,7 @@ const current_page = ref(1);
 
 const filterForm = ref({
   search: null,
+  cancellation: null,
   cliente_id: null,
   status_id: null,
   sucursal_id: null,
@@ -462,17 +524,17 @@ const columns = [
     sortable: true,
   },
   {
-    name: "folio",
-    label: "# de folio",
-    align: "left",
-    field: "folio",
-    sortable: true,
-  },
-  {
     name: "economic",
     label: "# economico",
     align: "left",
     field: "economic",
+    sortable: true,
+  },
+  {
+    name: "folio",
+    label: "# de folio",
+    align: "left",
+    field: "folio",
     sortable: true,
   },
   {
@@ -520,6 +582,7 @@ const openEditValidate = (item) => {
 
 const clearFilters = () => {
   filterForm.value.search = null;
+  filterForm.value.cancellation = null;
   filterForm.value.cliente_id = null;
   filterForm.value.status_id = null;
   filterForm.value.sucursal_id = null;

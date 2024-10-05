@@ -77,22 +77,30 @@
           filled
           dense
           v-model="formCliente.telefono"
-          label="Telefono"
+          label="Telefono movil"
           mask="(###) ### - ####"
           unmasked-value
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        >
+          <template v-slot:prepend>
+            <q-icon name="fa-brands fa-whatsapp" />
+          </template>
+        </q-input>
       </q-item-section>
       <q-item-section>
         <q-input
           filled
           dense
           v-model="formCliente.telefono_casa"
-          label="Telefono de casa"
+          label="Telefono fijo"
           mask="(###) ### - ####"
           unmasked-value
           hint
-        />
+        >
+          <template v-slot:prepend>
+            <q-icon name="fa-solid fa-phone" />
+          </template>
+        </q-input>
       </q-item-section>
       <q-item-section>
         <q-input

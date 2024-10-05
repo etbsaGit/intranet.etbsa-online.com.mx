@@ -32,7 +32,7 @@
                   dense
                   color="primary"
                   icon="add"
-                  label="Click para agrgear cliente nuevo"
+                  label="Click para agregar cliente nuevo"
                   @click="showAdd = true"
                 />
               </q-item-section>
@@ -58,6 +58,18 @@
                   {{ formatPhoneNumber(selectedCliente.telefono) }}
                 </q-item-label>
               </q-item-section>
+            </q-item>
+          </template>
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                {{ scope.opt.nombre }}
+              </q-item-section>
+              <q-item-section>
+                Telefono: {{ formatPhoneNumber(scope.opt.telefono) }}
+              </q-item-section>
+              <q-item-section> RFC: {{ scope.opt.rfc }} </q-item-section>
+              <q-item-section> CURP: {{ scope.opt.curp }} </q-item-section>
             </q-item>
           </template>
         </q-select>
@@ -99,6 +111,17 @@
                   label="Click para agrgear referencia"
                   @click="showRefe = true"
                 />
+              </q-item-section>
+            </q-item>
+          </template>
+          <template v-slot:option="scope">
+            <q-item v-bind="scope.itemProps">
+              <q-item-section>
+                {{ scope.opt.nombre }}
+              </q-item-section>
+
+              <q-item-section side>
+                {{ formatPhoneNumber(scope.opt.telefono) }}
               </q-item-section>
             </q-item>
           </template>
@@ -370,7 +393,7 @@
     transition-hide="slide-down"
     persistent
   >
-    <q-card>
+    <q-card style="width: 100%">
       <q-item class="text-white bg-primary">
         <q-item-section>
           <q-item-label class="text-h6">Agregar</q-item-label>

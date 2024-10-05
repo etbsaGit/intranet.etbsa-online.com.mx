@@ -131,7 +131,11 @@
               icon="close"
               v-if="props.row.validated == 0"
               @click="openEditValidate(props.row)"
-            />
+            >
+              <q-tooltip class="bg-red text-h6">
+                {{ props.row.feedback }}
+              </q-tooltip>
+            </q-chip>
             <q-chip
               clickable
               color="green-10"
@@ -139,7 +143,11 @@
               icon="check"
               v-else-if="props.row.validated == 1"
               @click="openEditValidate(props.row)"
-            />
+            >
+              <q-tooltip class="bg-green text-h6">
+                {{ props.row.feedback }}
+              </q-tooltip>
+            </q-chip>
             <q-chip color="grey-9" text-color="white" icon="error" v-else />
           </q-td>
         </template>
@@ -158,6 +166,20 @@
                 >
                   {{ props.row.date }}
                 </q-chip>
+              </q-item-section>
+            </q-item>
+          </q-td>
+        </template>
+        <template v-slot:body-cell-origin="props">
+          <q-td>
+            <q-item dense class="q-pa-none">
+              <q-item-section>
+                <q-item-label>
+                  {{ props.row.empleado.nombreCompleto }}
+                </q-item-label>
+                <q-item-label caption>
+                  {{ props.row.sucursal.nombre }}
+                </q-item-label>
               </q-item-section>
             </q-item>
           </q-td>
@@ -502,18 +524,25 @@ const columns = [
     align: "left",
     label: "detalle",
   },
+  // {
+  //   name: "order",
+  //   label: "# de orden",
+  //   align: "left",
+  //   field: "order",
+  //   sortable: true,
+  // },
+  // {
+  //   name: "serial",
+  //   label: "# de serie",
+  //   align: "left",
+  //   field: "serial",
+  //   sortable: true,
+  // },
   {
-    name: "order",
-    label: "# de orden",
+    name: "economic",
+    label: "# economico",
     align: "left",
-    field: "order",
-    sortable: true,
-  },
-  {
-    name: "serial",
-    label: "# de serie",
-    align: "left",
-    field: "serial",
+    field: "economic",
     sortable: true,
   },
   {
@@ -521,13 +550,6 @@ const columns = [
     label: "Factura",
     align: "left",
     field: "invoice",
-    sortable: true,
-  },
-  {
-    name: "economic",
-    label: "# economico",
-    align: "left",
-    field: "economic",
     sortable: true,
   },
   {
@@ -545,6 +567,13 @@ const columns = [
     sortable: true,
   },
   {
+    name: "origin",
+    label: "Origen",
+    align: "left",
+    field: "origin",
+    sortable: true,
+  },
+  {
     name: "cliente",
     label: "Cliente",
     align: "left",
@@ -552,13 +581,13 @@ const columns = [
     sortable: true,
   },
 
-  {
-    name: "status",
-    label: "Tipo",
-    align: "left",
-    field: "status",
-    sortable: true,
-  },
+  // {
+  //   name: "status",
+  //   label: "Tipo",
+  //   align: "left",
+  //   field: "status",
+  //   sortable: true,
+  // },
   {
     name: "validated",
     label: "Validado",

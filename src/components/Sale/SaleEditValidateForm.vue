@@ -2,19 +2,16 @@
   <q-form ref="myForm" greedy>
     <q-item class="custom-label">
       <q-item-section>
+        <q-item-label>Origen</q-item-label>
+      </q-item-section>
+      <q-item-section>
         <q-item-label>Cliente</q-item-label>
       </q-item-section>
       <q-item-section>
-        <q-item-label>Referencia</q-item-label>
-      </q-item-section>
-      <q-item-section class="col-2">
-        <q-item-label>Celular</q-item-label>
-      </q-item-section>
-      <q-item-section class="col-2">
-        <q-item-label>Tel casa</q-item-label>
+        <q-item-label>Contactos</q-item-label>
       </q-item-section>
       <q-item-section>
-        <q-item-label>Email</q-item-label>
+        <q-item-label>Referencia</q-item-label>
       </q-item-section>
       <q-item-section>
         <q-item-label>Retroalimentacion</q-item-label>
@@ -25,26 +22,26 @@
     </q-item>
     <q-item>
       <q-item-section>
+        <q-item-label>{{ sale.empleado.nombreCompleto }}</q-item-label>
+        <q-item-label caption>{{ sale.sucursal.nombre }}</q-item-label>
+      </q-item-section>
+      <q-item-section>
         <q-item-label>{{ sale.cliente.nombre }}</q-item-label>
+      </q-item-section>
+      <q-item-section>
+        <q-item-label>
+          Celular: {{ formatPhoneNumber(sale.cliente.telefono) }}
+        </q-item-label>
+        <q-item-label>
+          Fijo: {{ formatPhoneNumber(sale.cliente.telefono_casa) }}
+        </q-item-label>
+        <q-item-label> Email: {{ sale.cliente.email }} </q-item-label>
       </q-item-section>
       <q-item-section>
         <q-item-label>{{ sale.referencia?.nombre }}</q-item-label>
         <q-item-label>
           {{ formatPhoneNumber(sale.referencia?.telefono) }}
         </q-item-label>
-      </q-item-section>
-      <q-item-section class="col-2">
-        <q-item-label>
-          {{ formatPhoneNumber(sale.cliente.telefono) }}
-        </q-item-label>
-      </q-item-section>
-      <q-item-section class="col-2">
-        <q-item-label>
-          {{ formatPhoneNumber(sale.cliente.telefono_casa) }}
-        </q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label>{{ sale.cliente.email }}</q-item-label>
       </q-item-section>
       <q-item-section>
         <q-input

@@ -49,11 +49,12 @@
           :rules="[
             (val) => !!val || 'Este campo es obligatorio',
             (val) =>
-              (val && val.length === 13) ||
-              'El RFC debe tener exactamente 13 caracteres',
+              (val && val.length >= 12 && val.length <= 13) ||
+              'El RFC debe tener entre 12 y 13 caracteres',
           ]"
         />
       </q-item-section>
+
       <q-item-section>
         <q-input
           v-model="formCliente.curp"

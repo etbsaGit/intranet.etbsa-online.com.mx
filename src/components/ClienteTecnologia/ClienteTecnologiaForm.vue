@@ -20,7 +20,7 @@
           v-model="formNuevaTecnologia.hectareas"
           filled
           dense
-          label="Hectareas"
+          label="Hectareas conectadas"
           lazy-rules
           hint
           mask="#####"

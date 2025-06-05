@@ -5,7 +5,7 @@
         <q-item-label><strong>Editar</strong></q-item-label>
       </q-item-section>
       <q-item-section>
-        <q-item-label><strong>Hectareas</strong></q-item-label>
+        <q-item-label><strong>Hectareas conectadas</strong></q-item-label>
       </q-item-section>
       <q-item-section>
         <q-item-label><strong>Cantidad</strong></q-item-label>

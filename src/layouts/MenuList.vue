@@ -30,6 +30,30 @@
 
       <q-item-section>Clientes</q-item-section>
     </q-item>
+
+    <q-expansion-item
+      expand-separator
+      icon="fa-solid fa-microchip"
+      label="Nuevas Tecnologias"
+      group="somegroup"
+      v-if="checkRole('Intranet.nt')"
+    >
+      <q-item
+        clickable
+        v-ripple
+        to="/nt/hectareas"
+        :active="link === 'nt'"
+        @click="link = 'nt'"
+        active-class="my-menu-link"
+      >
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-globe" />
+        </q-item-section>
+
+        <q-item-section>Hectareas conectadas</q-item-section>
+      </q-item>
+    </q-expansion-item>
+
     <q-item
       v-if="checkRole('Admin')"
       clickable

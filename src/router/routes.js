@@ -1,13 +1,4 @@
-import {
-  auth,
-  guest,
-  admin,
-  rrhh,
-  encuestador,
-  servicio,
-  clientes,
-  sales,
-} from "./middleware";
+import { auth, guest, admin, clientes, sales, NT } from "./middleware";
 
 const routes = [
   {
@@ -67,6 +58,23 @@ const routes = [
       {
         path: "/sale",
         component: () => import("src/pages/sale/SalePage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [NT],
+    },
+    children: [
+      {
+        path: "/nt/hectareas",
+        component: () =>
+          import(
+            "src/pages/NuevasTecnologias/HectareasConectadas/HectareasConectadasIndex.vue"
+          ),
       },
     ],
   },

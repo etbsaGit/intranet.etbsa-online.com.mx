@@ -64,7 +64,7 @@ export function sales(/* { to, from, next } */ { to, next }) {
   return next();
 }
 
-export function rrhh({ to, next }) {
+export function NT(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();
 
   if (!auth.user) {
@@ -72,40 +72,9 @@ export function rrhh({ to, next }) {
     return next("/login");
   }
 
-  if (!checkRole("RRHH")) {
-    if (!checkRole("Jefe")) {
-      return next("/");
-    }
-    return next();
+  if (!checkRole("Intranet.nt")) {
+    return next("/");
   }
 
   return next();
-}
-
-export function servicio({ to, next }) {
-  const auth = useAuthStore();
-
-  if (!auth.user) {
-    auth.returnUrl = to.fullPath;
-    return next("/login");
-  }
-
-  if (checkRole("Servicio") || checkRole("Taller")) {
-    return next();
-  }
-  auth.returnUrl = to.fullPath;
-  return next("/");
-}
-
-export function encuestador(/* { to, from, next } */ { to, next }) {
-  const auth = useAuthStore();
-  if (!auth.user) {
-    auth.returnUrl = to.fullPath;
-    return next("/login");
-  }
-  if (checkRole("Encuestador") || checkRole("Evaluador")) {
-    return next();
-  }
-  auth.returnUrl = to.fullPath;
-  return next("/");
 }

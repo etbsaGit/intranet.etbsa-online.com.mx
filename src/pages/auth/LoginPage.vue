@@ -7,18 +7,17 @@
           Equipos y tractores del bajio
         </div>
       </q-card-section>
-      <!-- <q-card-section class="text-center">
-        <div class="text-grey-9 text-h5 text-weight-bold">Sign in</div>
-        <div class="text-grey-8">Sign in below to access your account</div>
-      </q-card-section> -->
-      <q-form @submit.prevent="login(form)" class="q-gutter-md">
+
+      <q-form @submit.prevent="submitLogin" class="q-gutter-md">
         <q-card-section>
           <q-input
             dense
             outlined
             v-model="form.email"
             label="Email Address"
-          ></q-input>
+            type="email"
+            required
+          />
           <q-input
             dense
             outlined
@@ -26,8 +25,10 @@
             v-model="form.password"
             type="password"
             label="Password"
-          ></q-input>
+            required
+          />
         </q-card-section>
+
         <q-card-section>
           <q-btn
             style="border-radius: 8px"
@@ -38,27 +39,114 @@
             no-caps
             class="full-width"
             type="submit"
-          ></q-btn>
+            :loading="loading"
+          />
         </q-card-section>
       </q-form>
+
       <q-card-section class="text-center q-pt-none">
         <div class="text-grey-8">
-          Don't have an account yet?
-          <q-btn to="/register" class="text-dark text-weight-bold">
-            Sign up.
+          Olvidaste tu contraseña?
+          <q-btn to="/forgot-password" class="text-dark text-weight-bold" flat>
+            Cambiala aqui.
           </q-btn>
         </div>
       </q-card-section>
     </q-card>
+
+    <!-- 2FA Modal -->
+    <q-dialog v-model="showTwoFactor">
+      <q-card style="min-width: 300px">
+        <q-card-section class="text-center">
+          <div class="text-h6">Verificación en dos pasos</div>
+          <div class="text-caption text-grey">
+            Ingresa el código enviado a tu correo
+          </div>
+        </q-card-section>
+
+        <q-form @submit.prevent="submit2FACode">
+          <q-card-section>
+            <q-input
+              v-model="code"
+              label="Código de verificación"
+              maxlength="6"
+              outlined
+              autofocus
+              dense
+              required
+            />
+          </q-card-section>
+
+          <q-card-actions align="right">
+            <q-btn flat label="Cancelar" v-close-popup />
+            <q-btn
+              label="Verificar"
+              color="primary"
+              :loading="verifying"
+              type="submit"
+            />
+          </q-card-actions>
+        </q-form>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
-<script setup>
-import { useAuthStore } from "src/stores/auth";
-import { ref } from "vue";
 
-const { login } = useAuthStore();
-const form = ref({ email: "", password: "" });
+<script setup>
+import { ref } from "vue";
+import { useAuthStore } from "src/stores/auth";
+import { Notify } from "quasar";
+
+const auth = useAuthStore();
+
+const form = ref({
+  email: "",
+  password: "",
+});
+
+const loading = ref(false);
+const verifying = ref(false);
+const code = ref("");
+const showTwoFactor = ref(false);
+
+const submitLogin = async () => {
+  loading.value = true;
+  try {
+    await auth.login(form.value);
+
+    if (auth.isTwoFactorPending) {
+      showTwoFactor.value = true;
+    } else {
+      // Login completo, redirecciona si quieres
+    }
+  } catch (error) {
+    Notify.create({
+      color: "negative",
+      message: error.message,
+      icon: "report_problem",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+const submit2FACode = async () => {
+  verifying.value = true;
+  try {
+    await auth.verifyTwoFactor(code.value);
+    showTwoFactor.value = false;
+  } catch (error) {
+    Notify.create({
+      color: "negative",
+      message: "Código inválido o expirado",
+      icon: "report_problem",
+    });
+  } finally {
+    verifying.value = false;
+  }
+};
 </script>
+
 <style>
 .my_card {
   width: 25rem;

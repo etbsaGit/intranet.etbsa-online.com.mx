@@ -9,7 +9,7 @@
       <q-table
         flat
         bordered
-        :rows="rows"
+        :rows="crud.paginatedItems"
         :columns="columns"
         row-key="id"
         :dense="$q.screen.lt.md"
@@ -58,8 +58,8 @@
           <td>
             <q-pagination
               color="primary"
-              v-model="current_page"
-              :max="last_page"
+              v-model="crud.pagination.currentPage"
+              :max="crud.pagination.lastPage"
               :max-pages="6"
               direction-links
               boundary-links
@@ -188,33 +188,29 @@
     </q-item-section>
   </q-item>
 
-  <q-dialog
-    v-model="showAdd"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
-    <q-card>
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Agregar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Agregar" color="blue" @click="postItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <sale-form ref="add" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+  <BaseDialog full-width v-model="showAdd" mode="create" @submit="postItem">
+    <template #form>
+      <sale-form ref="add" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog full-width v-model="showEdit" mode="edit" @submit="putItem">
+    <template #form>
+      <sale-form ref="edit" :sale="selectedItem" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog full-width v-model="showValid" mode="edit" @submit="putValidated">
+    <template #form>
+      <sale-validate-form ref="valid" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog full-width v-model="showEditValid" mode="edit" @submit="putItem">
+    <template #form>
+      <sale-edit-validate-form ref="edit" :sale="selectedItem" />
+    </template>
+  </BaseDialog>
 
   <q-dialog v-model="showFilters" position="top" full-width>
     <q-card>
@@ -306,7 +302,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.status_id"
-            :options="statuses"
+            :options="crud.items.statuses"
             label="Tipo de pedido"
             option-value="id"
             option-label="nombre"
@@ -371,7 +367,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.sucursal_id"
-            :options="sucursales"
+            :options="crud.items.sucursales"
             label="Sucursal"
             option-value="id"
             option-label="nombre"
@@ -389,97 +385,17 @@
       </q-item>
     </q-card>
   </q-dialog>
-
-  <q-dialog
-    v-model="showEdit"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
-    <q-card>
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Editar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Modificar" color="blue" @click="putItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <sale-form ref="edit" :sale="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
-
-  <q-dialog
-    v-model="showValid"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
-    <q-card>
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Validar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Guardar" color="blue" @click="putValidated" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <sale-validate-form ref="valid" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
-
-  <q-dialog
-    v-model="showEditValid"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
-    <q-card>
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Editar validacion</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Guardar" color="blue" @click="putItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <sale-edit-validate-form ref="edit" :sale="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { sendRequest, dataIncomplete } from "src/boot/functions";
 import { checkRole } from "src/boot/functions";
+import { useCrudStore } from "src/stores/crud";
 
+const crud = useCrudStore();
+
+import BaseDialog from "src/bases/BaseDialog.vue";
 import SaleForm from "src/components/Sale/SaleForm.vue";
 import SaleValidateForm from "src/components/Sale/SaleValidateForm.vue";
 import SaleEditValidateForm from "src/components/Sale/SaleEditValidateForm.vue";
@@ -494,6 +410,8 @@ const showValid = ref(false);
 const valid = ref(null);
 const showEditValid = ref(false);
 const showFilters = ref(false);
+
+const baseURL = ref("/api/intranet/sale");
 
 const next_page_url = ref("");
 const prev_page_url = ref("");
@@ -622,85 +540,54 @@ const clearFilters = () => {
 };
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/sale/options", "");
-  clientes.value = res.clientes;
-  statuses.value = res.statuses;
-  empleados.value = res.empleados;
-  sucursales.value = res.sucursales;
+  await crud.getItems(baseURL.value + "/options");
 };
 
-const getRows = async (page = 1) => {
-  const current = {
-    page: page,
-  };
-  const final = {
+const getRows = async () => {
+  const filtersWithPage = {
     ...filterForm.value,
-    ...current,
+    page: crud.pagination.currentPage,
   };
-  let res = await sendRequest("POST", final, "/api/intranet/sales", "");
-  rows.value = res.data;
-  filterForm.value.page = res.current_page;
-  next_page_url.value = res.next_page_url;
-  prev_page_url.value = res.prev_page_url;
-  last_page.value = res.last_page;
+  await crud.getPaginatedItems(baseURL.value + "s", filtersWithPage);
 };
 
 const postItem = async () => {
-  const add_valid = await add.value.validate();
-  if (!add_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...add.value.formSale,
-  };
-  let res = await sendRequest("POST", final, "/api/intranet/sale", "");
-  showAdd.value = false;
-  getRows();
+  const data = { ...add.value.formSale };
+  await crud.postItem(baseURL.value, data, add.value.validate, () => {
+    showAdd.value = false;
+    getRows();
+  });
 };
 
 const putItem = async () => {
-  const edit_valid = await edit.value.validate();
-  if (!edit_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...edit.value.formSale,
-  };
-  let res = await sendRequest(
-    "PUT",
-    final,
-    "/api/intranet/sale/" + final.id,
-    ""
-  );
-  showEdit.value = false;
-  showEditValid.value = false;
-  getRows();
+  const data = { ...edit.value.formSale };
+
+  await crud.putItem(baseURL.value, data, edit.value.validate, () => {
+    showEdit.value = false;
+    showEditValid.value = false;
+    getRows();
+  });
 };
 
 const putValidated = async () => {
-  const valid_valid = await valid.value.validate();
-  if (!valid_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...valid.value.salesData,
-  };
-  let res = await sendRequest(
-    "POST",
-    final,
-    "/api/intranet/sale/post/validated",
-    ""
+  const data = { ...valid.value.salesData };
+  await crud.postItem(
+    baseURL.value + "/post/validated",
+    data,
+    valid.value.validate,
+    () => {
+      showValid.value = false;
+      getRows();
+    }
   );
-  showValid.value = false;
-  getRows();
 };
 
-watch(current_page, (newPage) => {
-  getRows(newPage);
-});
+watch(
+  () => crud.pagination.currentPage,
+  () => {
+    getRows();
+  }
+);
 
 let timeout = null;
 
@@ -715,14 +602,14 @@ const onInputChange = () => {
 const filterFn = (val, update) => {
   if (val === "") {
     update(() => {
-      filterClientes.value = clientes.value;
+      filterClientes.value = crud.items.clientes;
     });
     return;
   }
 
   update(() => {
     const needle = val.toLowerCase();
-    filterClientes.value = clientes.value.filter(
+    filterClientes.value = crud.items.clientes.filter(
       (customer) => customer.nombre.toLowerCase().indexOf(needle) > -1
     );
   });
@@ -731,14 +618,14 @@ const filterFn = (val, update) => {
 const filterFnE = (val, update) => {
   if (val === "") {
     update(() => {
-      filterEmpleados.value = empleados.value;
+      filterEmpleados.value = crud.items.empleados;
     });
     return;
   }
 
   update(() => {
     const needle = val.toLowerCase();
-    filterEmpleados.value = empleados.value.filter(
+    filterEmpleados.value = crud.items.empleados.filter(
       (empleado) => empleado.apellidoCompleto.toLowerCase().indexOf(needle) > -1
     );
   });

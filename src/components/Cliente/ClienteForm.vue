@@ -122,7 +122,7 @@
       <q-item-section>
         <q-select
           v-model="formCliente.state_entity_id"
-          :options="states"
+          :options="crud.items.states"
           label="Estado"
           option-value="id"
           option-label="name"
@@ -203,7 +203,7 @@
       <q-item-section>
         <q-select
           v-model="formCliente.classification_id"
-          :options="classifications"
+          :options="crud.items.classifications"
           label="Clasificacion general"
           option-value="id"
           option-label="name"
@@ -220,7 +220,7 @@
       <q-item-section>
         <q-select
           v-model="formCliente.segmentation_id"
-          :options="segmentations"
+          :options="crud.items.segmentations"
           label="Segmentacion"
           option-value="id"
           option-label="name"
@@ -239,7 +239,7 @@
       <q-item-section>
         <q-select
           v-model="formCliente.tactic_id"
-          :options="tactics"
+          :options="crud.items.tactics"
           label="Tacticas John Deere"
           option-value="id"
           option-label="name"
@@ -256,7 +256,7 @@
       <q-item-section>
         <q-select
           v-model="formCliente.construction_classification_id"
-          :options="constructionClassifications"
+          :options="crud.items.constructionClassifications"
           label="Clasificacion Construccion"
           option-value="id"
           option-label="name"
@@ -277,16 +277,16 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
+import { useCrudStore } from "src/stores/crud";
+
+const crud = useCrudStore();
 
 const { cliente } = defineProps(["cliente"]);
 
+const baseURL = ref("/api/intranet/cliente");
+
 const sat = ["fisica", "moral"];
-const states = ref([]);
 const towns = ref([]);
-const classifications = ref([]);
-const segmentations = ref([]);
-const tactics = ref([]);
-const constructionClassifications = ref([]);
 
 const myForm = ref(null);
 
@@ -315,12 +315,7 @@ const formCliente = ref({
 });
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/cliente/options", "");
-  states.value = res.states;
-  classifications.value = res.classifications;
-  segmentations.value = res.segmentations;
-  tactics.value = res.tactics;
-  constructionClassifications.value = res.constructionClassifications;
+  await crud.getItems(baseURL.value + "/options");
 };
 
 const updateTowns = (id) => {

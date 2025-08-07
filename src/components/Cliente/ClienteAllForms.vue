@@ -53,7 +53,7 @@
               <q-item-label class="text-h6"> Informacion general </q-item-label>
             </q-item-section>
             <q-item-section side>
-              <q-btn label="Guardar" color="blue" @click="putCliente" />
+              <q-btn label="Guardar" color="blue" @click="putItem" />
             </q-item-section>
           </q-item>
           <cliente-form
@@ -165,10 +165,9 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { sendRequest } from "src/boot/functions";
-import { useQuasar } from "quasar";
+import { useCrudStore } from "src/stores/crud";
 
-const $q = useQuasar();
+const crud = useCrudStore();
 
 import ClienteForm from "src/components/Cliente/ClienteForm.vue";
 import ReferenciaIndex from "src/components/Referencia/ReferenciaIndex.vue";
@@ -189,27 +188,14 @@ const splitterModel = ref(15);
 const currentCliente = ref(null);
 const edit = ref(null);
 
-const putCliente = async () => {
-  const edit_valid = await edit.value.validate();
-  if (!edit_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
-    return;
-  }
-  const final = {
-    ...edit.value.formCliente,
-  };
-  let res = await sendRequest(
-    "PUT",
-    final,
-    "/api/intranet/cliente/" + final.id,
-    ""
-  );
-  currentCliente.value = res;
+const baseURL = ref("/api/intranet/cliente");
+
+const putItem = async () => {
+  const data = { ...edit.value.formCliente };
+
+  await crud.putItem(baseURL.value, data, edit.value.validate, (res) => {
+    currentCliente.value = res;
+  });
 };
 
 onMounted(() => {

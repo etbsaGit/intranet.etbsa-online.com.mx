@@ -10,10 +10,9 @@
         flat
         bordered
         title="Clientes"
-        :rows="rows"
+        :rows="crud.paginatedItems"
         :columns="columns"
         row-key="id"
-        :dense="$q.screen.lt.md"
         :rows-per-page-options="[0]"
       >
         <template v-slot:top-left>
@@ -45,8 +44,8 @@
           <td>
             <q-pagination
               color="primary"
-              v-model="current_page"
-              :max="last_page"
+              v-model="crud.pagination.currentPage"
+              :max="crud.pagination.lastPage"
               :max-pages="6"
               direction-links
               boundary-links
@@ -90,63 +89,17 @@
     </q-item-section>
   </q-item>
 
-  <q-dialog
-    v-model="showAdd"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
-    <q-card>
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Agregar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Agregar" color="blue" @click="postItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <cliente-form ref="add" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+    <template #form>
+      <cliente-form ref="add" />
+    </template>
+  </BaseDialog>
 
-  <q-dialog
-    v-model="showEdit"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    maximized
-  >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">{{ selectedItem.nombre }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            label="Cerrar"
-            color="red"
-            v-close-popup
-            @click="getRows(current_page)"
-          />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <cliente-all-forms ref="edit" :cliente="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+  <BaseDialog maximized v-model="showEdit" mode="edit">
+    <template #form>
+      <cliente-all-forms ref="edit" :cliente="selectedItem" />
+    </template>
+  </BaseDialog>
 
   <q-dialog v-model="showFilters" position="top" full-width>
     <q-card style="width: 900px">
@@ -197,7 +150,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.state_entity_id"
-            :options="states"
+            :options="crud.items.states"
             label="Estado"
             option-value="id"
             option-label="name"
@@ -234,7 +187,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.classification_id"
-            :options="classifications"
+            :options="crud.items.classifications"
             label="Clasificacion general"
             option-value="id"
             option-label="name"
@@ -251,7 +204,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.segmentation_id"
-            :options="segmentations"
+            :options="crud.items.segmentations"
             label="Segmentacion"
             option-value="id"
             option-label="name"
@@ -270,7 +223,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.tactic_id"
-            :options="tactics"
+            :options="crud.items.tactics"
             label="Tacticas John Deere"
             option-value="id"
             option-label="name"
@@ -287,7 +240,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.construction_classification_id"
-            :options="constructionClassifications"
+            :options="crud.items.constructionClassifications"
             label="Clasificacion Construccion"
             option-value="id"
             option-label="name"
@@ -307,16 +260,16 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { sendRequest, dataIncomplete } from "src/boot/functions";
+import { sendRequest } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
-import { useQuasar } from "quasar";
+import { useCrudStore } from "src/stores/crud";
 
-const $q = useQuasar();
+const crud = useCrudStore();
 
+import BaseDialog from "src/bases/BaseDialog.vue";
 import ClienteForm from "src/components/Cliente/ClienteForm.vue";
 import ClienteAllForms from "src/components/Cliente/ClienteAllForms.vue";
 
-const rows = ref([]);
 const selectedItem = ref(null);
 const showAdd = ref(false);
 const add = ref(null);
@@ -324,10 +277,10 @@ const showEdit = ref(false);
 const edit = ref(null);
 const showFilters = ref(false);
 
-const next_page_url = ref("");
-const prev_page_url = ref("");
-const last_page = ref(0);
+const baseURL = ref("/api/intranet/cliente");
+
 const current_page = ref(1);
+const towns = ref([]);
 
 const filterForm = ref({
   search: null,
@@ -338,13 +291,6 @@ const filterForm = ref({
   tactic_id: null,
   construction_classification_id: null,
 });
-
-const states = ref([]);
-const towns = ref([]);
-const classifications = ref([]);
-const segmentations = ref([]);
-const tactics = ref([]);
-const constructionClassifications = ref([]);
 
 const columns = [
   {
@@ -416,12 +362,7 @@ const clearFilters = () => {
 };
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/cliente/options", "");
-  states.value = res.states;
-  classifications.value = res.classifications;
-  segmentations.value = res.segmentations;
-  tactics.value = res.tactics;
-  constructionClassifications.value = res.constructionClassifications;
+  await crud.getItems(baseURL.value + "/options");
 };
 
 const updateTowns = (id) => {
@@ -443,40 +384,30 @@ const getTowns = async (id) => {
   towns.value = res;
 };
 
-const getRows = async (page = 1) => {
-  const current = {
-    page: page,
-  };
-  const final = {
+const getRows = async () => {
+  const filtersWithPage = {
     ...filterForm.value,
-    ...current,
+    page: crud.pagination.currentPage,
   };
-  let res = await sendRequest("POST", final, "/api/intranet/clientes", "");
-  rows.value = res.data;
-  filterForm.value.page = res.current_page;
-  next_page_url.value = res.next_page_url;
-  prev_page_url.value = res.prev_page_url;
-  last_page.value = res.last_page;
+  await crud.getPaginatedItems(baseURL.value + "s", filtersWithPage);
 };
 
 const postItem = async () => {
-  const add_valid = await add.value.validate();
-  if (!add_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...add.value.formCliente,
-  };
-  let res = await sendRequest("POST", final, "/api/intranet/cliente", "");
-  showAdd.value = false;
-  selectedItem.value = res;
-  showEdit.value = true;
+  const data = { ...add.value.formCliente };
+
+  await crud.postItem(baseURL.value, data, add.value.validate, (res) => {
+    showAdd.value = false;
+    selectedItem.value = res;
+    showEdit.value = true;
+  });
 };
 
-watch(current_page, (newPage) => {
-  getRows(newPage);
-});
+watch(
+  () => crud.pagination.currentPage,
+  () => {
+    getRows();
+  }
+);
 
 let timeout = null;
 
@@ -485,7 +416,7 @@ const onInputChange = () => {
 
   timeout = setTimeout(() => {
     getRows();
-  }, 2000);
+  }, 1000);
 };
 
 onMounted(() => {

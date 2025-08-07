@@ -91,6 +91,9 @@ const formSale = ref({
   status_id: sale ? sale.status_id : null,
   feedback: sale ? sale.feedback : null,
   validated: sale ? sale.validated : null,
+  empleado_id: sale ? sale.empleado_id : null,
+  sucursal_id: sale ? sale.sucursal_id : null,
+  cancellation: sale ? sale.cancellation : null,
 });
 
 const validate = async () => {

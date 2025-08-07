@@ -9,6 +9,15 @@ const routes = [
     },
     children: [
       { path: "", component: () => import("pages/auth/LoginPage.vue") },
+      {
+        path: "/reset-password",
+        component: () => import("src/pages/auth/ResetPassword.vue"),
+      },
+      {
+        path: "/forgot-password",
+        component: () => import("src/pages/auth/ForgotPassword.vue"),
+        meta: { requiresGuest: true },
+      },
     ],
   },
   {

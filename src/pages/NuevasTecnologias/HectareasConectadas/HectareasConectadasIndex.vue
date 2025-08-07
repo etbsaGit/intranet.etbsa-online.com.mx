@@ -5,7 +5,7 @@
         flat
         bordered
         title="Clientes"
-        :rows="rows"
+        :rows="crud.paginatedItems"
         :columns="columns"
         row-key="id"
         :rows-per-page-options="[0]"
@@ -38,8 +38,8 @@
           <td>
             <q-pagination
               color="primary"
-              v-model="current_page"
-              :max="last_page"
+              v-model="crud.pagination.currentPage"
+              :max="crud.pagination.lastPage"
               :max-pages="6"
               direction-links
               boundary-links
@@ -104,35 +104,11 @@
     </q-item-section>
   </q-item>
 
-  <q-dialog
-    v-model="showEdit"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    maximized
-  >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">{{ selectedItem.nombre }}</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn
-            label="Cerrar"
-            color="red"
-            v-close-popup
-            @click="getRows(current_page)"
-          />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <cliente-all-forms ref="edit" :cliente="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+  <BaseDialog maximized v-model="showEdit" mode="edit">
+    <template #form>
+      <cliente-all-forms ref="edit" :cliente="selectedItem" />
+    </template>
+  </BaseDialog>
 
   <q-dialog v-model="showFilters" position="top" full-width>
     <q-card style="width: 900px">
@@ -175,7 +151,7 @@
         <q-item-section>
           <q-select
             v-model="filterForm.state_entity_id"
-            :options="states"
+            :options="crud.items.states"
             label="Estado"
             option-value="id"
             option-label="name"
@@ -217,27 +193,28 @@ import { ref, onMounted, watch } from "vue";
 import { sendRequest, dataIncomplete } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
 
+import { useCrudStore } from "src/stores/crud";
+
+const crud = useCrudStore();
+
+import BaseDialog from "src/bases/BaseDialog.vue";
 import ClienteAllForms from "src/components/Cliente/ClienteAllForms.vue";
 
-const rows = ref([]);
 const selectedItem = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
 const showFilters = ref(false);
 
-const next_page_url = ref("");
-const prev_page_url = ref("");
-const last_page = ref(0);
+const baseURL = ref("/api/intranet/nt/clientes");
+
 const current_page = ref(1);
+const towns = ref([]);
 
 const filterForm = ref({
   search: null,
   state_entity_id: null,
   town_id: null,
 });
-
-const states = ref([]);
-const towns = ref([]);
 
 const columns = [
   {
@@ -326,8 +303,7 @@ const clearFilters = () => {
 };
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/cliente/options", "");
-  states.value = res.states;
+  await crud.getItems("/api/intranet/cliente/options");
 };
 
 const updateTowns = (id) => {
@@ -350,20 +326,12 @@ const getTowns = async (id) => {
   towns.value = res;
 };
 
-const getRows = async (page = 1) => {
-  const current = {
-    page: page,
-  };
-  const final = {
+const getRows = async () => {
+  const filtersWithPage = {
     ...filterForm.value,
-    ...current,
+    page: crud.pagination.currentPage,
   };
-  let res = await sendRequest("POST", final, "/api/intranet/nt/clientes", "");
-  rows.value = res.data;
-  filterForm.value.page = res.current_page;
-  next_page_url.value = res.next_page_url;
-  prev_page_url.value = res.prev_page_url;
-  last_page.value = res.last_page;
+  await crud.getPaginatedItems(baseURL.value, filtersWithPage);
 };
 
 const getExcel = async () => {
@@ -389,9 +357,12 @@ const getExcel = async () => {
   URL.revokeObjectURL(url);
 };
 
-watch(current_page, (newPage) => {
-  getRows(newPage);
-});
+watch(
+  () => crud.pagination.currentPage,
+  () => {
+    getRows();
+  }
+);
 
 let timeout = null;
 

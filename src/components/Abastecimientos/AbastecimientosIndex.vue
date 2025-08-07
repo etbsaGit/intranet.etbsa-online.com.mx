@@ -1,196 +1,116 @@
 <template>
-  <q-list bordered separator dense style="border-radius: 10px">
-    <q-item align="center">
-      <q-item-section avatar>
-        <q-item-label><strong>Editar</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Cantidad</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Tipo de abastecimiento</strong></q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item align="center" v-for="(abastecimiento, index) in rows" :key="index">
-      <q-item-section avatar>
-        <q-btn
-          dense
-          color="primary"
-          flat
-          icon="edit_square"
-          @click="openEdit(abastecimiento)"
-        />
-      </q-item-section>
-      <q-item-section>
-        {{ abastecimiento.cantidad }}
-      </q-item-section>
-      <q-item-section>
-        {{ abastecimiento.abastecimiento.name }}
-      </q-item-section>
-    </q-item>
-    <q-item>
-      <q-item-section>
-        <q-btn
-          dense
-          flat
-          label="Agregar abastecimiento"
-          color="primary"
-          icon="add_circle"
-          @click="showAdd = true"
-        />
-      </q-item-section>
-    </q-item>
-  </q-list>
-
-  <q-dialog
-    v-model="showAdd"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
+  <BaseList
+    :items="crud.items"
+    :headers="[
+      { label: 'Eliminar', avatar: true, slot: 'delete' },
+      { label: 'Editar', avatar: true, slot: 'edit' },
+      { label: 'Cantidad', key: 'nombre' },
+      { label: 'Tipo de abastecimiento', key: 'abastecimiento.name' },
+    ]"
+    :labelAdd="'Nueva abastecimiento'"
+    :onAdd="openCreate"
   >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Agregar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Agregar" color="blue" @click="postItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <abastecimientos-form ref="add" :cliente="cliente" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <template #edit="{ item }">
+      <q-btn
+        dense
+        color="blue"
+        flat
+        icon="edit_square"
+        @click="openEdit(item)"
+      />
+    </template>
 
-  <q-dialog
-    v-model="showEdit"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
-  >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Actualizar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Actualizar" color="blue" @click="putItem" />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Borrar" color="orange" @click="destroyItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <abastecimientos-form ref="edit" :abastecimiento="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <template #delete="{ item }">
+      <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+    </template>
+  </BaseList>
+
+  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+    <template #form>
+      <abastecimientos-form ref="add" :cliente="cliente" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
+    <template #form>
+      <abastecimientos-form ref="edit" :abastecimiento="selectedItem" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
+    <template #delete-message>
+      ¿Estás seguro que deseas eliminar este elemento?
+    </template>
+  </BaseDialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
+import { useCrudStore } from "src/stores/crud";
+
+const crud = useCrudStore();
+
 import { useQuasar } from "quasar";
 
 const $q = useQuasar();
 
+import BaseDialog from "src/bases/BaseDialog.vue";
+import BaseList from "src/bases/BaseList.vue";
 import AbastecimientosForm from "src/components/Abastecimientos/AbastecimientosForm.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
-const rows = ref([]);
 const selectedItem = ref(null);
 const showAdd = ref(false);
 const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
+const showDelete = ref(false);
+
+const baseURL = ref("/api/intranet/clienteAbastecimiento");
+
+const openCreate = () => {
+  selectedItem.value = null; // nuevo registro vacío
+  showAdd.value = true;
+};
 
 const openEdit = (item) => {
   selectedItem.value = item;
   showEdit.value = true;
 };
 
+const openDelete = (item) => {
+  selectedItem.value = item;
+  showDelete.value = true;
+};
+
 const getRows = async (id) => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/clienteAbastecimiento/cliente/" + id,
-    ""
-  );
-  rows.value = res;
+  await crud.getItems(baseURL.value + "/cliente/" + id);
 };
 
-const postItem = async () => {
-  const add_valid = await add.value.validate();
-  if (!add_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
-    return;
-  }
-  const final = {
-    ...add.value.formAbastecimiento,
-  };
-  let res = await sendRequest(
-    "POST",
-    final,
-    "/api/intranet/clienteAbastecimiento",
-    ""
-  );
-  showAdd.value = false;
-  getRows(cliente.id);
+const postItem = () => {
+  const data = { ...add.value.formAbastecimiento };
+  crud.postItem(baseURL.value, data, add.value.validate, () => {
+    showAdd.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const putItem = async () => {
-  const edit_valid = await edit.value.validate();
-  if (!edit_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
-    return;
-  }
-  const final = {
-    ...edit.value.formAbastecimiento,
-  };
-  let res = await sendRequest(
-    "PUT",
-    final,
-    "/api/intranet/clienteAbastecimiento/" + final.id,
-    ""
-  );
-  showEdit.value = false;
-  getRows(cliente.id);
+const putItem = () => {
+  const data = { ...edit.value.formAbastecimiento };
+  crud.putItem(baseURL.value, data, edit.value.validate, () => {
+    showEdit.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const destroyItem = async () => {
-  let res = await sendRequest(
-    "DELETE",
-    null,
-    "/api/intranet/clienteAbastecimiento/" + selectedItem.value.id,
-    ""
-  );
-  selectedItem.value = null;
-  showEdit.value = false;
-  getRows(cliente.id);
+const destroyItem = () => {
+  crud.deleteItem(baseURL.value, selectedItem.value.id, () => {
+    selectedItem.value = null;
+    showDelete.value = false;
+    getRows(cliente.id);
+  });
 };
 
 onMounted(() => {

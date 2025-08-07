@@ -94,5 +94,5 @@ import riegoPage from "./riegoPage.vue";
 import tipoEquipoPage from "./tipoEquipoPage.vue";
 import clasEquipoPage from "./clasEquipoPage.vue";
 
-const tab = ref("");
+const tab = ref("clasificacion_construccion");
 </script>

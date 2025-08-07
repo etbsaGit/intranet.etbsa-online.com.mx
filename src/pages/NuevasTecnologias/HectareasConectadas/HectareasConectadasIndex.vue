@@ -1,9 +1,4 @@
 <template>
-  <q-item class="custom-item" align="center">
-    <q-item-section>
-      <q-item-label class="custom-label">-Clientes-</q-item-label>
-    </q-item-section>
-  </q-item>
   <q-item>
     <q-item-section>
       <q-table
@@ -15,18 +10,8 @@
         row-key="id"
         :rows-per-page-options="[0]"
       >
-        <template v-slot:top-left>
+        <template v-slot:top-right>
           <q-item>
-            <q-item-section>
-              <q-btn
-                dense
-                outline
-                label="Nuevo cliente"
-                color="primary"
-                @click="showAdd = true"
-                icon="add_circle"
-              />
-            </q-item-section>
             <q-item-section side>
               <q-btn
                 outline
@@ -35,6 +20,15 @@
                 icon="filter_alt"
                 label="Filtros"
                 @click="showFilters = true"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-btn
+                dense
+                outline
+                color="primary"
+                icon="fa-solid fa-file-arrow-down"
+                @click="getExcel"
               />
             </q-item-section>
           </q-item>
@@ -85,15 +79,30 @@
             {{ formatPhoneNumber(props.row.telefono) }}
           </q-td>
         </template>
+
+        <template v-slot:body-cell-hectareas_propias="props">
+          <q-td>
+            {{ props.row.hectareasConectadas?.hectareas_propias }}
+          </q-td>
+        </template>
+        <template v-slot:body-cell-hectareas_rentadas="props">
+          <q-td>
+            {{ props.row.hectareasConectadas?.hectareas_rentadas }}
+          </q-td>
+        </template>
+        <template v-slot:body-cell-hectareas_conectadas="props">
+          <q-td>
+            {{ props.row.hectareasConectadas?.hectareas_conectadas }}
+          </q-td>
+        </template>
+        <template v-slot:body-cell-hectareas_sin_conectar="props">
+          <q-td>
+            {{ props.row.hectareasConectadas?.hectareas_sin_conectar }}
+          </q-td>
+        </template>
       </q-table>
     </q-item-section>
   </q-item>
-
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
-    <template #form>
-      <cliente-form ref="add" />
-    </template>
-  </BaseDialog>
 
   <BaseDialog maximized v-model="showEdit" mode="edit">
     <template #form>
@@ -110,15 +119,7 @@
         <q-item-section side>
           <q-btn label="Cerrar" icon="close" dense color="red" v-close-popup />
         </q-item-section>
-        <q-item-section side>
-          <q-btn
-            label="Buscar"
-            icon="search"
-            dense
-            color="blue"
-            @click="getRows"
-          />
-        </q-item-section>
+
         <q-item-section side>
           <q-btn
             dense
@@ -180,78 +181,7 @@
             outlined
             dense
             clearable
-          />
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <q-select
-            v-model="filterForm.classification_id"
-            :options="crud.items.classifications"
-            label="Clasificacion general"
-            option-value="id"
-            option-label="name"
-            option-disable="inactive"
-            emit-value
-            map-options
-            transition-show="jump-up"
-            transition-hide="jump-up"
-            outlined
-            dense
-            clearable
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-select
-            v-model="filterForm.segmentation_id"
-            :options="crud.items.segmentations"
-            label="Segmentacion"
-            option-value="id"
-            option-label="name"
-            option-disable="inactive"
-            emit-value
-            map-options
-            transition-show="jump-up"
-            transition-hide="jump-up"
-            outlined
-            dense
-            clearable
-          />
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <q-select
-            v-model="filterForm.tactic_id"
-            :options="crud.items.tactics"
-            label="Tacticas John Deere"
-            option-value="id"
-            option-label="name"
-            option-disable="inactive"
-            emit-value
-            map-options
-            transition-show="jump-up"
-            transition-hide="jump-up"
-            outlined
-            dense
-            clearable
-          />
-        </q-item-section>
-        <q-item-section>
-          <q-select
-            v-model="filterForm.construction_classification_id"
-            :options="crud.items.constructionClassifications"
-            label="Clasificacion Construccion"
-            option-value="id"
-            option-label="name"
-            option-disable="inactive"
-            emit-value
-            map-options
-            transition-show="jump-up"
-            transition-hide="jump-up"
-            outlined
-            dense
-            clearable
+            @update:model-value="onInputChange"
           />
         </q-item-section>
       </q-item>
@@ -260,24 +190,22 @@
 </template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { sendRequest, dataIncomplete } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
+
 import { useCrudStore } from "src/stores/crud";
 
 const crud = useCrudStore();
 
 import BaseDialog from "src/bases/BaseDialog.vue";
-import ClienteForm from "src/components/Cliente/ClienteForm.vue";
 import ClienteAllForms from "src/components/Cliente/ClienteAllForms.vue";
 
 const selectedItem = ref(null);
-const showAdd = ref(false);
-const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
 const showFilters = ref(false);
 
-const baseURL = ref("/api/intranet/cliente");
+const baseURL = ref("/api/intranet/nt/clientes");
 
 const current_page = ref(1);
 const towns = ref([]);
@@ -286,10 +214,6 @@ const filterForm = ref({
   search: null,
   state_entity_id: null,
   town_id: null,
-  classification_id: null,
-  segmentation_id: null,
-  tactic_id: null,
-  construction_classification_id: null,
 });
 
 const columns = [
@@ -314,13 +238,6 @@ const columns = [
     sortable: true,
   },
   {
-    name: "rfc",
-    label: "RFC",
-    align: "left",
-    field: "rfc",
-    sortable: true,
-  },
-  {
     name: "telefono",
     label: "Telefono",
     align: "left",
@@ -341,6 +258,34 @@ const columns = [
     field: "ciudad",
     sortable: true,
   },
+  {
+    name: "hectareas_propias",
+    label: "H. propias",
+    align: "left",
+    field: "hectareas_propias",
+    sortable: true,
+  },
+  {
+    name: "hectareas_rentadas",
+    label: "H. rentadas",
+    align: "left",
+    field: "hectareas_rentadas",
+    sortable: true,
+  },
+  {
+    name: "hectareas_conectadas",
+    label: "H. conectadas",
+    align: "left",
+    field: "hectareas_conectadas",
+    sortable: true,
+  },
+  {
+    name: "hectareas_sin_conectar",
+    label: "H. sin conectar",
+    align: "left",
+    field: "hectareas_sin_conectar",
+    sortable: true,
+  },
 ];
 
 const openEdit = (item) => {
@@ -352,23 +297,20 @@ const clearFilters = () => {
   filterForm.value.search = null;
   filterForm.value.state_entity_id = null;
   filterForm.value.town_id = null;
-  filterForm.value.classification_id = null;
-  filterForm.value.segmentation_id = null;
-  filterForm.value.tactic_id = null;
-  filterForm.value.construction_classification_id = null;
   current_page.value = 1;
   towns.value = [];
   getRows();
 };
 
 const getOptions = async () => {
-  await crud.getItems(baseURL.value + "/options");
+  await crud.getItems("/api/intranet/cliente/options");
 };
 
 const updateTowns = (id) => {
   filterForm.value.town_id = null;
   towns.value = [];
   getTowns(id);
+  onInputChange();
 };
 
 const getTowns = async (id) => {
@@ -389,17 +331,30 @@ const getRows = async () => {
     ...filterForm.value,
     page: crud.pagination.currentPage,
   };
-  await crud.getPaginatedItems(baseURL.value + "s", filtersWithPage);
+  await crud.getPaginatedItems(baseURL.value, filtersWithPage);
 };
 
-const postItem = async () => {
-  const data = { ...add.value.formCliente };
+const getExcel = async () => {
+  const final = {
+    ...filterForm.value,
+  };
+  const res = await sendRequest(
+    "POST",
+    final,
+    "/api/intranet/nt/clientes/xls",
+    ""
+  );
+  const base64Response = await fetch(
+    `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${res.file_base64}`
+  );
+  const blob = await base64Response.blob();
+  const url = URL.createObjectURL(blob);
 
-  await crud.postItem(baseURL.value, data, add.value.validate, (res) => {
-    showAdd.value = false;
-    selectedItem.value = res;
-    showEdit.value = true;
-  });
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = res.file_name;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 watch(

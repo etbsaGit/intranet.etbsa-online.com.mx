@@ -28,13 +28,13 @@ export function admin(/* { to, from, next } */ { to, next }) {
   }
 
   if (!checkRole("Admin")) {
-    return next("/perfil");
+    return next("/");
   }
 
   return next();
 }
 
-export function rrhh({ to, next }) {
+export function clientes(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();
 
   if (!auth.user) {
@@ -42,17 +42,14 @@ export function rrhh({ to, next }) {
     return next("/login");
   }
 
-  if (!checkRole("RRHH")) {
-    if (!checkRole("Jefe")) {
-      return next("/perfil");
-    }
-    return next();
+  if (!checkRole("Intranet.clientes")) {
+    return next("/");
   }
 
   return next();
 }
 
-export function servicio({ to, next }) {
+export function sales(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();
 
   if (!auth.user) {
@@ -60,22 +57,24 @@ export function servicio({ to, next }) {
     return next("/login");
   }
 
-  if (checkRole("Servicio") || checkRole("Taller")) {
-    return next();
+  if (!checkRole("Intranet.sales")) {
+    return next("/");
   }
-  auth.returnUrl = to.fullPath;
-  return next("/perfil");
+
+  return next();
 }
 
-export function encuestador(/* { to, from, next } */ { to, next }) {
+export function NT(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();
+
   if (!auth.user) {
     auth.returnUrl = to.fullPath;
     return next("/login");
   }
-  if (checkRole("Encuestador") || checkRole("Evaluador")) {
-    return next();
+
+  if (!checkRole("Intranet.nt")) {
+    return next("/");
   }
-  auth.returnUrl = to.fullPath;
-  return next("/perfil");
+
+  return next();
 }

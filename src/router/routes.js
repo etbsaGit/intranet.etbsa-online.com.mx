@@ -1,4 +1,4 @@
-import { auth, guest, admin, rrhh, encuestador, servicio } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT } from "./middleware";
 
 const routes = [
   {
@@ -9,6 +9,15 @@ const routes = [
     },
     children: [
       { path: "", component: () => import("pages/auth/LoginPage.vue") },
+      {
+        path: "/reset-password",
+        component: () => import("src/pages/auth/ResetPassword.vue"),
+      },
+      {
+        path: "/forgot-password",
+        component: () => import("src/pages/auth/ForgotPassword.vue"),
+        meta: { requiresGuest: true },
+      },
     ],
   },
   {
@@ -17,15 +26,64 @@ const routes = [
     meta: {
       middlewares: [auth],
     },
+    children: [{ path: "", component: () => import("pages/HomePage.vue") }],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [admin],
+    },
     children: [
-      { path: "", component: () => import("pages/HomePage.vue") },
       {
         path: "/catalogos",
         component: () => import("src/pages/catalogos/indexPage.vue"),
       },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [clientes],
+    },
+    children: [
       {
         path: "/cliente",
         component: () => import("src/pages/cliente/ClientePage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [sales],
+    },
+    children: [
+      {
+        path: "/sale",
+        component: () => import("src/pages/sale/SalePage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [NT],
+    },
+    children: [
+      {
+        path: "/nt/hectareas",
+        component: () =>
+          import(
+            "src/pages/NuevasTecnologias/HectareasConectadas/HectareasConectadasIndex.vue"
+          ),
       },
     ],
   },

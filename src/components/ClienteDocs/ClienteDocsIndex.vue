@@ -1,211 +1,132 @@
 <template>
-  <q-list bordered separator dense style="border-radius: 10px">
-    <q-item align="center">
-      <q-item-section avatar>
-        <q-item-label><strong>Editar</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Nombre</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Extencion</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Tipo</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Fecha de caducidad</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Ver / Descargar</strong></q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item
-      align="center"
-      v-for="(doc, index) in rows"
-      :key="index"
-      :class="{ 'text-red': isExpired(doc.expiration_date) }"
-    >
-      <q-item-section avatar>
-        <q-btn
-          dense
-          color="primary"
-          flat
-          icon="edit_square"
-          @click="openEdit(doc)"
-        />
-      </q-item-section>
-      <q-item-section>
-        {{ doc.name }}
-      </q-item-section>
-      <q-item-section>
-        {{ doc.extension }}
-      </q-item-section>
-      <q-item-section>
-        {{ doc.status?.nombre }}
-      </q-item-section>
-      <q-item-section>
-        {{ doc.expiration_date }}
-      </q-item-section>
-      <q-item-section>
-        <q-btn
-          dense
-          color="primary"
-          flat
-          icon="description"
-          @click="openWindow(doc)"
-        />
-      </q-item-section>
-    </q-item>
-    <q-item>
-      <q-item-section>
-        <q-btn
-          dense
-          flat
-          label="Agregar documento"
-          color="primary"
-          icon="add_circle"
-          @click="showAdd = true"
-        />
-      </q-item-section>
-    </q-item>
-  </q-list>
-
-  <q-dialog
-    v-model="showAdd"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
+  <BaseList
+    :items="crud.items"
+    :headers="[
+      { label: 'Eliminar', avatar: true, slot: 'delete' },
+      { label: 'Editar', avatar: true, slot: 'edit' },
+      { label: 'Nombre', key: 'name' },
+      { label: 'Extencion', key: 'extension' },
+      { label: 'Tipo', key: 'status.nombre' },
+      { label: 'Fecha de caducidad', key: 'expiration_date' },
+      { label: 'Ver / Descargar', avatar: true, slot: 'download' },
+    ]"
+    :rowHighlightFn="
+      (item) => (isExpired(item.expiration_date) ? 'text-red' : '')
+    "
+    :labelAdd="'Agregar documento'"
+    :onAdd="openCreate"
   >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Agregar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Agregar" color="blue" @click="postItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <cliente-docs-form ref="add" :cliente="cliente" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <!-- Slots personalizados -->
+    <template #edit="{ item }">
+      <q-btn
+        dense
+        color="blue"
+        flat
+        icon="edit_square"
+        @click="openEdit(item)"
+      />
+    </template>
 
-  <q-dialog
-    v-model="showEdit"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
-  >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Actualizar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Actualizar" color="blue" @click="putItem" />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Borrar" color="orange" @click="destroyItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <cliente-docs-form ref="edit" :doc="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <template #delete="{ item }">
+      <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+    </template>
+
+    <template #download="{ item }">
+      <q-btn
+        dense
+        color="primary"
+        flat
+        icon="description"
+        @click="openWindow(item)"
+      />
+    </template>
+  </BaseList>
+
+  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+    <template #form>
+      <cliente-docs-form ref="add" :cliente="cliente" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
+    <template #form>
+      <cliente-docs-form ref="edit" :doc="selectedItem" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
+    <template #delete-message>
+      ¿Estás seguro que deseas eliminar este elemento?
+    </template>
+  </BaseDialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { sendRequest, dataIncomplete } from "src/boot/functions";
+import { useCrudStore } from "src/stores/crud";
 
+const crud = useCrudStore();
+
+import BaseDialog from "src/bases/BaseDialog.vue";
+import BaseList from "src/bases/BaseList.vue";
 import ClienteDocsForm from "src/components/ClienteDocs/ClienteDocsForm.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
-const rows = ref([]);
 const selectedItem = ref(null);
 const showAdd = ref(false);
 const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
+const showDelete = ref(false);
+
+const baseURL = ref("/api/intranet/clientesDoc");
+
+const openCreate = () => {
+  selectedItem.value = null; // nuevo registro vacío
+  showAdd.value = true;
+};
 
 const openEdit = (item) => {
   selectedItem.value = item;
   showEdit.value = true;
 };
 
-const openWindow = (item) => {
-  window.open(item.realpath, "_blank");
+const openDelete = (item) => {
+  selectedItem.value = item;
+  showDelete.value = true;
 };
 
 const getRows = async (id) => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/clientesDoc/cliente/" + id,
-    ""
-  );
-  rows.value = res;
+  await crud.getItems(baseURL.value + "/cliente/" + id);
 };
 
-const postItem = async () => {
-  const add_valid = await add.value.validate();
-  if (!add_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...add.value.formDoc,
-  };
-  let res = await sendRequest("POST", final, "/api/intranet/clientesDoc", "");
-  showAdd.value = false;
-  getRows(cliente.id);
+const postItem = () => {
+  const data = { ...add.value.formDoc };
+  crud.postItem(baseURL.value, data, add.value.validate, () => {
+    showAdd.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const putItem = async () => {
-  const edit_valid = await edit.value.validate();
-  if (!edit_valid) {
-    dataIncomplete();
-    return;
-  }
-  const final = {
-    ...edit.value.formDoc,
-  };
-  let res = await sendRequest(
-    "PUT",
-    final,
-    "/api/intranet/clientesDoc/" + final.id,
-    ""
-  );
-  showEdit.value = false;
-  getRows(cliente.id);
+const putItem = () => {
+  const data = { ...edit.value.formDoc };
+  crud.putItem(baseURL.value, data, edit.value.validate, () => {
+    showEdit.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const destroyItem = async () => {
-  let res = await sendRequest(
-    "DELETE",
-    null,
-    "/api/intranet/clientesDoc/" + selectedItem.value.id,
-    ""
-  );
-  selectedItem.value = null;
-  showEdit.value = false;
-  getRows(cliente.id);
+const destroyItem = () => {
+  crud.deleteItem(baseURL.value, selectedItem.value.id, () => {
+    selectedItem.value = null;
+    showDelete.value = false;
+    getRows(cliente.id);
+  });
+};
+
+const openWindow = (item) => {
+  window.open(item.realpath, "_blank");
 };
 
 const isExpired = (date) => {

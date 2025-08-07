@@ -1,203 +1,117 @@
 <template>
-  <q-list bordered separator dense style="border-radius: 10px">
-    <q-item align="center">
-      <q-item-section avatar>
-        <q-item-label><strong>Editar</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Nombre</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Ubicacion</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Hectareas Propias</strong></q-item-label>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label><strong>Hectareas Rentadas</strong></q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item align="center" v-for="(dist, index) in rows" :key="index">
-      <q-item-section avatar>
-        <q-btn
-          dense
-          color="primary"
-          flat
-          icon="edit_square"
-          @click="openEdit(dist)"
-        />
-      </q-item-section>
-      <q-item-section>
-        {{ dist.nombre }}
-      </q-item-section>
-      <q-item-section>
-        {{ dist.ubicacion }}
-      </q-item-section>
-      <q-item-section>
-        {{ dist.hectareas_propias }}
-      </q-item-section>
-      <q-item-section>
-        {{ dist.hectareas_rentadas }}
-      </q-item-section>
-    </q-item>
-    <q-item>
-      <q-item-section>
-        <q-btn
-          dense
-          flat
-          label="Agregar distribucion"
-          color="primary"
-          icon="add_circle"
-          @click="showAdd = true"
-        />
-      </q-item-section>
-    </q-item>
-  </q-list>
-
-  <q-dialog
-    v-model="showAdd"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
+  <BaseList
+    :items="crud.items"
+    :headers="[
+      { label: 'Eliminar', avatar: true, slot: 'delete' },
+      { label: 'Editar', avatar: true, slot: 'edit' },
+      { label: 'Nombre', key: 'nombre' },
+      { label: 'Ubicacion', key: 'ubicacion' },
+      { label: 'Hectareas propias', key: 'hectareas_propias' },
+      { label: 'Hectareas rentadas', key: 'hectareas_rentadas' },
+    ]"
+    :labelAdd="'Nueva referencia'"
+    :onAdd="openCreate"
   >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Agregar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Agregar" color="blue" @click="postItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <distribucion-form ref="add" :cliente="cliente" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <template #edit="{ item }">
+      <q-btn
+        dense
+        color="blue"
+        flat
+        icon="edit_square"
+        @click="openEdit(item)"
+      />
+    </template>
 
-  <q-dialog
-    v-model="showEdit"
-    transition-show="rotate"
-    transition-hide="rotate"
-    persistent
-  >
-    <q-card style="width: 100%">
-      <q-item class="text-white bg-primary">
-        <q-item-section>
-          <q-item-label class="text-h6">Actualizar</q-item-label>
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Cerrar" color="red" v-close-popup />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Actualizar" color="blue" @click="putItem" />
-        </q-item-section>
-        <q-item-section side>
-          <q-btn label="Borrar" color="orange" @click="destroyItem" />
-        </q-item-section>
-      </q-item>
-      <q-separator />
-      <q-item>
-        <q-item-section>
-          <distribucion-form ref="edit" :distribucion="selectedItem" />
-        </q-item-section>
-      </q-item>
-    </q-card>
-  </q-dialog>
+    <template #delete="{ item }">
+      <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+    </template>
+
+    <template #telefono="{ item }">
+      {{ formatPhoneNumber(item.telefono) }}
+    </template>
+  </BaseList>
+
+  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+    <template #form>
+      <distribucion-form ref="add" :cliente="cliente" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
+    <template #form>
+      <distribucion-form ref="edit" :distribucion="selectedItem" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
+    <template #delete-message>
+      ¿Estás seguro que deseas eliminar este elemento?
+    </template>
+  </BaseDialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { sendRequest } from "src/boot/functions";
-import { useQuasar } from "quasar";
+import { useCrudStore } from "src/stores/crud";
 
-const $q = useQuasar();
+const crud = useCrudStore();
 
+import BaseDialog from "src/bases/BaseDialog.vue";
+import BaseList from "src/bases/BaseList.vue";
 import DistribucionForm from "src/components/Distribucion/DistribucionForm.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
-const rows = ref([]);
 const selectedItem = ref(null);
 const showAdd = ref(false);
 const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
+const showDelete = ref(false);
+
+const baseURL = ref("/api/intranet/distribucion");
+
+const openCreate = () => {
+  selectedItem.value = null; // nuevo registro vacío
+  showAdd.value = true;
+};
 
 const openEdit = (item) => {
   selectedItem.value = item;
   showEdit.value = true;
 };
 
+const openDelete = (item) => {
+  selectedItem.value = item;
+  showDelete.value = true;
+};
+
 const getRows = async (id) => {
-  let res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/distribucion/cliente/" + id,
-    ""
-  );
-  rows.value = res;
+  await crud.getItems(baseURL.value + "/cliente/" + id);
 };
 
-const postItem = async () => {
-  const add_valid = await add.value.validate();
-  if (!add_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
-    return;
-  }
-  const final = {
-    ...add.value.formDistribucion,
-  };
-  let res = await sendRequest("POST", final, "/api/intranet/distribucion", "");
-  showAdd.value = false;
-  getRows(cliente.id);
+const postItem = () => {
+  const data = { ...add.value.formDistribucion };
+  crud.postItem(baseURL.value, data, add.value.validate, () => {
+    showAdd.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const putItem = async () => {
-  const edit_valid = await edit.value.validate();
-  if (!edit_valid) {
-    $q.notify({
-      color: "red-5",
-      textColor: "white",
-      icon: "warning",
-      message: "Por favor completa todos los campos obligatorios",
-    });
-    return;
-  }
-  const final = {
-    ...edit.value.formDistribucion,
-  };
-  let res = await sendRequest(
-    "PUT",
-    final,
-    "/api/intranet/distribucion/" + final.id,
-    ""
-  );
-  showEdit.value = false;
-  getRows(cliente.id);
+const putItem = () => {
+  const data = { ...edit.value.formDistribucion };
+  crud.putItem(baseURL.value, data, edit.value.validate, () => {
+    showEdit.value = false;
+    getRows(cliente.id);
+  });
 };
 
-const destroyItem = async () => {
-  let res = await sendRequest(
-    "DELETE",
-    null,
-    "/api/intranet/distribucion/" + selectedItem.value.id,
-    ""
-  );
-  selectedItem.value = null;
-  showEdit.value = false;
-  getRows(cliente.id);
+const destroyItem = () => {
+  crud.deleteItem(baseURL.value, selectedItem.value.id, () => {
+    selectedItem.value = null;
+    showDelete.value = false;
+    getRows(cliente.id);
+  });
 };
 
 onMounted(() => {

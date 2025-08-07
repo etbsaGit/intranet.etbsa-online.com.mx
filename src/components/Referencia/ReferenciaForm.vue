@@ -17,11 +17,15 @@
           filled
           dense
           v-model="formReferencia.telefono"
-          label="Telefono"
+          label="Telefono movil"
           mask="(###) ### - ####"
           unmasked-value
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        >
+          <template v-slot:prepend>
+            <q-icon name="fa-brands fa-whatsapp" />
+          </template>
+        </q-input>
       </q-item-section>
       <q-item-section>
         <q-select

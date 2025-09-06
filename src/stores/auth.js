@@ -22,7 +22,9 @@ export const useAuthStore = defineStore("auth", {
       await this.getToken();
       try {
         const res = await axios.post("/api/auth/login", form);
+
         if (res.data.two_factor_required) {
+          // Usuario con email verificado → requiere 2FA
           this.twoFactorUserId = res.data.user_id;
           this.awaitingTwoFactor = true;
           Notify.create({
@@ -31,6 +33,7 @@ export const useAuthStore = defineStore("auth", {
             icon: "mail",
           });
         } else {
+          // Usuario sin email verificado → login directo
           this.authToken = res.data.token;
           this.authUser = res.data.data;
           this.awaitingTwoFactor = false;
@@ -45,6 +48,47 @@ export const useAuthStore = defineStore("auth", {
         });
       }
     },
+
+    async sendEmailVerification() {
+      try {
+        await axios.post(
+          "/api/auth/send-email-verification",
+          {},
+          {
+            headers: { Authorization: `Bearer ${this.authToken}` },
+          }
+        );
+        Notify.create({
+          color: "positive",
+          message: "Correo de verificación enviado",
+          icon: "mail",
+        });
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.response?.data?.message || "Error enviando correo",
+          icon: "report_problem",
+        });
+      }
+    },
+
+    async confirmEmailVerification(id, hash) {
+      try {
+        const res = await axios.get(`/api/auth/verify-email/${id}/${hash}`);
+        Notify.create({
+          color: "positive",
+          message: res.data.message,
+          icon: "check",
+        });
+      } catch (error) {
+        Notify.create({
+          color: "negative",
+          message: error.response?.data?.message || "Error verificando correo",
+          icon: "report_problem",
+        });
+      }
+    },
+
     async verifyTwoFactor(code) {
       try {
         const res = await axios.post("/api/auth/verify", {

@@ -19,6 +19,7 @@
     <q-tab name="abastecimiento" label="Abastecimiento" />
     <q-tab name="condicion" label="Condicion" />
     <q-tab name="cultivo" label="Cultivos" />
+    <q-tab name="ganado" label="Ganado" />
     <q-tab name="tipoCultivo" label="Tipos de cultivo" />
     <q-tab name="marca" label="Marcas" />
     <q-tab name="nuevaTecnologia" label="Nuevas Tecnologias" />
@@ -54,6 +55,9 @@
     </q-tab-panel>
     <q-tab-panel name="cultivo" class="q-pa-none">
       <cultivo-page />
+    </q-tab-panel>
+    <q-tab-panel name="ganado" class="q-pa-none">
+      <ganado-page />
     </q-tab-panel>
     <q-tab-panel name="tipoCultivo" class="q-pa-none">
       <tipo-cultivo-page />
@@ -93,6 +97,7 @@ import nuevaTecnologiaPage from "./nuevaTecnologiaPage.vue";
 import riegoPage from "./riegoPage.vue";
 import tipoEquipoPage from "./tipoEquipoPage.vue";
 import clasEquipoPage from "./clasEquipoPage.vue";
+import ganadoPage from "./ganadoPage.vue";
 
 const tab = ref("clasificacion_construccion");
 </script>

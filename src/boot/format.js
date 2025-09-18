@@ -12,3 +12,10 @@ export function formatPhoneNumber(phoneNumber) {
   // Si no coincide con el patrón esperado, devolver el número sin formato
   return cleaned;
 }
+
+export function formatCurrency(value) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+  }).format(value);
+}

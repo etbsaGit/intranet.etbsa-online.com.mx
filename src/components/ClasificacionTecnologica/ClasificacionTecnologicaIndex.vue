@@ -1,119 +1,117 @@
 <template>
-  <q-page class="q-pa-md">
-    <q-stepper v-model="step" ref="stepper" color="red-10" animated>
-      <q-step :name="1" title="Adopción Baja" :done="step > 1">
-        <q-list bordered separator class="my-list">
-          <q-item class="year-navigator">
-            <span class="year-display">Adopción Baja</span>
-          </q-item>
-          <q-item v-for="item in lowLevelData" :key="item.id">
-            <q-item-section>
-              <q-toggle
-                color="blue"
-                :label="item.name"
-                v-model="items"
-                :val="item.id"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-step>
+  <q-stepper v-model="step" ref="stepper" color="red-10" animated>
+    <q-step :name="1" title="Adopción Baja" :done="step > 1">
+      <q-list bordered separator class="my-list">
+        <q-item class="year-navigator">
+          <span class="year-display">Adopción Baja</span>
+        </q-item>
+        <q-item v-for="item in lowLevelData" :key="item.id">
+          <q-item-section>
+            <q-toggle
+              color="blue"
+              :label="item.name"
+              v-model="items"
+              :val="item.id"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-step>
 
-      <q-step :name="2" title="Adopción Media" :done="step > 2">
-        <q-list bordered separator class="my-list">
-          <q-item class="year-navigator">
-            <span class="year-display">Adopción Media</span>
-          </q-item>
-          <q-item v-for="item in mediumLevelData" :key="item.id">
-            <q-item-section>
-              <q-toggle
-                color="orange"
-                :label="item.name"
-                v-model="items"
-                :val="item.id"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-step>
+    <q-step :name="2" title="Adopción Media" :done="step > 2">
+      <q-list bordered separator class="my-list">
+        <q-item class="year-navigator">
+          <span class="year-display">Adopción Media</span>
+        </q-item>
+        <q-item v-for="item in mediumLevelData" :key="item.id">
+          <q-item-section>
+            <q-toggle
+              color="orange"
+              :label="item.name"
+              v-model="items"
+              :val="item.id"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-step>
 
-      <q-step :name="3" title="Adopción Alta" :done="step > 3">
-        <q-list bordered separator class="my-list">
-          <q-item class="year-navigator">
-            <span class="year-display">Adopción Alta</span>
-          </q-item>
-          <q-item v-for="item in highLevelData" :key="item.id">
-            <q-item-section>
-              <q-toggle
-                color="yellow"
-                :label="item.name"
-                v-model="items"
-                :val="item.id"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-step>
+    <q-step :name="3" title="Adopción Alta" :done="step > 3">
+      <q-list bordered separator class="my-list">
+        <q-item class="year-navigator">
+          <span class="year-display">Adopción Alta</span>
+        </q-item>
+        <q-item v-for="item in highLevelData" :key="item.id">
+          <q-item-section>
+            <q-toggle
+              color="yellow"
+              :label="item.name"
+              v-model="items"
+              :val="item.id"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-step>
 
-      <q-step :name="4" title="Adopción experto">
-        <q-list bordered separator class="my-list">
-          <q-item class="year-navigator">
-            <span class="year-display">Adopción Experto</span>
-          </q-item>
-          <q-item v-for="item in expertLevelData" :key="item.id">
-            <q-item-section>
-              <q-toggle
-                color="red"
-                :label="item.name"
-                v-model="items"
-                :val="item.id"
-              />
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-step>
+    <q-step :name="4" title="Adopción experto">
+      <q-list bordered separator class="my-list">
+        <q-item class="year-navigator">
+          <span class="year-display">Adopción Experto</span>
+        </q-item>
+        <q-item v-for="item in expertLevelData" :key="item.id">
+          <q-item-section>
+            <q-toggle
+              color="red"
+              :label="item.name"
+              v-model="items"
+              :val="item.id"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-step>
 
-      <template v-slot:navigation>
-        <q-stepper-navigation>
-          <q-item dense>
-            <q-item-section avatar v-if="step != 4">
-              <q-btn
-                :disabled="!isStepComplete(step)"
-                @click="nextStep"
-                color="primary"
-                label="Continue"
-              />
-            </q-item-section>
-            <q-item-section avatar v-if="step > 1">
-              <q-btn
-                outline
-                color="primary"
-                @click="previousStep"
-                label="Back"
-                class="q-ml-sm"
-              />
-            </q-item-section>
-            <q-space></q-space>
-            <q-item-section side>
-              <q-btn
-                label="Guardar"
-                color="blue"
-                @click="postItems(cliente.id)"
-              />
-            </q-item-section>
-          </q-item>
-          <q-item>
-            <q-item-section align="center">
-              <q-item-label class="title-label">Nivel actual:</q-item-label>
-              <q-item-label class="current-level">
-                {{ currentClassTech }}
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-stepper-navigation>
-      </template>
-    </q-stepper>
-  </q-page>
+    <template v-slot:navigation>
+      <q-stepper-navigation>
+        <q-item dense>
+          <q-item-section avatar v-if="step != 4">
+            <q-btn
+              :disabled="!isStepComplete(step)"
+              @click="nextStep"
+              color="primary"
+              label="Continue"
+            />
+          </q-item-section>
+          <q-item-section avatar v-if="step > 1">
+            <q-btn
+              outline
+              color="primary"
+              @click="previousStep"
+              label="Back"
+              class="q-ml-sm"
+            />
+          </q-item-section>
+          <q-space></q-space>
+          <q-item-section side>
+            <q-btn
+              label="Guardar"
+              color="blue"
+              @click="postItems(cliente.id)"
+            />
+          </q-item-section>
+        </q-item>
+        <q-item>
+          <q-item-section align="center">
+            <q-item-label class="title-label">Nivel actual:</q-item-label>
+            <q-item-label class="current-level">
+              {{ currentClassTech }}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-stepper-navigation>
+    </template>
+  </q-stepper>
 </template>
 
 <script setup>

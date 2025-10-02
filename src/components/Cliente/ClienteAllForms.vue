@@ -52,11 +52,21 @@
             icon="fa-solid fa-cow"
             label="Inversiones ganaderas"
           />
+          <q-tab
+            name="ingreso"
+            icon="fa-solid fa-hand-holding-dollar"
+            label="Otros ingresos"
+          />
           <q-tab name="riegos" icon="shower" label="Riegos" />
           <q-tab
             name="abastecimientos"
             icon="water_drop"
             label="Abastecimientos"
+          />
+          <q-tab
+            name="analitica"
+            icon="fa-solid fa-chart-pie"
+            label="Analitica"
           />
         </q-tabs>
       </div>
@@ -207,6 +217,15 @@
           />
         </q-tab-panel>
 
+        <q-tab-panel name="ingreso">
+          <q-item dense>
+            <q-item-section>
+              <q-item-label class="text-h6"> Otros ingresos </q-item-label>
+            </q-item-section>
+          </q-item>
+          <ingreso-index :cliente="currentCliente" :key="currentCliente" />
+        </q-tab-panel>
+
         <q-tab-panel name="cultivos">
           <q-item dense>
             <q-item-section>
@@ -224,6 +243,7 @@
           </q-item>
           <riegos-index :cliente="currentCliente" :key="currentCliente" />
         </q-tab-panel>
+
         <q-tab-panel name="abastecimientos">
           <q-item dense>
             <q-item-section>
@@ -234,6 +254,15 @@
             :cliente="currentCliente"
             :key="currentCliente"
           />
+        </q-tab-panel>
+
+        <q-tab-panel name="analitica">
+          <q-item dense>
+            <q-item-section>
+              <q-item-label class="text-h6"> Analitica </q-item-label>
+            </q-item-section>
+          </q-item>
+          <analitica-index :cliente="currentCliente" :key="currentCliente" />
         </q-tab-panel>
       </q-tab-panels>
     </template>
@@ -261,6 +290,8 @@ import ReferenciaComercialIndex from "src/components/ReferenciaComercial/Referen
 import AgricolaInversionIndex from "src/components/AgricolaInversion/AgricolaInversionIndex.vue";
 import GanaderaInversionIndex from "src/components/GanaderaInversion/GanaderaInversionIndex.vue";
 import FincaIndex from "src/components/Finca/FincaIndex.vue";
+import AnaliticaIndex from "src/components/Analitica/AnaliticaIndex.vue";
+import IngresoIndex from "src/components/Ingreso/IngresoIndex.vue";
 
 const { cliente } = defineProps(["cliente"]);
 

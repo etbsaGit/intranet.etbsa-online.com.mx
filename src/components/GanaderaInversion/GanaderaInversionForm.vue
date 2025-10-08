@@ -91,7 +91,7 @@
       <q-item-section>
         <q-input
           v-model="formInversion.cantidad"
-          label="Cantidad de cabezas para venta"
+          label="Rendimiento en kilos por cabeza"
           filled
           dense
           lazy-rules
@@ -108,7 +108,7 @@
           unmasked-value
           filled
           dense
-          label="Precio por cabeza"
+          label="Precio por kilo"
           :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
         />
       </q-item-section>
@@ -128,15 +128,12 @@
       </q-item-section>
       <q-item-section>
         <q-input
-          v-model="utilidad"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
+          :model-value="utilidadFormatted"
           filled
           dense
           readonly
-          label="Utilidad del ganado"
+          label="Utilidad del cultivo"
+          :input-class="utilidad < 0 ? 'text-red' : 'text-green'"
           hint
         />
       </q-item-section>
@@ -164,12 +161,17 @@ const total = computed(() => {
 
 const ingreso = computed(() => {
   const t = Number(formInversion.value.cantidad) || 0;
+  const h = Number(formInversion.value.unidades) || 0;
   const p = Number(formInversion.value.precio) || 0;
-  return t * p;
+  return t * h * p;
 });
 
 const utilidad = computed(() => {
   return ingreso.value - total.value;
+});
+
+const utilidadFormatted = computed(() => {
+  return formatCurrency(utilidad.value);
 });
 // --------------------------------
 

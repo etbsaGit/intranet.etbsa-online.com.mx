@@ -17,7 +17,7 @@
           v-model="formFinca.descripcion"
           filled
           dense
-          label="Descripcion"
+          label="# de superficie "
           lazy-rules
           hint
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"

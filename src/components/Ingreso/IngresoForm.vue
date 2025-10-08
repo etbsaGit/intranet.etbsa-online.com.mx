@@ -3,6 +3,21 @@
     <q-item>
       <q-item-section>
         <q-select
+          v-model="formIngreso.year"
+          :options="years"
+          label="Año"
+          filled
+          dense
+          options-dense
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          :rules="[(val) => !!val || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-select
           v-model="formIngreso.tipo"
           :options="types"
           label="Tipo"
@@ -11,6 +26,7 @@
           filled
           dense
           options-dense
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
     </q-item>
@@ -24,7 +40,38 @@
           unmasked-value
           filled
           dense
-          label="Monto"
+          label="Monto mensual"
+          :rules="[(val) => Number(val) > 0 || 'El monto debe ser mayor a 0']"
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-select
+          v-model="formIngreso.months"
+          :options="months"
+          label="Meses efectivos"
+          filled
+          dense
+          options-dense
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          :rules="[(val) => !!val || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-input
+          v-model="total"
+          prefix="$"
+          mask="###,###,###"
+          reverse-fill-mask
+          unmasked-value
+          filled
+          dense
+          readonly
+          label="Total"
           hint
         />
       </q-item-section>
@@ -81,10 +128,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
 
 const { ingreso, cliente } = defineProps(["ingreso", "cliente"]);
+
+const years = ref([]);
+const months = ref([]);
 
 const myForm = ref(null);
 
@@ -102,11 +152,20 @@ const formIngreso = ref({
   id: ingreso ? ingreso.id : null,
   tipo: ingreso ? ingreso.tipo : null,
   monto: ingreso ? ingreso.monto : 0,
+  months: ingreso ? ingreso.months : 1,
+  year: ingreso ? ingreso.year : null,
   cliente_id: ingreso ? ingreso.cliente_id : cliente.id,
   ingreso_docs: ingreso ? ingreso.ingreso_docs : [],
 
   base64: [],
   file: [],
+});
+
+// --- CALCULOS AUTOMATICOS ---
+const total = computed(() => {
+  const h = Number(formIngreso.value.monto) || 0;
+  const c = Number(formIngreso.value.months) || 0;
+  return h * c;
 });
 
 const deleteDoc = async (id) => {
@@ -141,6 +200,16 @@ const convertirFile = (event) => {
   }
 };
 
+const populateYears = () => {
+  const current = new Date().getFullYear();
+  years.value = Array.from({ length: 6 }, (_, i) => current - 4 + i);
+};
+
+const populateMonths = () => {
+  // Genera [1, 2, 3, ..., 12]
+  months.value = Array.from({ length: 12 }, (_, i) => i + 1);
+};
+
 const openFile = (url) => {
   window.open(url, "_blank");
 };
@@ -148,6 +217,11 @@ const openFile = (url) => {
 const validate = async () => {
   return await myForm.value.validate();
 };
+
+onMounted(() => {
+  populateYears();
+  populateMonths();
+});
 
 defineExpose({
   formIngreso,

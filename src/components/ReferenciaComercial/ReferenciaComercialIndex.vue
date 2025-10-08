@@ -4,8 +4,11 @@
     :headers="[
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
-      { label: 'Nombre', key: 'nombre' },
+      { label: 'Vendedor', key: 'nombre' },
       { label: 'Teléfono', key: 'telefono', slot: 'telefono' },
+      { label: 'Empresa', key: 'empresa' },
+      { label: 'Negocio', key: 'negocio' },
+      { label: 'Domicilio', key: 'domicilio' },
     ]"
     :labelAdd="'Nueva referencia'"
     :onAdd="openCreate"

@@ -1,15 +1,18 @@
 <template>
-  <q-splitter v-model="splitterModel" style="height: 90vh">
+  <q-splitter v-model="splitterModel" unit="px" style="height: 90vh" disable>
     <template v-slot:before>
-      <div class="q-pa-xs">
+      <div class="q-pa-none">
         <q-tabs
           v-model="tab"
           vertical
-          class="text-black"
-          active-color="teal"
-          indicator-color="teal"
+          class="custom-tabs"
+          active-color="white"
+          active-bg-color="primary"
+          switch-indicator
+          inline-label
+          indicator-color="transparent"
         >
-          <q-tab name="info" icon="person" label="Informacion" />
+          <q-tab name="info" icon="person" label="Información" />
           <q-tab name="docs" icon="folder" label="Documentos" />
           <q-tab name="referencia" icon="3p" label="Referencias personales" />
           <q-tab
@@ -17,59 +20,73 @@
             icon="fa-regular fa-id-card"
             label="Referencias comerciales"
           />
-
           <q-tab
             name="representante"
             icon="supervisor_account"
             label="Representante"
           />
-          <q-tab name="maquinas" icon="directions_car" label="Vehiculos" />
-          <q-tab
-            name="nuevaTecnologia"
-            icon="satellite_alt"
-            label="Tecnologias"
-          />
-          <q-tab
-            name="classTech"
-            icon="satellite"
-            label="Adopción de tecnología"
-          />
-          <q-tab name="distribucion" icon="pin_drop" label="Distribucion" />
+          <q-tab name="maquinas" icon="directions_car" label="Vehículos" />
           <q-tab
             name="fincas"
             icon="fa-solid fa-map-location"
             label="Fincas y terrenos"
           />
-
-          <q-tab name="cultivos" icon="eco" label="Cultivos" />
           <q-tab
-            name="inversionAgricola"
-            icon="fa-solid fa-money-bill-wheat"
-            label="Inversiones agricolas"
+            name="inversiones"
+            icon="fa-solid fa-file-invoice-dollar"
+            label="Inversiones"
           />
           <q-tab
-            name="inversionGanadera"
-            icon="fa-solid fa-cow"
-            label="Inversiones ganaderas"
+            name="inversionAgricola"
+            icon="fa-solid fa-sack-dollar"
+            label="Ingresos"
           />
           <q-tab
             name="ingreso"
             icon="fa-solid fa-hand-holding-dollar"
             label="Otros ingresos"
           />
+          <q-tab
+            name="analitica"
+            icon="fa-solid fa-chart-pie"
+            label="Analítica"
+          />
+
+          <q-separator spaced inset />
+
+          <q-tab
+            name="nuevaTecnologia"
+            icon="satellite_alt"
+            label="Tecnologías"
+          />
+          <q-tab
+            name="classTech"
+            icon="satellite"
+            label="Adopción tecnológica"
+          />
+          <q-tab name="distribucion" icon="pin_drop" label="Distribución" />
+          <q-tab name="cultivos" icon="eco" label="Cultivos" />
           <q-tab name="riegos" icon="shower" label="Riegos" />
           <q-tab
             name="abastecimientos"
             icon="water_drop"
             label="Abastecimientos"
           />
-          <q-tab
-            name="analitica"
-            icon="fa-solid fa-chart-pie"
-            label="Analitica"
-          />
         </q-tabs>
       </div>
+    </template>
+
+    <template v-slot:separator>
+      <q-btn
+        round
+        color="primary"
+        :icon="
+          splitterModel === 50
+            ? 'fa-solid fa-arrow-right'
+            : 'fa-solid fa-arrow-left'
+        "
+        @click="toggleSidebar"
+      />
     </template>
 
     <template v-slot:after>
@@ -190,31 +207,11 @@
         </q-tab-panel>
 
         <q-tab-panel name="inversionAgricola">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6">
-                Inversiones Agricolas
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <agricola-inversion-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
+          <ingresos-tab :cliente="currentCliente" :key="currentCliente" />
         </q-tab-panel>
 
-        <q-tab-panel name="inversionGanadera">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6">
-                Inversiones Ganaderas
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <ganadera-inversion-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
+        <q-tab-panel name="inversiones">
+          <inversiones-tab :cliente="currentCliente" :key="currentCliente" />
         </q-tab-panel>
 
         <q-tab-panel name="ingreso">
@@ -287,18 +284,45 @@ import AbastecimientosIndex from "src/components/Abastecimientos/Abastecimientos
 import ClasificacionTecnologicaIndex from "src/components/ClasificacionTecnologica/ClasificacionTecnologicaIndex.vue";
 import ClienteDocsIndex from "src/components/ClienteDocs/ClienteDocsIndex.vue";
 import ReferenciaComercialIndex from "src/components/ReferenciaComercial/ReferenciaComercialIndex.vue";
-import AgricolaInversionIndex from "src/components/AgricolaInversion/AgricolaInversionIndex.vue";
-import GanaderaInversionIndex from "src/components/GanaderaInversion/GanaderaInversionIndex.vue";
 import FincaIndex from "src/components/Finca/FincaIndex.vue";
 import AnaliticaIndex from "src/components/Analitica/AnaliticaIndex.vue";
 import IngresoIndex from "src/components/Ingreso/IngresoIndex.vue";
+import IngresosTab from "src/components/AgricolaInversion/IngresosTab.vue";
+import InversionesTab from "src/components/InversionesAgricolas/InversionesTab.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
 const tab = ref("info");
-const splitterModel = ref(15);
+const splitterModel = ref(270);
 const currentCliente = ref(null);
 const edit = ref(null);
+let animationFrame = null;
+
+const animateSplitter = (target, duration = 300) => {
+  if (animationFrame) cancelAnimationFrame(animationFrame);
+
+  const start = splitterModel.value;
+  const distance = target - start;
+  const startTime = performance.now();
+
+  const step = (now) => {
+    const progress = Math.min((now - startTime) / duration, 1);
+    // Easing suave
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    splitterModel.value = Math.round(start + distance * easedProgress);
+
+    if (progress < 1) {
+      animationFrame = requestAnimationFrame(step);
+    }
+  };
+
+  animationFrame = requestAnimationFrame(step);
+};
+
+const toggleSidebar = () => {
+  const target = splitterModel.value > 60 ? 50 : 270;
+  animateSplitter(target, 400); // 400ms de animación
+};
 
 const baseURL = ref("/api/intranet/cliente");
 
@@ -314,3 +338,46 @@ onMounted(() => {
   currentCliente.value = cliente;
 });
 </script>
+<style scoped>
+.custom-tabs {
+  background: #f9fafb; /* Fondo claro */
+  border-right: 1px solid #e0e0e0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  min-width: 230px;
+}
+
+.custom-tabs .q-tab {
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 500;
+  color: #444;
+  border-radius: 8px;
+  margin: 2px 6px;
+  transition: all 0.2s ease;
+}
+
+.custom-tabs .q-tab:hover {
+  background-color: #e8f0fe;
+  color: #1976d2;
+}
+
+.custom-tabs .q-tab--active {
+  background-color: #1976d2 !important;
+  color: white !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.custom-tabs .q-icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.q-btn[icon="menu"] {
+  transition: transform 0.2s ease;
+}
+
+.q-btn[icon="menu"]:hover {
+  transform: scale(1.1);
+}
+</style>

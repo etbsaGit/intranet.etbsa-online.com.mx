@@ -19,18 +19,17 @@
     />
   </q-item>
   <BaseList
-    :items="crud.items"
+    :items="crud.items.inverciones"
     :headers="[
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
-      { label: 'Tipo', key: 'tipo' },
-      { label: 'Monto mensual', key: 'monto', slot: 'monto' },
-      { label: 'Meses efectivos', key: 'months' },
-      { label: 'Total ingreso anual', key: 'total', slot: 'total' },
-
-      { label: 'Documentos', key: 'docs', slot: 'docs' },
+      { label: 'Ciclo', key: 'ciclo' },
+      { label: '# de cabezas', key: 'unidades' },
+      { label: 'Ganado', key: 'ganado', slot: 'ganado' },
+      { label: 'Costo p/ cabeza', key: 'costo', slot: 'costo' },
+      { label: 'Total', key: 'total', slot: 'total' },
     ]"
-    :labelAdd="'Nuevo ingreso'"
+    :labelAdd="'Ingresar inversion ganadera'"
     :onAdd="openCreate"
   >
     <template #edit="{ item }">
@@ -47,56 +46,27 @@
       <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
     </template>
 
-    <template #monto="{ item }">
-      {{ formatCurrency(item.monto) }}
+    <template #ganado="{ item }">
+      {{ item.ganado?.name }}
     </template>
 
+    <template #costo="{ item }">
+      {{ formatCurrency(item.costo) }}
+    </template>
     <template #total="{ item }">
       {{ formatCurrency(item.total) }}
     </template>
-
-    <template #docs="{ item }">
-      <div v-if="item.ingreso_docs">
-        <q-btn-dropdown
-          v-if="item.ingreso_docs.length"
-          dense
-          label="Documentos"
-          color="primary"
-        >
-          <q-list dense class="bg-primary" separator>
-            <q-item
-              v-for="(doc, index) in item.ingreso_docs"
-              :key="index"
-              clickable
-              @click="openFile(doc.realpath)"
-            >
-              <q-item-section>
-                <q-item-label class="text-white">
-                  <q-icon name="fa-solid fa-file-arrow-down" size="xs" />
-                  {{ doc.name }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
-      </div>
-    </template>
   </BaseList>
 
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+  <BaseDialog fullWidth v-model="showAdd" mode="create" @submit="postItem">
     <template #form>
-      <ingreso-form ref="add" :cliente="cliente" />
+      <inversiones-ganaderas-form ref="add" :cliente="cliente" />
     </template>
   </BaseDialog>
 
-  <BaseDialog
-    v-model="showEdit"
-    mode="edit"
-    @submit="putItem"
-    @close="getRows(cliente.id, currentYear)"
-  >
+  <BaseDialog fullWidth v-model="showEdit" mode="edit" @submit="putItem">
     <template #form>
-      <ingreso-form ref="edit" :ingreso="selectedItem" />
+      <inversiones-ganaderas-form ref="edit" :inversion="selectedItem" />
     </template>
   </BaseDialog>
 
@@ -109,14 +79,15 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { formatCurrency } from "src/boot/format";
 import { useCrudStore } from "src/stores/crud";
 
-const crud = useCrudStore();
-
+import { formatCurrency } from "src/boot/format";
 import BaseDialog from "src/bases/BaseDialog.vue";
 import BaseList from "src/bases/BaseList.vue";
-import IngresoForm from "src/components/Ingreso/IngresoForm.vue";
+
+import InversionesGanaderasForm from "src/components/InversionesGanaderas/InversionesGanaderasForm.vue";
+
+const crud = useCrudStore();
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -137,7 +108,7 @@ const nextYear = () => {
   currentYear.value += 1;
 };
 
-const baseURL = ref("/api/intranet/ingreso");
+const baseURL = ref("/api/intranet/inversionesGanadera");
 
 const openCreate = () => {
   selectedItem.value = null; // nuevo registro vacío
@@ -159,7 +130,7 @@ const getRows = async (id, year) => {
 };
 
 const postItem = () => {
-  const data = { ...add.value.formIngreso };
+  const data = { ...add.value.formInversion };
   crud.postItem(baseURL.value, data, add.value.validate, () => {
     showAdd.value = false;
     getRows(cliente.id, currentYear.value);
@@ -167,7 +138,7 @@ const postItem = () => {
 };
 
 const putItem = () => {
-  const data = { ...edit.value.formIngreso };
+  const data = { ...edit.value.formInversion };
   crud.putItem(baseURL.value, data, edit.value.validate, () => {
     showEdit.value = false;
     getRows(cliente.id, currentYear.value);
@@ -180,10 +151,6 @@ const destroyItem = () => {
     showDelete.value = false;
     getRows(cliente.id, currentYear.value);
   });
-};
-
-const openFile = (url) => {
-  window.open(url, "_blank");
 };
 
 watch(currentYear, (newYear) => {

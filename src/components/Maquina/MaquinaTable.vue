@@ -7,7 +7,7 @@
       { label: 'Serie', key: 'serie' },
       { label: 'Modelo', key: 'modelo' },
       { label: 'Año', key: 'anio' },
-      { label: 'Valor', key: 'valor' },
+      { label: 'Valor', key: 'valor', slot: 'valor' },
       { label: 'Marca', key: 'marca.name' },
       { label: 'Condicion', key: 'condicion.name' },
       { label: 'Clasificacion de equipo', key: 'clas_equipo.name' },
@@ -28,6 +28,10 @@
 
     <template #delete="{ item }">
       <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+    </template>
+
+    <template #valor="{ item }">
+      {{ formatCurrency(item.valor) }}
     </template>
   </BaseList>
 
@@ -59,6 +63,7 @@ const crud = useCrudStore();
 import BaseDialog from "src/bases/BaseDialog.vue";
 import BaseList from "src/bases/BaseList.vue";
 import MaquinaForm from "src/components/Maquina/MaquinaForm.vue";
+import { formatCurrency } from "src/boot/format";
 
 const { cliente } = defineProps(["cliente"]);
 

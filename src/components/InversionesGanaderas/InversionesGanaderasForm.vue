@@ -31,8 +31,8 @@
       </q-item-section>
       <q-item-section>
         <q-input
-          v-model="formInversion.hectareas"
-          label="# de hectareas"
+          v-model="formInversion.unidades"
+          label="# de cabezas"
           filled
           dense
           lazy-rules
@@ -42,9 +42,9 @@
       </q-item-section>
       <q-item-section>
         <q-select
-          v-model="formInversion.cultivo_id"
-          :options="cultivos"
-          label="Cultivo"
+          v-model="formInversion.ganado_id"
+          :options="ganados"
+          label="Ganado"
           option-value="id"
           option-label="name"
           option-disable="inactive"
@@ -87,57 +87,6 @@
         />
       </q-item-section>
     </q-item>
-    <q-item>
-      <q-item-section>
-        <q-input
-          v-model="formInversion.toneladas"
-          label="Rendimiento toneladas p/ hectarea"
-          filled
-          dense
-          lazy-rules
-          mask="#####"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          v-model="formInversion.precio"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          filled
-          dense
-          label="Precio por tonelada"
-          :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          v-model="ingreso"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          filled
-          dense
-          readonly
-          label="Ingreso total"
-          hint
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          :model-value="utilidadFormatted"
-          filled
-          dense
-          readonly
-          label="Utilidad del cultivo"
-          :input-class="utilidad < 0 ? 'text-red' : 'text-green'"
-          hint
-        />
-      </q-item-section>
-    </q-item>
   </q-form>
 </template>
 
@@ -148,33 +97,15 @@ import { formatCurrency } from "src/boot/format";
 
 const { inversion, cliente } = defineProps(["inversion", "cliente"]);
 
-const cultivos = ref([]);
+const ganados = ref([]);
 const years = ref([]);
 const ciclos = ref(["Primavera - Verano", "Otoño - Invierno"]);
 
-// --- CALCULOS AUTOMATICOS ---
 const total = computed(() => {
-  const h = Number(formInversion.value.hectareas) || 0;
+  const h = Number(formInversion.value.unidades) || 0;
   const c = Number(formInversion.value.costo) || 0;
   return h * c;
 });
-
-const ingreso = computed(() => {
-  const t = Number(formInversion.value.toneladas) || 0;
-  const h = Number(formInversion.value.hectareas) || 0;
-  const p = Number(formInversion.value.precio) || 0;
-  return t * h * p;
-});
-
-const utilidad = computed(() => {
-  return ingreso.value - total.value;
-});
-
-const utilidadFormatted = computed(() => {
-  return formatCurrency(utilidad.value);
-});
-
-// --------------------------------
 
 const myForm = ref(null);
 
@@ -182,11 +113,9 @@ const formInversion = ref({
   id: inversion ? inversion.id : null,
   year: inversion ? inversion.year : null,
   ciclo: inversion ? inversion.ciclo : null,
-  hectareas: inversion ? inversion.hectareas : null,
+  unidades: inversion ? inversion.unidades : null,
   costo: inversion ? inversion.costo : null,
-  toneladas: inversion ? inversion.toneladas : null,
-  precio: inversion ? inversion.precio : null,
-  cultivo_id: inversion ? inversion.cultivo_id : null,
+  ganado_id: inversion ? inversion.ganado_id : null,
   cliente_id: inversion ? inversion.cliente_id : cliente.id,
 });
 
@@ -194,10 +123,10 @@ const getOptions = async () => {
   let res = await sendRequest(
     "GET",
     null,
-    "/api/intranet/clienteCultivo/options",
+    "/api/intranet/inversionesGanadera/options",
     ""
   );
-  cultivos.value = res.cultivos;
+  ganados.value = res.ganados;
 };
 
 const populateYears = () => {

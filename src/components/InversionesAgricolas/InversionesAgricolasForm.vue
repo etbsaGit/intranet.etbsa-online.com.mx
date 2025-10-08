@@ -87,57 +87,6 @@
         />
       </q-item-section>
     </q-item>
-    <q-item>
-      <q-item-section>
-        <q-input
-          v-model="formInversion.toneladas"
-          label="Rendimiento toneladas p/ hectarea"
-          filled
-          dense
-          lazy-rules
-          mask="#####"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          v-model="formInversion.precio"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          filled
-          dense
-          label="Precio por tonelada"
-          :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          v-model="ingreso"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          filled
-          dense
-          readonly
-          label="Ingreso total"
-          hint
-        />
-      </q-item-section>
-      <q-item-section>
-        <q-input
-          :model-value="utilidadFormatted"
-          filled
-          dense
-          readonly
-          label="Utilidad del cultivo"
-          :input-class="utilidad < 0 ? 'text-red' : 'text-green'"
-          hint
-        />
-      </q-item-section>
-    </q-item>
   </q-form>
 </template>
 
@@ -159,23 +108,6 @@ const total = computed(() => {
   return h * c;
 });
 
-const ingreso = computed(() => {
-  const t = Number(formInversion.value.toneladas) || 0;
-  const h = Number(formInversion.value.hectareas) || 0;
-  const p = Number(formInversion.value.precio) || 0;
-  return t * h * p;
-});
-
-const utilidad = computed(() => {
-  return ingreso.value - total.value;
-});
-
-const utilidadFormatted = computed(() => {
-  return formatCurrency(utilidad.value);
-});
-
-// --------------------------------
-
 const myForm = ref(null);
 
 const formInversion = ref({
@@ -184,8 +116,6 @@ const formInversion = ref({
   ciclo: inversion ? inversion.ciclo : null,
   hectareas: inversion ? inversion.hectareas : null,
   costo: inversion ? inversion.costo : null,
-  toneladas: inversion ? inversion.toneladas : null,
-  precio: inversion ? inversion.precio : null,
   cultivo_id: inversion ? inversion.cultivo_id : null,
   cliente_id: inversion ? inversion.cliente_id : cliente.id,
 });
@@ -194,7 +124,7 @@ const getOptions = async () => {
   let res = await sendRequest(
     "GET",
     null,
-    "/api/intranet/clienteCultivo/options",
+    "/api/intranet/inversionesAgricola/options",
     ""
   );
   cultivos.value = res.cultivos;

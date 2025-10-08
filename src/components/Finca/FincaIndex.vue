@@ -5,7 +5,7 @@
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
       { label: 'Nombre', key: 'nombre' },
-      { label: 'Descripcion', key: 'descripcion', slot: 'descripcion' },
+      { label: '# de superficie', key: 'descripcion', slot: 'descripcion' },
       { label: 'Tipo', key: 'estatus', slot: 'estatus' },
       { label: 'Valor', key: 'valor', slot: 'valor' },
       { label: 'Costo', key: 'costo', slot: 'costo' },

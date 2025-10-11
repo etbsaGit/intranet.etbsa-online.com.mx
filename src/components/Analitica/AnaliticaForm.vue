@@ -44,14 +44,29 @@
     <q-item>
       <q-item-section>
         <q-input
-          v-model="formAnalitica.gastos"
+          v-model="formAnalitica.documentospc"
           prefix="$"
           mask="###,###,###"
           reverse-fill-mask
           unmasked-value
           filled
           dense
-          label="Gastos"
+          label="Documentos por cobrar"
+          hint
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-input
+          v-model="formAnalitica.mercancias"
+          prefix="$"
+          mask="###,###,###"
+          reverse-fill-mask
+          unmasked-value
+          filled
+          dense
+          label="Mercancias"
           hint
         />
       </q-item-section>
@@ -72,6 +87,7 @@
           filled
           dense
           options-dense
+          hint
         />
       </q-item-section>
     </q-item>
@@ -111,10 +127,11 @@ const formattedString = date.formatDate(timeStamp, "YYYY-MM-DD");
 const formAnalitica = ref({
   id: analitica ? analitica.id : null,
   titulo: analitica ? analitica.titulo : null,
-
   efectivo: analitica ? analitica.efectivo : 0,
   caja: analitica ? analitica.caja : 0,
   gastos: analitica ? analitica.gastos : 0,
+  documentospc: analitica ? analitica.documentospc : 0,
+  mercancias: analitica ? analitica.mercancias : 0,
   status: analitica ? analitica.status : null,
   fecha: analitica ? analitica.fecha : formattedString,
   comentarios: analitica ? analitica.comentarios : null,

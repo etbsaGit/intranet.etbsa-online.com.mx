@@ -12,66 +12,11 @@
           inline-label
           indicator-color="transparent"
         >
-          <q-tab name="info" icon="person" label="Información" />
-          <q-tab name="docs" icon="folder" label="Documentos" />
-          <q-tab name="referencia" icon="3p" label="Referencias personales" />
-          <q-tab
-            name="referenciaComercial"
-            icon="fa-regular fa-id-card"
-            label="Referencias comerciales"
-          />
-          <q-tab
-            name="representante"
-            icon="supervisor_account"
-            label="Representante"
-          />
-          <q-tab name="maquinas" icon="directions_car" label="Vehículos" />
-          <q-tab
-            name="fincas"
-            icon="fa-solid fa-map-location"
-            label="Fincas y terrenos"
-          />
-          <q-tab
-            name="inversiones"
-            icon="fa-solid fa-file-invoice-dollar"
-            label="Inversiones"
-          />
-          <q-tab
-            name="inversionAgricola"
-            icon="fa-solid fa-sack-dollar"
-            label="Ingresos"
-          />
-          <q-tab
-            name="ingreso"
-            icon="fa-solid fa-hand-holding-dollar"
-            label="Otros ingresos"
-          />
-          <q-tab
-            name="analitica"
-            icon="fa-solid fa-chart-pie"
-            label="Analítica"
-          />
+          <template v-for="item in tabs" :key="item.name">
+            <q-tab :name="item.name" :icon="item.icon" :label="item.label" />
+          </template>
 
           <q-separator spaced inset />
-
-          <q-tab
-            name="nuevaTecnologia"
-            icon="satellite_alt"
-            label="Tecnologías"
-          />
-          <q-tab
-            name="classTech"
-            icon="satellite"
-            label="Adopción tecnológica"
-          />
-          <q-tab name="distribucion" icon="pin_drop" label="Distribución" />
-          <q-tab name="cultivos" icon="eco" label="Cultivos" />
-          <q-tab name="riegos" icon="shower" label="Riegos" />
-          <q-tab
-            name="abastecimientos"
-            icon="water_drop"
-            label="Abastecimientos"
-          />
         </q-tabs>
       </div>
     </template>
@@ -98,169 +43,30 @@
         transition-prev="jump-up"
         transition-next="jump-up"
       >
-        <q-tab-panel name="info">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Informacion general </q-item-label>
-            </q-item-section>
-            <q-item-section side>
-              <q-btn label="Guardar" color="blue" @click="putItem" />
-            </q-item-section>
-          </q-item>
-          <cliente-form
-            ref="edit"
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
-        </q-tab-panel>
+        <template v-for="item in tabs" :key="item.name">
+          <q-tab-panel :name="item.name">
+            <div class="panel-header">
+              <q-item dense>
+                <q-item-section>
+                  <q-item-label class="panel-title">{{
+                    item.label
+                  }}</q-item-label>
+                </q-item-section>
+                <q-item-section v-if="item.name === 'info'" side>
+                  <q-btn label="Guardar" color="blue" @click="putItem" />
+                </q-item-section>
+              </q-item>
+            </div>
 
-        <q-tab-panel name="docs">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Documentos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <cliente-docs-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="referencia">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Referencias </q-item-label>
-            </q-item-section>
-          </q-item>
-          <referencia-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="referenciaComercial">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6">
-                Referencias comerciales
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <referencia-comercial-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
-        </q-tab-panel>
-
-        <q-tab-panel name="representante">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Representante legal </q-item-label>
-            </q-item-section>
-          </q-item>
-          <representante-card :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-        <q-tab-panel name="maquinas">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6">
-                Maquinas y vehículos utilitarios
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <maquina-table :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-        <q-tab-panel name="nuevaTecnologia">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Nuevas tecnologias </q-item-label>
-            </q-item-section>
-          </q-item>
-          <cliente-tecnologia-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
-        </q-tab-panel>
-        <q-tab-panel name="classTech">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6">
-                Adopción de tecnología
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <clasificacion-tecnologica-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
-        </q-tab-panel>
-        <q-tab-panel name="distribucion">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Distribucion </q-item-label>
-            </q-item-section>
-          </q-item>
-          <distribucion-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="fincas">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Fincas y terrenos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <finca-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="inversionAgricola">
-          <ingresos-tab :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="inversiones">
-          <inversiones-tab :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="ingreso">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Otros ingresos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <ingreso-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="cultivos">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Cultivos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <cultivos-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="riegos">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Riegos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <riegos-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
-
-        <q-tab-panel name="abastecimientos">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Abastecimientos </q-item-label>
-            </q-item-section>
-          </q-item>
-          <abastecimientos-index
-            :cliente="currentCliente"
-            :key="currentCliente"
-          />
-        </q-tab-panel>
-
-        <q-tab-panel name="analitica">
-          <q-item dense>
-            <q-item-section>
-              <q-item-label class="text-h6"> Analitica </q-item-label>
-            </q-item-section>
-          </q-item>
-          <analitica-index :cliente="currentCliente" :key="currentCliente" />
-        </q-tab-panel>
+            <!-- Cargar componente dinámicamente -->
+            <component
+              :is="item.component"
+              :cliente="currentCliente"
+              :key="currentCliente"
+              ref="item.name === 'info' ? 'edit' : null"
+            />
+          </q-tab-panel>
+        </template>
       </q-tab-panels>
     </template>
   </q-splitter>
@@ -289,6 +95,7 @@ import AnaliticaIndex from "src/components/Analitica/AnaliticaIndex.vue";
 import IngresoIndex from "src/components/Ingreso/IngresoIndex.vue";
 import IngresosTab from "src/components/AgricolaInversion/IngresosTab.vue";
 import InversionesTab from "src/components/InversionesAgricolas/InversionesTab.vue";
+import EgresoIndex from "src/components/Egresos/EgresoIndex.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -297,6 +104,113 @@ const splitterModel = ref(270);
 const currentCliente = ref(null);
 const edit = ref(null);
 let animationFrame = null;
+
+// Definición de tabs dinámicos
+const tabs = [
+  {
+    name: "info",
+    label: "Información",
+    icon: "person",
+    component: ClienteForm,
+  },
+  {
+    name: "docs",
+    label: "Documentos",
+    icon: "folder",
+    component: ClienteDocsIndex,
+  },
+  {
+    name: "referencia",
+    label: "Referencias personales",
+    icon: "3p",
+    component: ReferenciaIndex,
+  },
+  {
+    name: "referenciaComercial",
+    label: "Referencias comerciales",
+    icon: "fa-regular fa-id-card",
+    component: ReferenciaComercialIndex,
+  },
+  {
+    name: "representante",
+    label: "Representante",
+    icon: "supervisor_account",
+    component: RepresentanteCard,
+  },
+  {
+    name: "maquinas",
+    label: "Vehículos",
+    icon: "directions_car",
+    component: MaquinaTable,
+  },
+  {
+    name: "fincas",
+    label: "Fincas y terrenos",
+    icon: "fa-solid fa-map-location",
+    component: FincaIndex,
+  },
+  {
+    name: "inversiones",
+    label: "Inversiones",
+    icon: "fa-solid fa-file-invoice-dollar",
+    component: InversionesTab,
+  },
+  {
+    name: "inversionAgricola",
+    label: "Ingresos",
+    icon: "fa-solid fa-sack-dollar",
+    component: IngresosTab,
+  },
+  {
+    name: "ingreso",
+    label: "Otros ingresos",
+    icon: "fa-solid fa-hand-holding-dollar",
+    component: IngresoIndex,
+  },
+  {
+    name: "egreso",
+    label: "Egresos",
+    icon: "fa-solid fa-receipt",
+    component: EgresoIndex,
+  },
+  {
+    name: "analitica",
+    label: "Analítica",
+    icon: "fa-solid fa-chart-pie",
+    component: AnaliticaIndex,
+  },
+  {
+    name: "nuevaTecnologia",
+    label: "Tecnologías",
+    icon: "satellite_alt",
+    component: ClienteTecnologiaIndex,
+  },
+  {
+    name: "classTech",
+    label: "Adopción tecnológica",
+    icon: "satellite",
+    component: ClasificacionTecnologicaIndex,
+  },
+  {
+    name: "distribucion",
+    label: "Distribución",
+    icon: "pin_drop",
+    component: DistribucionIndex,
+  },
+  {
+    name: "cultivos",
+    label: "Cultivos",
+    icon: "eco",
+    component: CultivosIndex,
+  },
+  { name: "riegos", label: "Riegos", icon: "shower", component: RiegosIndex },
+  {
+    name: "abastecimientos",
+    label: "Abastecimientos",
+    icon: "water_drop",
+    component: AbastecimientosIndex,
+  },
+];
 
 const animateSplitter = (target, duration = 300) => {
   if (animationFrame) cancelAnimationFrame(animationFrame);
@@ -379,5 +293,19 @@ onMounted(() => {
 
 .q-btn[icon="menu"]:hover {
   transform: scale(1.1);
+}
+
+/* 🌈 Nuevo estilo de encabezado */
+.panel-header {
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #1976d2;
+}
+
+.panel-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a237e;
+  letter-spacing: 0.5px;
 }
 </style>

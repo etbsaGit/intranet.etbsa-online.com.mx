@@ -9,7 +9,6 @@
           label="serie"
           lazy-rules
           hint
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
       <q-item-section>

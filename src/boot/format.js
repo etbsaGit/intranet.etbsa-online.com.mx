@@ -19,3 +19,20 @@ export function formatCurrency(value) {
     currency: "MXN",
   }).format(value);
 }
+
+export function obtenerPeriodicidad(numero) {
+  switch (numero) {
+    case 12:
+      return "Mensual";
+    case 6:
+      return "Bimestral";
+    case 4:
+      return "Trimestral";
+    case 2:
+      return "Semestral";
+    case 1:
+      return "Anual";
+    default:
+      return "Desconocido";
+  }
+}

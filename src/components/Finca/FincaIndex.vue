@@ -9,6 +9,7 @@
       { label: 'Tipo', key: 'estatus', slot: 'estatus' },
       { label: 'Valor', key: 'valor', slot: 'valor' },
       { label: 'Costo', key: 'costo', slot: 'costo' },
+      { label: 'Documentos', key: 'docs', slot: 'docs' },
     ]"
     :labelAdd="'Nueva finca'"
     :onAdd="openCreate"
@@ -36,6 +37,32 @@
     <template #estatus="{ item }">
       {{ item.estatus?.nombre }}
     </template>
+    <template #docs="{ item }">
+      <div v-if="item.finca_docs">
+        <q-btn-dropdown
+          v-if="item.finca_docs.length"
+          dense
+          label="Documentos"
+          color="primary"
+        >
+          <q-list dense class="bg-primary" separator>
+            <q-item
+              v-for="(doc, index) in item.finca_docs"
+              :key="index"
+              clickable
+              @click="openFile(doc.realpath)"
+            >
+              <q-item-section>
+                <q-item-label class="text-white">
+                  <q-icon name="fa-solid fa-file-arrow-down" size="xs" />
+                  {{ doc.name }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
+    </template>
   </BaseList>
 
   <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
@@ -44,7 +71,12 @@
     </template>
   </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
+  <BaseDialog
+    v-model="showEdit"
+    mode="edit"
+    @submit="putItem"
+    @close="getRows(cliente.id, currentYear)"
+  >
     <template #form>
       <finca-form ref="edit" :finca="selectedItem" />
     </template>
@@ -120,6 +152,10 @@ const destroyItem = () => {
     showDelete.value = false;
     getRows(cliente.id);
   });
+};
+
+const openFile = (url) => {
+  window.open(url, "_blank");
 };
 
 onMounted(() => {

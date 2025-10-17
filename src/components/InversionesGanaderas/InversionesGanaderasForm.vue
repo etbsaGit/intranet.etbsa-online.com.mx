@@ -68,7 +68,7 @@
           unmasked-value
           filled
           dense
-          label="Costo por hectarea"
+          label="Costo por cabeza"
           :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
         />
       </q-item-section>

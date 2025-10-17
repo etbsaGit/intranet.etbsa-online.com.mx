@@ -1,6 +1,6 @@
 <template>
   <q-form ref="myForm" greedy>
-    <q-item>
+    <q-item v-if="checkRole('Credito')">
       <q-item-section>
         <q-select
           v-model="formDoc.status_id"
@@ -66,7 +66,7 @@
         />
       </q-item-section>
     </q-item>
-    <q-item>
+    <q-item v-if="checkRole('Credito')">
       <q-item-section>
         <q-input
           v-model="formDoc.comments"
@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { checkRole, sendRequest } from "src/boot/functions";
 
 const { doc, cliente } = defineProps(["doc", "cliente"]);
 
@@ -143,6 +143,12 @@ const validate = async () => {
 
 onMounted(() => {
   getOptions();
+  // Si no tiene fecha, asignamos la actual + 3 meses
+  if (!formDoc.value.expiration_date) {
+    const now = new Date();
+    now.setMonth(now.getMonth() + 3); // suma 3 meses
+    formDoc.value.expiration_date = now.toISOString().split("T")[0]; // formato YYYY-MM-DD
+  }
 });
 
 defineExpose({

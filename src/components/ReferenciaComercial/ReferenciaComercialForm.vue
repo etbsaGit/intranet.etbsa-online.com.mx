@@ -6,7 +6,7 @@
           v-model="formReferencia.nombre"
           filled
           dense
-          label="Nombre"
+          label="Vendedor"
           lazy-rules
           hint
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
@@ -40,7 +40,7 @@
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
-      <q-item-section>
+      <!-- <q-item-section>
         <q-input
           v-model="formReferencia.negocio"
           filled
@@ -50,7 +50,7 @@
           hint
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
-      </q-item-section>
+      </q-item-section> -->
     </q-item>
     <q-item>
       <q-item-section>

@@ -43,7 +43,7 @@
       <q-item-section>
         <q-select
           v-model="formInversion.cultivo_id"
-          :options="cultivos"
+          :options="filterCultivos"
           label="Cultivo"
           option-value="id"
           option-label="name"
@@ -56,6 +56,10 @@
           filled
           dense
           clearable
+          use-input
+          @filter="filterFn"
+          input-debounce="0"
+          behavior="menu"
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
       </q-item-section>
@@ -98,8 +102,25 @@ import { formatCurrency } from "src/boot/format";
 const { inversion, cliente } = defineProps(["inversion", "cliente"]);
 
 const cultivos = ref([]);
+const filterCultivos = ref(null);
 const years = ref([]);
 const ciclos = ref(["Primavera - Verano", "Otoño - Invierno"]);
+
+const filterFn = (val, update) => {
+  if (val === "") {
+    update(() => {
+      filterCultivos.value = cultivos.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterCultivos.value = cultivos.value.filter(
+      (customer) => customer.name.toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
 
 // --- CALCULOS AUTOMATICOS ---
 const total = computed(() => {

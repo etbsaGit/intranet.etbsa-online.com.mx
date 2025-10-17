@@ -18,6 +18,27 @@
     </q-item>
     <q-item>
       <q-item-section>
+        <q-select
+          v-model="formEgreso.type"
+          :options="types"
+          label="Tipo de pago"
+          filled
+          dense
+          clearable
+          options-dense
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          :rules="[(val) => !!val || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
         <q-input
           v-model="formEgreso.pago"
           prefix="$"
@@ -26,7 +47,7 @@
           unmasked-value
           filled
           dense
-          label="Pago mensual"
+          label="Cantidad pago"
           :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
         />
       </q-item-section>
@@ -105,6 +126,13 @@ import { formatCurrency } from "src/boot/format";
 const { egreso, cliente } = defineProps(["egreso", "cliente"]);
 
 const years = ref([]);
+const types = ref([
+  { id: 12, name: "Mensual" },
+  { id: 6, name: "Bimestral" },
+  { id: 4, name: "Trimestral" },
+  { id: 2, name: "Semestral" },
+  { id: 1, name: "Anual" },
+]);
 
 // --- CALCULOS AUTOMATICOS ---
 const total = computed(() => {
@@ -120,6 +148,7 @@ const formEgreso = ref({
   year: egreso ? egreso.year : null,
   pago: egreso ? egreso.pago : null,
   months: egreso ? egreso.months : null,
+  type: egreso ? egreso.type : null,
   entidad: egreso ? egreso.entidad : null,
   concepto: egreso ? egreso.concepto : null,
   descripcion: egreso ? egreso.descripcion : null,

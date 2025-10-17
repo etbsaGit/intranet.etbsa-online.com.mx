@@ -63,7 +63,11 @@
               :is="item.component"
               :cliente="currentCliente"
               :key="currentCliente"
-              ref="item.name === 'info' ? 'edit' : null"
+              :ref="
+                (el) => {
+                  if (item.name === 'info') edit = el;
+                }
+              "
             />
           </q-tab-panel>
         </template>
@@ -241,6 +245,11 @@ const toggleSidebar = () => {
 const baseURL = ref("/api/intranet/cliente");
 
 const putItem = async () => {
+  if (!edit.value) {
+    console.warn("⚠️ El formulario aún no está montado");
+    return;
+  }
+
   const data = { ...edit.value.formCliente };
 
   await crud.putItem(baseURL.value, data, edit.value.validate, (res) => {

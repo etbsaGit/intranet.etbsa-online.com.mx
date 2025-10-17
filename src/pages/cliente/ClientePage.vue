@@ -23,7 +23,7 @@
                 outline
                 label="Nuevo cliente"
                 color="primary"
-                @click="showAdd = true"
+                @click="showRFC = true"
                 icon="add_circle"
               />
             </q-item-section>
@@ -35,6 +35,20 @@
                 icon="filter_alt"
                 label="Filtros"
                 @click="showFilters = true"
+              />
+            </q-item-section>
+          </q-item>
+        </template>
+        <template v-slot:top-right>
+          <q-item v-if="checkRole('Credito')">
+            <q-item-section>
+              <q-btn
+                dense
+                outline
+                label="Asignar clientes"
+                color="primary"
+                @click="showAsync = true"
+                icon="fa-solid fa-people-arrows"
               />
             </q-item-section>
           </q-item>
@@ -95,7 +109,7 @@
     </template>
   </BaseDialog>
 
-  <BaseDialog maximized v-model="showEdit" mode="edit">
+  <BaseDialog maximized v-model="showEdit" mode="edit" @close="getRows()">
     <template #form>
       <cliente-all-forms ref="edit" :cliente="selectedItem" />
     </template>
@@ -257,10 +271,27 @@
       </q-item>
     </q-card>
   </q-dialog>
+
+  <BaseDialog v-model="showRFC" mode="create" @submit="getItem(rfc.rfc)">
+    <template #form>
+      <cliente-RFC ref="rfc" />
+    </template>
+  </BaseDialog>
+
+  <BaseDialog
+    fullWidth
+    v-model="showAsync"
+    mode="create"
+    @submit="asyncCustomers"
+  >
+    <template #form>
+      <cliente-async ref="refAsync" />
+    </template>
+  </BaseDialog>
 </template>
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { checkRole, sendRequest } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
 import { useCrudStore } from "src/stores/crud";
 
@@ -269,6 +300,8 @@ const crud = useCrudStore();
 import BaseDialog from "src/bases/BaseDialog.vue";
 import ClienteForm from "src/components/Cliente/ClienteForm.vue";
 import ClienteAllForms from "src/components/Cliente/ClienteAllForms.vue";
+import ClienteRFC from "src/components/Cliente/ClienteRFC.vue";
+import ClienteAsync from "src/components/Cliente/ClienteAsync.vue";
 
 const selectedItem = ref(null);
 const showAdd = ref(false);
@@ -276,6 +309,10 @@ const add = ref(null);
 const showEdit = ref(false);
 const edit = ref(null);
 const showFilters = ref(false);
+const rfc = ref(null);
+const showRFC = ref(false);
+const showAsync = ref(false);
+const refAsync = ref(null);
 
 const baseURL = ref("/api/intranet/cliente");
 
@@ -400,6 +437,40 @@ const postItem = async () => {
     selectedItem.value = res;
     showEdit.value = true;
   });
+};
+
+const getItem = async (rfc) => {
+  try {
+    const res = await sendRequest(
+      "GET",
+      null,
+      "/api/intranet/cliente/rfc/" + rfc,
+      ""
+    );
+    const cliente = res?.cliente || res?.data?.cliente;
+
+    selectedItem.value = cliente;
+    showEdit.value = true;
+    showRFC.value = false;
+  } catch (error) {
+    const status = error?.response?.status;
+    if (status === 404) {
+      showAdd.value = true;
+      showRFC.value = false;
+    }
+  }
+};
+
+const asyncCustomers = async () => {
+  const data = { ...refAsync.value };
+
+  let res = await sendRequest(
+    "POST",
+    data,
+    "/api/intranet/clientes/empleados/async",
+    ""
+  );
+  showAsync.value = false;
 };
 
 watch(

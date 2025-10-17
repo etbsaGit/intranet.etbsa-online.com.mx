@@ -53,7 +53,12 @@
     </template>
   </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
+  <BaseDialog
+    v-model="showEdit"
+    mode="edit"
+    @submit="putItem"
+    @close="getRows(cliente.id, currentYear)"
+  >
     <template #form>
       <analitica-form ref="edit" :analitica="selectedItem" />
     </template>

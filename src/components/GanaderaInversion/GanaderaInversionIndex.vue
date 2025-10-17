@@ -29,7 +29,7 @@
       { label: 'Costo p/ cabeza', key: 'costo', slot: 'costo' },
       { label: 'Total', key: 'total', slot: 'total' },
       { label: 'Cantidad de cabezas para venta', key: 'cantidad' },
-      { label: 'Precio p/ cabeza', key: 'precio', slot: 'precio' },
+      { label: 'Precio p/ kilo', key: 'precio', slot: 'precio' },
       { label: 'Ingreso total', key: 'ingreso', slot: 'ingreso' },
       { label: 'Utilidad del ganado', key: 'utilidad', slot: 'utilidad' },
     ]"

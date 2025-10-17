@@ -23,8 +23,9 @@
     :headers="[
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
-      { label: 'Pago mensual', key: 'pago', slot: 'pago' },
-      { label: 'Meses restantes', key: 'months', slot: 'months' },
+      { label: 'Pago', key: 'pago', slot: 'pago' },
+      { label: 'Tipo de pago', key: 'type', slot: 'type' },
+      { label: 'Pagos restantes', key: 'months', slot: 'months' },
       { label: 'A quien le debe', key: 'entidad', slot: 'entidad' },
       { label: 'Detalle de la deuda', key: 'concepto', slot: 'concepto' },
       { label: 'Total deuda', key: 'total', slot: 'total' },
@@ -53,6 +54,10 @@
     <template #total="{ item }">
       {{ formatCurrency(item.total) }}
     </template>
+
+    <template #type="{ item }">
+      {{ obtenerPeriodicidad(item.type) }}
+    </template>
   </BaseList>
 
   <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
@@ -78,7 +83,7 @@
 import { ref, onMounted, watch } from "vue";
 import { useCrudStore } from "src/stores/crud";
 
-import { formatCurrency } from "src/boot/format";
+import { formatCurrency, obtenerPeriodicidad } from "src/boot/format";
 import BaseDialog from "src/bases/BaseDialog.vue";
 import BaseList from "src/bases/BaseList.vue";
 

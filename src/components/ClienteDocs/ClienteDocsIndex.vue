@@ -4,8 +4,8 @@
     :headers="[
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
-      { label: 'Nombre', key: 'name' },
-      { label: 'Extencion', key: 'extension' },
+      { label: 'check', avatar: true, slot: 'check' },
+      { label: 'nombre', key: 'name' },
       { label: 'Tipo', key: 'status.nombre' },
       { label: 'Fecha de caducidad', key: 'expiration_date' },
       { label: 'Ver / Descargar', avatar: true, slot: 'download' },
@@ -14,7 +14,7 @@
       (item) => (isExpired(item.expiration_date) ? 'text-red' : '')
     "
     :labelAdd="'Agregar documento'"
-    :onAdd="openCreate"
+    :onAdd="checkRole('Credito') ? openCreate : null"
   >
     <!-- Slots personalizados -->
     <template #edit="{ item }">
@@ -28,16 +28,34 @@
     </template>
 
     <template #delete="{ item }">
-      <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+      <q-btn
+        v-if="item.realpath"
+        dense
+        color="red"
+        flat
+        icon="delete"
+        @click="openDelete(item)"
+      />
     </template>
 
     <template #download="{ item }">
       <q-btn
+        v-if="item.realpath"
         dense
         color="primary"
         flat
         icon="description"
         @click="openWindow(item)"
+      />
+    </template>
+
+    <template #check="{ item }">
+      <q-checkbox
+        v-model="item.checked"
+        :model-value="!!item.realpath"
+        :disable="true"
+        :color="item.realpath ? 'green' : 'red'"
+        keep-color
       />
     </template>
   </BaseList>
@@ -70,6 +88,7 @@ const crud = useCrudStore();
 import BaseDialog from "src/bases/BaseDialog.vue";
 import BaseList from "src/bases/BaseList.vue";
 import ClienteDocsForm from "src/components/ClienteDocs/ClienteDocsForm.vue";
+import { checkRole } from "src/boot/functions";
 
 const { cliente } = defineProps(["cliente"]);
 

@@ -78,6 +78,39 @@
     </q-item>
     <q-item>
       <q-item-section>
+        <q-input
+          v-model="formIngreso.costos"
+          prefix="$"
+          mask="###,###,###"
+          reverse-fill-mask
+          unmasked-value
+          filled
+          dense
+          label="Costos"
+          :rules="[
+            (val) => Number(val) >= 0 || 'El monto debe ser mayor o igual a 0',
+          ]"
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-input
+          v-model="neto"
+          prefix="$"
+          mask="###,###,###"
+          reverse-fill-mask
+          unmasked-value
+          filled
+          dense
+          readonly
+          label="Ingreso neto"
+          hint
+        />
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
         <q-file
           clearable
           color="secondary"
@@ -154,6 +187,7 @@ const formIngreso = ref({
   monto: ingreso ? ingreso.monto : 0,
   months: ingreso ? ingreso.months : 1,
   year: ingreso ? ingreso.year : null,
+  costos: ingreso ? ingreso.costos : 0,
   cliente_id: ingreso ? ingreso.cliente_id : cliente.id,
   ingreso_docs: ingreso ? ingreso.ingreso_docs : [],
 
@@ -166,6 +200,13 @@ const total = computed(() => {
   const h = Number(formIngreso.value.monto) || 0;
   const c = Number(formIngreso.value.months) || 0;
   return h * c;
+});
+
+// --- CALCULOS AUTOMATICOS ---
+const neto = computed(() => {
+  const h = Number(total.value) || 0; // ✅ usar .value
+  const c = Number(formIngreso.value.costos) || 0;
+  return h - c;
 });
 
 const deleteDoc = async (id) => {

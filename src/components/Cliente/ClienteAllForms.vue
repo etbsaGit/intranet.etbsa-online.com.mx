@@ -173,7 +173,7 @@ const tabs = [
   },
   {
     name: "egreso",
-    label: "Egresos",
+    label: "Pasivos",
     icon: "fa-solid fa-receipt",
     component: EgresoIndex,
   },

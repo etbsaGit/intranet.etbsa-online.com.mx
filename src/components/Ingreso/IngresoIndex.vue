@@ -26,8 +26,9 @@
       { label: 'Tipo', key: 'tipo' },
       { label: 'Monto mensual', key: 'monto', slot: 'monto' },
       { label: 'Meses efectivos', key: 'months' },
-      { label: 'Total ingreso anual', key: 'total', slot: 'total' },
-
+      { label: 'Total ingreso anual bruto', key: 'total', slot: 'total' },
+      { label: 'Costos', key: 'costos', slot: 'costos' },
+      { label: 'Total ingreso neto', key: 'neto', slot: 'neto' },
       { label: 'Documentos', key: 'docs', slot: 'docs' },
     ]"
     :labelAdd="'Nuevo ingreso'"
@@ -53,6 +54,14 @@
 
     <template #total="{ item }">
       {{ formatCurrency(item.total) }}
+    </template>
+
+    <template #costos="{ item }">
+      {{ formatCurrency(item.costos) }}
+    </template>
+
+    <template #neto="{ item }">
+      {{ formatCurrency(item.neto) }}
     </template>
 
     <template #docs="{ item }">

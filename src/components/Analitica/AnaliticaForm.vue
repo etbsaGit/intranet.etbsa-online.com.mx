@@ -1,5 +1,5 @@
 <template>
-  <q-form ref="myForm">
+  <q-form ref="myForm" greedy>
     <q-tabs
       v-model="tab"
       dense
@@ -21,9 +21,31 @@
               v-model="formAnalitica.titulo"
               filled
               dense
-              label="Titulo"
+              readonly
+              label="Periodo"
               :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-            />
+            >
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    cover
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date minimal @update:model-value="handleDateChange">
+                      <div class="row items-center justify-end">
+                        <q-btn
+                          v-close-popup
+                          label="Cerrar"
+                          color="primary"
+                          flat
+                        />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
           </q-item-section>
         </q-item>
         <q-item>
@@ -40,8 +62,6 @@
               hint
             />
           </q-item-section>
-        </q-item>
-        <q-item>
           <q-item-section>
             <q-input
               v-model="formAnalitica.caja"
@@ -55,8 +75,6 @@
               hint
             />
           </q-item-section>
-        </q-item>
-        <q-item>
           <q-item-section>
             <q-input
               v-model="formAnalitica.documentospc"
@@ -70,8 +88,6 @@
               hint
             />
           </q-item-section>
-        </q-item>
-        <q-item>
           <q-item-section>
             <q-input
               v-model="formAnalitica.mercancias"
@@ -85,7 +101,21 @@
               hint
             />
           </q-item-section>
+          <q-item-section>
+            <q-input
+              v-model="formAnalitica.gastos"
+              prefix="$"
+              mask="###,###,###"
+              reverse-fill-mask
+              unmasked-value
+              filled
+              dense
+              label="Gastos"
+              hint
+            />
+          </q-item-section>
         </q-item>
+
         <q-item v-if="checkRole('Credito')">
           <q-item-section>
             <q-select
@@ -105,8 +135,6 @@
               hint
             />
           </q-item-section>
-        </q-item>
-        <q-item v-if="checkRole('Credito')">
           <q-item-section>
             <q-input
               v-model="formAnalitica.comentarios"
@@ -132,7 +160,6 @@
               label="Subir evidencia"
               lazy-rules
               accept=".jpg, .jpeg, .png, .jfif, .pdf"
-              multiple
               @clear="formAnalitica.base64 = []"
               @input="convertirFile($event)"
             />
@@ -163,12 +190,25 @@
                 flat
                 round
                 dense
+                color="blue"
+                icon="fa-solid fa-comment-dots"
+                @click="openComent(doc)"
+              />
+            </q-item-section>
+            <q-item-section avatar>
+              <q-btn
+                flat
+                round
+                dense
                 icon="fa-solid fa-file-arrow-down"
                 @click="openFile(doc.realpath)"
               />
             </q-item-section>
             <q-item-section>
               {{ doc.name }}
+            </q-item-section>
+            <q-item-section>
+              {{ doc.comentarios }}
             </q-item-section>
             <q-item-section side>
               <q-btn-dropdown
@@ -177,6 +217,7 @@
                 :color="getDropdownPropsStatus(doc.status).color"
                 :text-color="getDropdownPropsStatus(doc.status).textColor"
                 :icon="getDropdownPropsStatus(doc.status).icon"
+                :label="getDropdownPropsStatus(doc.status).label"
               >
                 <q-list dense>
                   <q-item
@@ -228,17 +269,33 @@
       </q-tab-panel>
     </q-tab-panels>
   </q-form>
+
+  <BaseDialog v-model="comentShow" mode="edit" @submit="setComentDoc">
+    <template #form>
+      <analitica-coment ref="coment" :doc="selectedDoc" />
+    </template>
+  </BaseDialog>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { date } from "quasar";
 import { checkRole, sendRequest } from "src/boot/functions";
+import BaseDialog from "src/bases/BaseDialog.vue";
+import AnaliticaComent from "src/components/Analitica/AnaliticaComent.vue";
+import { useCrudStore } from "src/stores/crud";
+
+const crud = useCrudStore();
 
 const { analitica, cliente } = defineProps(["analitica", "cliente"]);
 
+const baseURL = ref("/api/intranet/analiticaDoc");
+
 const myForm = ref(null);
 const tab = ref("detalle");
+const comentShow = ref(false);
+const coment = ref(null);
+const selectedDoc = ref(null);
 
 const estatus = ref([
   { value: 0, label: "Rechazada" },
@@ -266,6 +323,32 @@ const formAnalitica = ref({
   base64: [],
   file: [],
 });
+
+const openComent = (item) => {
+  selectedDoc.value = item;
+  comentShow.value = true;
+};
+
+const setComentDoc = async () => {
+  const data = { ...coment.value.formAnaliticaDoc };
+
+  crud.putItem(baseURL.value, data, coment.value.validate, (response) => {
+    // 🔹 Cierra el modal
+    comentShow.value = false;
+
+    // 🔹 Busca el documento correspondiente y actualiza sus datos en la lista reactiva
+    const index = formAnalitica.value.analitica_docs.findIndex(
+      (doc) => doc.id === data.id
+    );
+    if (index !== -1) {
+      // Actualiza solo los campos que cambiaron
+      formAnalitica.value.analitica_docs[index] = {
+        ...formAnalitica.value.analitica_docs[index],
+        ...data,
+      };
+    }
+  });
+};
 
 const deleteDoc = async (id) => {
   let res = await sendRequest(
@@ -311,6 +394,30 @@ const convertirFile = (event) => {
     });
   }
 };
+
+function handleDateChange(fechaSeleccionada) {
+  // fechaSeleccionada llega como 'YYYY-MM-DD'
+  const fecha = new Date(fechaSeleccionada);
+
+  // Calcula la fecha + 1 año
+  const fechaMasUnAno = new Date(fecha);
+  fechaMasUnAno.setFullYear(fecha.getFullYear() + 1);
+
+  // Función para formatear en DD/MM/YYYY
+  const formato = (f) => {
+    const dia = String(f.getDate()).padStart(2, "0");
+    const mes = String(f.getMonth() + 1).padStart(2, "0");
+    const anio = f.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  };
+
+  // Convierte ambas fechas
+  const fechaStr = formato(fecha);
+  const fechaMasUnAnoStr = formato(fechaMasUnAno);
+
+  // Asigna el string combinado al input
+  formAnalitica.value.titulo = `${fechaStr} - ${fechaMasUnAnoStr}`;
+}
 
 const openFile = (url) => {
   window.open(url, "_blank");

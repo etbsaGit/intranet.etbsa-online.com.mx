@@ -132,7 +132,7 @@
           filled
           dense
           readonly
-          label="Utilidad del cultivo"
+          label="Utilidad del ganado"
           :input-class="utilidad < 0 ? 'text-red' : 'text-green'"
           hint
         />

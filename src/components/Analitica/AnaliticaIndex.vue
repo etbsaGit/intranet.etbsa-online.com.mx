@@ -4,7 +4,7 @@
     :headers="[
       { label: 'Eliminar', avatar: true, slot: 'delete' },
       { label: 'Editar', avatar: true, slot: 'edit' },
-      { label: 'Titulo', key: 'titulo' },
+      { label: 'Periodo', key: 'titulo' },
       { label: 'Cliente', key: 'cliente.nombre' },
       { label: 'Estatus', key: 'status', slot: 'status' },
       { label: 'Fecha', key: 'fecha', slot: 'fecha' },
@@ -47,13 +47,14 @@
     </template>
   </BaseList>
 
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
+  <BaseDialog fullWidth v-model="showAdd" mode="create" @submit="postItem">
     <template #form>
       <analitica-form ref="add" :cliente="cliente" />
     </template>
   </BaseDialog>
 
   <BaseDialog
+    fullWidth
     v-model="showEdit"
     mode="edit"
     @submit="putItem"

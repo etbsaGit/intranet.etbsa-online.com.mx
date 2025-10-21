@@ -71,7 +71,7 @@
         />
       </q-item-section>
     </q-item>
-    <q-item>
+    <q-item v-if="formFinca.estatus_id">
       <q-item-section>
         <q-file
           clearable
@@ -79,7 +79,13 @@
           dense
           outlined
           v-model="formFinca.file"
-          label="Subir evidencia"
+          :label="
+            formFinca.estatus_id === 121
+              ? 'Contrato de renta'
+              : formFinca.estatus_id === 120
+              ? 'Titulos parcelarios o escrituras'
+              : 'Subir evidencia'
+          "
           lazy-rules
           accept=".jpg, .jpeg, .png, .jfif, .pdf"
           multiple

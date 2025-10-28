@@ -8,7 +8,8 @@
       { label: 'Cliente', key: 'cliente.nombre' },
       { label: 'Estatus', key: 'status', slot: 'status' },
       { label: 'Fecha', key: 'fecha', slot: 'fecha' },
-      { label: 'Reporte', key: 'reporte', slot: 'reporte' },
+      { label: 'Reporte', key: 'reporte', slot: 'reporte', avatar: true },
+      { label: 'com', key: 'coments', slot: 'coments', avatar: true },
     ]"
     :labelAdd="'Nueva solicitud'"
     :onAdd="openCreate"
@@ -25,6 +26,20 @@
 
     <template #delete="{ item }">
       <q-btn dense color="red" flat icon="delete" @click="openDelete(item)" />
+    </template>
+
+    <template #coments="{ item }">
+      <q-btn
+        v-if="item.comentarios"
+        dense
+        color="blue"
+        flat
+        icon="fa-solid fa-comments"
+      >
+        <q-tooltip class="text-h6 text-green bg-white">
+          {{ item.comentarios }}
+        </q-tooltip>
+      </q-btn>
     </template>
 
     <template #reporte="{ item }">

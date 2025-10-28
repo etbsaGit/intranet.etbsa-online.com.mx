@@ -1,17 +1,43 @@
 <template>
   <div v-if="data != null" class="report-container">
-    <ResumenCard :analitica="data.analitica" />
+    <q-tabs
+      v-model="tab"
+      dense
+      :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'"
+      align="justify"
+      narrow-indicator
+    >
+      <q-tab name="cliente" label="Cliente" />
 
-    <!-- Cards -->
-    <ClienteCard :cliente="data.analitica.cliente" />
-    <ReferenciaCard :referencias="data.analitica.cliente.referencia" />
-    <ReferenciaComercialCard
-      :referencias="data.analitica.cliente.referencia_comercial"
-    />
-    <IngresoCard :ingresos="data.analitica.cliente.ingresos" />
-    <FincaCard :fincas="data.analitica.cliente.fincas" />
-    <InvercionAgricolaCard :inverciones="data.totales.agricolas" />
-    <InvercionGanaderaCard :inverciones="data.totales.ganaderas" />
+      <q-tab name="analitica" label="Analitica" />
+      <q-tab name="balance" label="Balance" />
+    </q-tabs>
+
+    <q-separator />
+
+    <q-tab-panels v-model="tab" animated>
+      <q-tab-panel name="cliente">
+        <ClienteCard :cliente="data.cliente" />
+        <ReferenciaCard :referencias="data.cliente.referencia" />
+        <ReferenciaComercialCard
+          :referencias="data.cliente.referencia_comercial"
+        />
+        <docs-card :docs="data.cliente.cliente_doc" />
+      </q-tab-panel>
+
+      <q-tab-panel name="analitica">
+        <activo-fijo-card :activos="data.activos_fijos" />
+        <activo-circulante-card :activos="data.activos_circulantes" />
+        <pasivo-card :pasivos="data.pasivos" />
+      </q-tab-panel>
+
+      <q-tab-panel name="balance">
+        <InvercionAgricolaCard :inverciones="data.ingresos.agricolas" />
+        <InvercionGanaderaCard :inverciones="data.ingresos.ganaderas" />
+        <IngresoCard :ingresos="data.ingresosDirectos" />
+        <GastosCard :gastos="data.otros_gastos" />
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
 </template>
 
@@ -20,20 +46,22 @@ import { ref, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
 import { date } from "quasar";
 
-import { formatCurrency } from "src/boot/format";
-
 import ClienteCard from "src/components/Analitica/AnaliticaReport/ClienteCard.vue";
 import ReferenciaCard from "src/components/Analitica/AnaliticaReport/ReferenciaCard.vue";
 import ReferenciaComercialCard from "src/components/Analitica/AnaliticaReport/ReferenciaComercialCard.vue";
+import DocsCard from "src/components/Analitica/AnaliticaReport/DocsCard.vue";
+import ActivoFijoCard from "src/components/Analitica/AnaliticaReport/ActivoFijoCard.vue";
+import ActivoCirculanteCard from "src/components/Analitica/AnaliticaReport/ActivoCirculanteCard.vue";
+import PasivoCard from "src/components/Analitica/AnaliticaReport/PasivoCard.vue";
+import GastosCard from "src/components/Analitica/AnaliticaReport/GastosCard.vue";
 import InvercionAgricolaCard from "src/components/Analitica/AnaliticaReport/InvercionAgricolaCard.vue";
 import InvercionGanaderaCard from "src/components/Analitica/AnaliticaReport/InvercionGanaderaCard.vue";
-import FincaCard from "src/components/Analitica/AnaliticaReport/FincaCard.vue";
 import IngresoCard from "src/components/Analitica/AnaliticaReport/IngresoCard.vue";
-import ResumenCard from "./AnaliticaReport/ResumenCard.vue";
 
 const { id } = defineProps(["id"]);
 
 const data = ref(null);
+const tab = ref("cliente");
 
 const getInfo = async (id) => {
   let res = await sendRequest(
@@ -59,7 +87,7 @@ function formatDate(value) {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;
+  padding: 0px;
   background: #f8f9fa;
   border-radius: 12px;
 }

@@ -54,50 +54,10 @@
           </q-item>
         </template>
         <template v-slot:bottom>
-          <q-space />
-          <td>
-            <q-pagination
-              color="primary"
-              v-model="crud.pagination.currentPage"
-              :max="crud.pagination.lastPage"
-              :max-pages="6"
-              direction-links
-              boundary-links
-              gutter="10px"
-              icon-first="skip_previous"
-              icon-last="skip_next"
-              icon-prev="fast_rewind"
-              icon-next="fast_forward"
-            />
-          </td>
-          <q-space />
-        </template>
-        <template v-slot:body-cell-editar="props">
-          <q-td>
-            <q-btn
-              dense
-              color="primary"
-              flat
-              icon="loupe"
-              @click="openEdit(props.row)"
-            />
-          </q-td>
-        </template>
-        <template v-slot:body-cell-estado="props">
-          <q-td>
-            {{ props.row.state_entity?.name }}
-          </q-td>
-        </template>
-        <template v-slot:body-cell-ciudad="props">
-          <q-td>
-            {{ props.row.town?.name }}
-          </q-td>
-        </template>
-
-        <template v-slot:body-cell-telefono="props">
-          <q-td>
-            {{ formatPhoneNumber(props.row.telefono) }}
-          </q-td>
+          <BasePagination
+            :pagination="crud.pagination"
+            @update:currentPage="(val) => (crud.pagination.currentPage = val)"
+          />
         </template>
       </q-table>
     </q-item-section>
@@ -290,10 +250,12 @@
   </BaseDialog>
 </template>
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, h } from "vue";
 import { checkRole, sendRequest } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
 import { useCrudStore } from "src/stores/crud";
+
+import BasePagination from "src/bases/BasePagination.vue";
 
 const crud = useCrudStore();
 
@@ -332,9 +294,16 @@ const filterForm = ref({
 const columns = [
   {
     name: "editar",
-    field: "editar",
     align: "left",
     label: "detalle",
+    field: (row) =>
+      h(QBtn, {
+        dense: true,
+        color: "primary",
+        flat: true,
+        icon: "loupe",
+        onClick: () => openEdit(row),
+      }),
   },
   {
     name: "equip",
@@ -361,21 +330,21 @@ const columns = [
     name: "telefono",
     label: "Telefono",
     align: "left",
-    field: "telefono",
+    field: (row) => formatPhoneNumber(row.telefono),
     sortable: true,
   },
   {
     name: "estado",
     label: "Estado",
     align: "left",
-    field: "estado",
+    field: (row) => row.state_entity?.name,
     sortable: true,
   },
   {
     name: "ciudad",
     label: "Ciudad",
     align: "left",
-    field: "ciudad",
+    field: (row) => row.town?.name,
     sortable: true,
   },
 ];

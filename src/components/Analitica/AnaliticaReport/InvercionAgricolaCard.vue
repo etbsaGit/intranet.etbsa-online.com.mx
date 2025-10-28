@@ -3,7 +3,7 @@
     <q-item>
       <q-item-section>
         <q-item-label class="text-h6 text-primary text-center q-mb-md">
-          🌾 Inversiones agricolas
+          🌾 Ingresos agricolas
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -24,7 +24,7 @@
               />
               <div class="text-caption text-grey-7">Costo</div>
               <div class="text-subtitle1 text-negative">
-                {{ formatCurrency(info.costo) }}
+                {{ formatCurrency(info.totales.costo) }}
               </div>
             </div>
 
@@ -37,7 +37,7 @@
               />
               <div class="text-caption text-grey-7">Total</div>
               <div class="text-subtitle1 text-dark">
-                {{ formatCurrency(info.total) }}
+                {{ formatCurrency(info.totales.total) }}
               </div>
             </div>
             <!-- Precio -->
@@ -49,7 +49,7 @@
               />
               <div class="text-caption text-grey-7">Precio</div>
               <div class="text-subtitle1 text-warning">
-                {{ formatCurrency(info.precio) }}
+                {{ formatCurrency(info.totales.precio) }}
               </div>
             </div>
 
@@ -62,7 +62,7 @@
               />
               <div class="text-caption text-grey-7">Ingreso</div>
               <div class="text-subtitle1 text-positive">
-                {{ formatCurrency(info.ingreso) }}
+                {{ formatCurrency(info.totales.ingreso) }}
               </div>
             </div>
 
@@ -75,7 +75,7 @@
               />
               <div class="text-caption text-grey-7">Utilidad</div>
               <div class="text-subtitle1 text-indigo">
-                {{ formatCurrency(info.utilidad) }}
+                {{ formatCurrency(info.totales.utilidad) }}
               </div>
             </div>
           </q-card-section>
@@ -92,7 +92,7 @@
                   flat
                   bordered
                   dense
-                  :rows="info.registros"
+                  :rows="info.items"
                   :columns="columns"
                   row-key="id"
                   hide-bottom

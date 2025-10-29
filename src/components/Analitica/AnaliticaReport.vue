@@ -38,6 +38,24 @@
         <GastosCard :gastos="data.otros_gastos" />
       </q-tab-panel>
     </q-tab-panels>
+    <q-page-sticky position="bottom-right" :offset="[30, 30]">
+      <q-btn
+        fab
+        color="blue"
+        icon="fa-solid fa-file-arrow-down"
+        @click="onRowClickPDF"
+        class="shadow-8"
+      >
+        <q-tooltip
+          class="text-h6 bg-blue"
+          anchor="center left"
+          self="center right"
+          :offset="[10, 10]"
+        >
+          Generar reporte
+        </q-tooltip>
+      </q-btn>
+    </q-page-sticky>
   </div>
 </template>
 
@@ -71,6 +89,35 @@ const getInfo = async (id) => {
     ""
   );
   data.value = res;
+};
+
+const onRowClickPDF = async () => {
+  try {
+    // Llamada al backend
+    const res = await sendRequest(
+      "GET",
+      null,
+      "/api/intranet/analitica/report/pdf/" + id,
+      ""
+    );
+
+    // Si `res` es un string JSON, conviértelo
+    const { file_name, mime_type, base64 } =
+      typeof res === "string" ? JSON.parse(res) : res;
+
+    // Crear un blob a partir del base64
+    const base64Response = await fetch(`data:${mime_type};base64,${base64}`);
+    const blob = await base64Response.blob();
+
+    // Crear URL temporal y abrir en nueva pestaña
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+
+    // (opcional) Liberar el objeto URL después de un tiempo
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  } catch (error) {
+    console.error("Error al generar el PDF:", error);
+  }
 };
 
 onMounted(() => {

@@ -86,7 +86,6 @@
                   :rows="activos.inversiones.agricolas.items"
                   :columns="columnsA"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>
@@ -132,7 +131,6 @@
                   :rows="activos.inversiones.ganaderas.items"
                   :columns="columnsG"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>

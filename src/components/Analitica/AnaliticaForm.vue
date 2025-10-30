@@ -110,7 +110,7 @@
               unmasked-value
               filled
               dense
-              label="Gastos"
+              label="Gastos familiares anuales"
               hint
             />
           </q-item-section>
@@ -401,7 +401,7 @@ function handleDateChange(fechaSeleccionada) {
 
   // Calcula la fecha + 1 año
   const fechaMasUnAno = new Date(fecha);
-  fechaMasUnAno.setFullYear(fecha.getFullYear() + 1);
+  fechaMasUnAno.setFullYear(fecha.getFullYear() - 1);
 
   // Función para formatear en DD/MM/YYYY
   const formato = (f) => {

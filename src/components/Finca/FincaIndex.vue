@@ -7,8 +7,8 @@
       { label: 'Nombre', key: 'nombre' },
       { label: '# de superficie', key: 'descripcion', slot: 'descripcion' },
       { label: 'Tipo', key: 'estatus', slot: 'estatus' },
-      { label: 'Valor', key: 'valor', slot: 'valor' },
-      { label: 'Costo', key: 'costo', slot: 'costo' },
+      { label: 'Valor propiedad', key: 'valor', slot: 'valor' },
+      { label: 'Costo de renta', key: 'costo', slot: 'costo' },
       { label: 'Documentos', key: 'docs', slot: 'docs' },
     ]"
     :labelAdd="'Nueva finca'"

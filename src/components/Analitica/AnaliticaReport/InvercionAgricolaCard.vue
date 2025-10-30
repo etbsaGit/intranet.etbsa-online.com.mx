@@ -95,7 +95,6 @@
                   :rows="info.items"
                   :columns="columns"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>

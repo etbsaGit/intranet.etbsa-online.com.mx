@@ -69,7 +69,6 @@
                   :rows="gastos.fincas.items"
                   :columns="columns"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>
@@ -95,7 +94,7 @@ const columns = [
   },
   {
     name: "costo",
-    label: "Costo",
+    label: "Costo total",
     field: (row) => formatCurrency(row.costo),
     align: "right",
   },

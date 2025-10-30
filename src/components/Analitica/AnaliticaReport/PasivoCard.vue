@@ -66,7 +66,6 @@
                   :rows="pasivos.items"
                   :columns="columnsPasivos"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>

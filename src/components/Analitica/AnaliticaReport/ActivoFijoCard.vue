@@ -49,7 +49,6 @@
                   :rows="machines.items"
                   :columns="columnsM"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>
@@ -99,7 +98,6 @@
                   :rows="fincas.items"
                   :columns="columnsF"
                   row-key="id"
-                  hide-bottom
                   class="my-mini-table"
                 />
               </q-expansion-item>

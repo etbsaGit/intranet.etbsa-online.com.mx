@@ -44,6 +44,7 @@
 
     <template #reporte="{ item }">
       <q-btn
+        v-if="checkRole('Credito')"
         dense
         color="purple"
         flat
@@ -103,6 +104,7 @@ import BaseDialog from "src/bases/BaseDialog.vue";
 import BaseList from "src/bases/BaseList.vue";
 import AnaliticaForm from "src/components/Analitica/AnaliticaForm.vue";
 import AnaliticaReport from "src/components/Analitica/AnaliticaReport.vue";
+import { checkRole } from "src/boot/functions";
 
 const { cliente } = defineProps(["cliente"]);
 

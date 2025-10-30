@@ -53,7 +53,7 @@
           unmasked-value
           filled
           dense
-          label="Costo de renta"
+          label="Costo de renta anual"
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>

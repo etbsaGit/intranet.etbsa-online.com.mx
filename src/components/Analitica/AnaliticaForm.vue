@@ -416,7 +416,7 @@ function handleDateChange(fechaSeleccionada) {
   const fechaMasUnAnoStr = formato(fechaMasUnAno);
 
   // Asigna el string combinado al input
-  formAnalitica.value.titulo = `${fechaStr} - ${fechaMasUnAnoStr}`;
+  formAnalitica.value.titulo = `${fechaMasUnAnoStr} - ${fechaStr}`;
 }
 
 const openFile = (url) => {

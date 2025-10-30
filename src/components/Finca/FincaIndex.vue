@@ -8,7 +8,7 @@
       { label: '# de superficie', key: 'descripcion', slot: 'descripcion' },
       { label: 'Tipo', key: 'estatus', slot: 'estatus' },
       { label: 'Valor propiedad', key: 'valor', slot: 'valor' },
-      { label: 'Costo de renta', key: 'costo', slot: 'costo' },
+      { label: 'Costo de renta anual', key: 'costo', slot: 'costo' },
       { label: 'Documentos', key: 'docs', slot: 'docs' },
     ]"
     :labelAdd="'Nueva finca'"

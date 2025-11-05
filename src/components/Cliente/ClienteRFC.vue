@@ -22,9 +22,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { sendRequest } from "src/boot/functions";
-import { useCrudStore } from "src/stores/crud";
+import { ref } from "vue";
 
 const rfc = ref(null);
 

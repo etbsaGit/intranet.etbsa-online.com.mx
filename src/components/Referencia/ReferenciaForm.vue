@@ -41,6 +41,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />

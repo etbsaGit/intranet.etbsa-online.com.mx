@@ -33,6 +33,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
       </q-item-section>
@@ -71,6 +72,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -89,6 +91,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -109,6 +112,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -127,6 +131,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />

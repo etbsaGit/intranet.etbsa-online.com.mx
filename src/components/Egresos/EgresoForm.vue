@@ -1,5 +1,5 @@
 <template>
-  <q-form ref="myForm">
+  <q-form ref="myForm" greedy>
     <q-item>
       <q-item-section>
         <q-select
@@ -15,8 +15,6 @@
           :rules="[(val) => !!val || 'Obligatorio']"
         />
       </q-item-section>
-    </q-item>
-    <q-item>
       <q-item-section>
         <q-select
           v-model="formEgreso.type"
@@ -51,8 +49,6 @@
           :rules="[(val) => (val && val >= 0) || 'Obligatorio']"
         />
       </q-item-section>
-    </q-item>
-    <q-item>
       <q-item-section>
         <q-input
           v-model="formEgreso.months"

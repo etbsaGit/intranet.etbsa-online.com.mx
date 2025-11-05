@@ -1,5 +1,5 @@
 <template>
-  <q-form ref="myForm">
+  <q-form ref="myForm" greedy>
     <q-item>
       <q-item-section>
         <q-select
@@ -14,8 +14,7 @@
           :rules="[(val) => !!val || 'Obligatorio']"
         />
       </q-item-section>
-    </q-item>
-    <q-item>
+
       <q-item-section>
         <q-select
           v-model="formIngreso.tipo"
@@ -44,8 +43,7 @@
           :rules="[(val) => Number(val) > 0 || 'El monto debe ser mayor a 0']"
         />
       </q-item-section>
-    </q-item>
-    <q-item>
+
       <q-item-section>
         <q-select
           v-model="formIngreso.months"
@@ -75,8 +73,7 @@
           hint
         />
       </q-item-section>
-    </q-item>
-    <q-item>
+
       <q-item-section>
         <q-input
           v-model="formIngreso.costos"

@@ -16,6 +16,7 @@
           clearable
           filled
           dense
+          options-dense
           @clear="clearForm"
           :rules="[(val) => val !== null || 'Obligatorio']"
         />

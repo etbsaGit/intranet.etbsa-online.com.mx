@@ -79,13 +79,13 @@
     </q-item-section>
   </q-item>
 
-  <BaseDialog fullWidth v-model="showAdd" mode="create" @submit="postItem">
+  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
     <template #form>
       <agricola-inversion-form ref="add" :cliente="cliente" />
     </template>
   </BaseDialog>
 
-  <BaseDialog fullWidth v-model="showEdit" mode="edit" @submit="putItem">
+  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
     <template #form>
       <agricola-inversion-form ref="edit" :inversion="selectedItem" />
     </template>

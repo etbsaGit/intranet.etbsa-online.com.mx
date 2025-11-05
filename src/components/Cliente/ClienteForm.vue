@@ -24,7 +24,6 @@
         />
       </q-item-section>
     </q-item>
-
     <q-item>
       <q-item-section>
         <q-select
@@ -35,6 +34,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
         />
       </q-item-section>
@@ -134,6 +134,7 @@
           clearable
           filled
           dense
+          options-dense
           @update:model-value="updateTowns(formCliente.state_entity_id)"
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -152,6 +153,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -214,6 +216,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
         />
       </q-item-section>
@@ -231,6 +234,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
         />
       </q-item-section>
@@ -250,6 +254,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
         />
       </q-item-section>
@@ -267,6 +272,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
         />
       </q-item-section>
@@ -281,7 +287,7 @@ import { useCrudStore } from "src/stores/crud";
 
 const crud = useCrudStore();
 
-const { cliente } = defineProps(["cliente"]);
+const { cliente, rfc } = defineProps(["cliente", "rfc"]);
 
 const baseURL = ref("/api/intranet/cliente");
 

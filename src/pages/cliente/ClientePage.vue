@@ -65,7 +65,7 @@
 
   <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
     <template #form>
-      <cliente-form ref="add" />
+      <cliente-form ref="add" :rfc="rfc" />
     </template>
   </BaseDialog>
 

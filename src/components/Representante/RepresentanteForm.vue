@@ -84,6 +84,7 @@
           clearable
           filled
           dense
+          options-dense
           @update:model-value="updateTowns(formRepresentante.state_entity_id)"
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
@@ -102,6 +103,7 @@
           transition-hide="jump-up"
           filled
           dense
+          options-dense
           clearable
           :rules="[(val) => val !== null || 'Obligatorio']"
         />

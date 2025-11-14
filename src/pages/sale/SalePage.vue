@@ -249,6 +249,9 @@ const showEdit = ref(false);
 const showValid = ref(false);
 const showEditValid = ref(false);
 const showFilters = ref(false);
+const add = ref(null);
+const edit = ref(null);
+const valid = ref(null);
 
 const filterForm = ref({
   search: null,

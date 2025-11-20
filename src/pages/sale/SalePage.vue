@@ -230,7 +230,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { h } from "vue";
 import { QChip, QTooltip, QBtn } from "quasar";
 import { useCrudStore } from "src/stores/crud";
@@ -464,6 +464,13 @@ const filterOptions = (val, update, type) => {
     else filterEmpleados.value = filtered;
   });
 };
+
+watch(
+  () => crud.pagination.currentPage,
+  () => {
+    getRows();
+  }
+);
 
 let timeout = null;
 

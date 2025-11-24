@@ -59,6 +59,20 @@
             @update:currentPage="(val) => (crud.pagination.currentPage = val)"
           />
         </template>
+        <template v-slot:body-cell-vendedor="props">
+          <q-td :props="props">
+            <q-chip
+              v-for="emp in props.row.empleados"
+              :key="emp.id"
+              color="primary"
+              text-color="white"
+              dense
+              class="q-mr-xs"
+            >
+              {{ emp.nombreCompleto }}
+            </q-chip>
+          </q-td>
+        </template>
       </q-table>
     </q-item-section>
   </q-item>
@@ -345,6 +359,13 @@ const columns = [
     label: "Ciudad",
     align: "left",
     field: (row) => row.town?.name,
+    sortable: true,
+  },
+  {
+    name: "vendedor",
+    label: "Vendedor",
+    align: "left",
+    field: "vendedor",
     sortable: true,
   },
 ];

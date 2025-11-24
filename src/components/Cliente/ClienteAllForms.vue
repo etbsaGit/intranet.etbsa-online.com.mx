@@ -72,6 +72,25 @@
           </q-tab-panel>
         </template>
       </q-tab-panels>
+
+      <q-page-sticky position="bottom-left" :offset="[50, 50]">
+        <q-btn
+          fab
+          icon="mail"
+          color="primary"
+          class="pulse-btn"
+          @click="sendEmail"
+        >
+          <q-tooltip
+            class="bg-primary text-white text-body2"
+            :offset="[10, 10]"
+            anchor="center right"
+            self="center left"
+          >
+            Enviar notificación de informacion acualizada
+          </q-tooltip>
+        </q-btn>
+      </q-page-sticky>
     </template>
   </q-splitter>
 </template>
@@ -257,6 +276,10 @@ const putItem = async () => {
   });
 };
 
+const sendEmail = async () => {
+  await crud.getItems(baseURL.value + "/mail/" + cliente.id);
+};
+
 onMounted(() => {
   currentCliente.value = cliente;
 });
@@ -316,5 +339,25 @@ onMounted(() => {
   font-weight: 600;
   color: #1a237e;
   letter-spacing: 0.5px;
+}
+
+.pulse-btn {
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(33, 150, 243, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
+  }
 }
 </style>

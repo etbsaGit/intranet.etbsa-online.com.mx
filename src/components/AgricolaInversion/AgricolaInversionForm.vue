@@ -38,7 +38,7 @@
           filled
           dense
           lazy-rules
-          mask="#####"
+          type="number"
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
       </q-item-section>

@@ -38,9 +38,10 @@
           filled
           dense
           lazy-rules
-          mask="#####"
+          type="number"
           :rules="[(val) => val !== null || 'Obligatorio']"
-        />
+        >
+        </q-input>
       </q-item-section>
       <q-item-section>
         <q-select
@@ -109,6 +110,7 @@ const cultivos = ref([]);
 const filterCultivos = ref(null);
 const years = ref([]);
 const ciclos = ref(["Primavera - Verano", "Otoño - Invierno"]);
+const val = ref(false);
 
 const filterFn = (val, update) => {
   if (val === "") {

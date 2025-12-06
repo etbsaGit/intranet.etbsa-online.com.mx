@@ -4,7 +4,7 @@
       <q-item-section>
         <q-select
           v-model="formIngreso.year"
-          :options="years"
+          :options="years()"
           label="Año"
           filled
           dense
@@ -160,10 +160,10 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
+import { years } from "src/boot/format";
 
 const { ingreso, cliente } = defineProps(["ingreso", "cliente"]);
 
-const years = ref([]);
 const months = ref([]);
 
 const myForm = ref(null);
@@ -238,11 +238,6 @@ const convertirFile = (event) => {
   }
 };
 
-const populateYears = () => {
-  const current = new Date().getFullYear();
-  years.value = Array.from({ length: 6 }, (_, i) => current - 4 + i);
-};
-
 const populateMonths = () => {
   // Genera [1, 2, 3, ..., 12]
   months.value = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -257,7 +252,6 @@ const validate = async () => {
 };
 
 onMounted(() => {
-  populateYears();
   populateMonths();
 });
 

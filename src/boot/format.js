@@ -36,3 +36,8 @@ export function obtenerPeriodicidad(numero) {
       return "Desconocido";
   }
 }
+
+export const years = () => {
+  const current = new Date().getFullYear();
+  return Array.from({ length: 4 }, (_, i) => current - 2 + i);
+};

@@ -4,7 +4,7 @@
       <q-item-section>
         <q-select
           v-model="formInversion.year"
-          :options="years"
+          :options="years()"
           label="Año"
           filled
           dense
@@ -97,12 +97,11 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { sendRequest } from "src/boot/functions";
-import { formatCurrency } from "src/boot/format";
+import { years } from "src/boot/format";
 
 const { inversion, cliente } = defineProps(["inversion", "cliente"]);
 
 const ganados = ref([]);
-const years = ref([]);
 const ciclos = ref(["Primavera - Verano", "Otoño - Invierno"]);
 
 const total = computed(() => {
@@ -133,18 +132,11 @@ const getOptions = async () => {
   ganados.value = res.ganados;
 };
 
-const populateYears = () => {
-  const current = new Date().getFullYear();
-  // Genera [current-3, current-2, current-1, current]
-  years.value = Array.from({ length: 4 }, (_, i) => current - 3 + i);
-};
-
 const validate = async () => {
   return await myForm.value.validate();
 };
 
 onMounted(() => {
-  populateYears();
   getOptions();
 });
 

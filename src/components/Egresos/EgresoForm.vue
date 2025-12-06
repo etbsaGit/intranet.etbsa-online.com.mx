@@ -4,7 +4,7 @@
       <q-item-section>
         <q-select
           v-model="formEgreso.year"
-          :options="years"
+          :options="years()"
           label="Año"
           filled
           dense
@@ -115,13 +115,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { sendRequest } from "src/boot/functions";
-import { formatCurrency } from "src/boot/format";
+import { ref, computed } from "vue";
+import { years } from "src/boot/format";
 
 const { egreso, cliente } = defineProps(["egreso", "cliente"]);
 
-const years = ref([]);
 const types = ref([
   { id: 12, name: "Mensual" },
   { id: 6, name: "Bimestral" },
@@ -151,19 +149,9 @@ const formEgreso = ref({
   cliente_id: egreso ? egreso.cliente_id : cliente.id,
 });
 
-const populateYears = () => {
-  const current = new Date().getFullYear();
-  // Genera [current-3, current-2, current-1, current]
-  years.value = Array.from({ length: 4 }, (_, i) => current - 3 + i);
-};
-
 const validate = async () => {
   return await myForm.value.validate();
 };
-
-onMounted(() => {
-  populateYears();
-});
 
 defineExpose({
   formEgreso,

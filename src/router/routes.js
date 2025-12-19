@@ -40,6 +40,10 @@ const routes = [
         path: "/catalogos",
         component: () => import("src/pages/catalogos/indexPage.vue"),
       },
+      {
+        path: "/invCatalogos",
+        component: () => import("src/pages/Inv/InvCatalogos.vue"),
+      },
     ],
   },
 

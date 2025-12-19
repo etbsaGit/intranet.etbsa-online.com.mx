@@ -54,6 +54,29 @@
       </q-item>
     </q-expansion-item>
 
+    <q-expansion-item
+      expand-separator
+      icon="fa-solid fa-boxes-stacked"
+      label="Inventarios"
+      group="somegroup"
+      v-if="checkRole('Admin')"
+    >
+      <q-item
+        clickable
+        v-ripple
+        to="invCatalogos"
+        :active="link === 'invCatalogos'"
+        @click="link = 'invCatalogos'"
+        active-class="my-menu-link"
+      >
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-box" />
+        </q-item-section>
+
+        <q-item-section>Catalogos de modelo</q-item-section>
+      </q-item>
+    </q-expansion-item>
+
     <q-item
       v-if="checkRole('Admin')"
       clickable

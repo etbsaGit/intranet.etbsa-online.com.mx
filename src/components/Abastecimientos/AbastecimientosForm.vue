@@ -54,8 +54,13 @@ const formAbastecimiento = ref({
 });
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/abastecimiento", "");
-  abastecimientos.value = res;
+  let res = await sendRequest(
+    "GET",
+    null,
+    "/api/intranet/clienteAbastecimiento/cliente/form",
+    ""
+  );
+  abastecimientos.value = res.abastecimiento;
 };
 
 const validate = async () => {

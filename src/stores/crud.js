@@ -3,73 +3,108 @@ import { ref } from "vue";
 import { sendRequest, dataIncomplete } from "src/boot/functions";
 
 export const useCrudStore = defineStore("crud", () => {
-  // Lista completa sin paginación
+  const loading = ref(false);
+
   const items = ref([]);
 
-  // Lista paginada + info de paginación
   const paginatedItems = ref([]);
   const pagination = ref({
     currentPage: 1,
     nextPageUrl: null,
     prevPageUrl: null,
     lastPage: 1,
+    perPage: 10,
+    total: 0,
+    from: 0,
+    to: 0,
   });
 
   const filters = ref({});
 
-  // Obtener todos los items sin paginación
   const getItems = async (url) => {
-    const res = await sendRequest("GET", null, url, "");
-    items.value = res;
-    return res;
+    loading.value = true;
+    try {
+      const res = await sendRequest("GET", null, url);
+      items.value = res || [];
+      return res;
+    } finally {
+      loading.value = false;
+    }
   };
 
-  // Obtener items paginados vía POST con filtros
-  const getPaginatedItems = async (url, filters = {}) => {
-    const res = await sendRequest("POST", filters, url, "");
+  const getPaginatedItems = async (url, filtersParam = {}) => {
+    loading.value = true;
+    try {
+      const res = await sendRequest("POST", filtersParam, url);
 
-    paginatedItems.value = res.data || [];
+      const paginator = res?.data?.current_page !== undefined ? res.data : res;
 
-    pagination.value = {
-      currentPage: res.current_page || filters.page || 1,
-      nextPageUrl: res.next_page_url,
-      prevPageUrl: res.prev_page_url,
-      lastPage: res.last_page || 1,
-    };
+      paginatedItems.value = paginator?.data || [];
 
-    return res;
+      pagination.value = {
+        currentPage: paginator?.current_page || filtersParam.page || 1,
+        nextPageUrl: paginator?.next_page_url || null,
+        prevPageUrl: paginator?.prev_page_url || null,
+        lastPage: paginator?.last_page || 1,
+        perPage: paginator?.per_page || 10,
+        total: paginator?.total || 0,
+        from: paginator?.from || 0,
+        to: paginator?.to || 0,
+      };
+
+      return res;
+    } finally {
+      loading.value = false;
+    }
   };
 
+  /**
+   * Crear
+   */
   const postItem = async (url, data, validateFn, onSuccess = () => {}) => {
     const valid = await validateFn();
     if (!valid) {
       dataIncomplete();
-      return;
+      return false;
     }
-    const res = await sendRequest("POST", data, url, "");
+
+    const res = await sendRequest("POST", data, url);
     onSuccess(res);
+    return true;
   };
 
+  /**
+   * Actualizar
+   */
   const putItem = async (url, data, validateFn, onSuccess = () => {}) => {
     const valid = await validateFn();
     if (!valid) {
       dataIncomplete();
-      return;
+      return false;
     }
-    const res = await sendRequest("PUT", data, `${url}/${data.id}`, "");
+
+    const res = await sendRequest("PUT", data, `${url}/${data.id}`);
     onSuccess(res);
+    return true;
   };
 
+  /**
+   * Eliminar
+   */
   const deleteItem = async (url, id, onSuccess = () => {}) => {
-    const res = await sendRequest("DELETE", null, `${url}/${id}`, "");
+    const res = await sendRequest("DELETE", null, `${url}/${id}`);
     onSuccess(res);
   };
 
   return {
-    items, // lista completa
-    paginatedItems, // lista paginada
+    // state
+    items,
+    loading,
+    paginatedItems,
     pagination,
     filters,
+
+    // actions
     getItems,
     getPaginatedItems,
     postItem,

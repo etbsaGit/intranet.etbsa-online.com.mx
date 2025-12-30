@@ -1,147 +1,72 @@
 <template>
-  <q-item>
-    <q-btn
-      dense
-      label="Agrgear Nueva tecnologia"
-      color="primary"
-      @click="openCreate"
-      icon="add_circle"
-    />
-  </q-item>
-  <q-item>
-    <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Nuevas Tecnologias"
-        :rows="crudStore.items"
-        :columns="columns"
-        row-key="name"
-        dense
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-name="props">
-          <q-td>
-            <q-item dense>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="red"
-                  flat
-                  icon="delete"
-                  @click="openDelete(props.row)"
-                />
-              </q-item-section>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="blue"
-                  flat
-                  icon="edit_square"
-                  @click="openEdit(props.row)"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>
-                  {{ props.row.name }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-td>
-        </template>
-      </q-table>
-    </q-item-section>
-  </q-item>
-
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
-    <template #form>
-      <nueva-tecnologia-form ref="add" />
+  <BaseCatalogo
+    title="Nuevas tecnologias"
+    :columns="columns"
+    url="/api/intranet/nuevaTecnologiums"
+    :on-create="createItem"
+    :on-update="updateItem"
+    @delete="destroyItem"
+  >
+    <template #create-form>
+      <NuevaTecnologiaForm ref="add" />
     </template>
-  </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
-    <template #form>
-      <nueva-tecnologia-form ref="edit" :nuevaTecnologia="selectedItem" />
+    <template #edit-form="{ item }">
+      <NuevaTecnologiaForm ref="edit" :nuevaTecnologia="item" />
     </template>
-  </BaseDialog>
-
-  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
-    <template #delete-message>
-      ¿Estás seguro que deseas eliminar este elemento?
-    </template>
-  </BaseDialog>
+  </BaseCatalogo>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
+
+import NuevaTecnologiaForm from "src/components/catalogos/NuevaTecnologiaForm.vue";
+import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 
 const crudStore = useCrudStore();
 
-import BaseDialog from "src/bases/BaseDialog.vue";
-import NuevaTecnologiaForm from "src/components/catalogos/NuevaTecnologiaForm.vue";
-
-const selectedItem = ref(null);
-const showAdd = ref(false);
 const add = ref(null);
-const showEdit = ref(false);
 const edit = ref(null);
-const showDelete = ref(false);
-
-const baseURL = ref("/api/intranet/nuevaTecnologia");
 
 const columns = [
   {
-    name: "name",
+    name: "actions",
+    label: "",
+    field: "actions",
     align: "left",
+  },
+  {
+    name: "name",
+    label: "Nombre",
     field: "name",
+    align: "left",
   },
 ];
 
-const openCreate = () => {
-  selectedItem.value = null; // nuevo registro vacío
-  showAdd.value = true;
-};
+const BASE_URL = "/api/intranet/nuevaTecnologium"; // singular para post/put/delete
 
-const openEdit = (item) => {
-  selectedItem.value = item;
-  showEdit.value = true;
-};
+const createItem = async () => {
+  const ok = await add.value.validate();
+  if (!ok) return false;
 
-const openDelete = (item) => {
-  selectedItem.value = item;
-  showDelete.value = true;
-};
-
-const getRows = async () => {
-  await crudStore.getItems(baseURL.value);
-};
-
-const postItem = () => {
   const data = { ...add.value.formNuevaTecnologia };
-  crudStore.postItem(baseURL.value, data, add.value.validate, () => {
-    showAdd.value = false;
-    getRows();
-  });
+  await crudStore.postItem(BASE_URL, data, add.value.validate);
+
+  return true;
 };
 
-const putItem = () => {
-  const data = { ...edit.value.formNuevaTecnologia };
-  crudStore.putItem(baseURL.value, data, edit.value.validate, () => {
-    showEdit.value = false;
-    getRows();
-  });
+const updateItem = async (item) => {
+  const ok = await edit.value.validate();
+  if (!ok) return false;
+
+  const data = { ...edit.value.formNuevaTecnologia, id: item.id };
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
 };
 
-const destroyItem = () => {
-  crudStore.deleteItem(baseURL.value, selectedItem.value.id, () => {
-    selectedItem.value = null;
-    showDelete.value = false;
-    getRows();
-  });
+const destroyItem = (item) => {
+  crudStore.deleteItem(BASE_URL, item.id);
 };
-
-onMounted(() => {
-  getRows();
-});
 </script>

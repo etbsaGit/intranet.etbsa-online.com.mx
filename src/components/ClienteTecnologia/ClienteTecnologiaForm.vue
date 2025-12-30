@@ -39,6 +39,7 @@
           option-disable="inactive"
           emit-value
           map-options
+          options-dense
           transition-show="jump-up"
           transition-hide="jump-up"
           filled
@@ -74,8 +75,8 @@ const formNuevaTecnologia = ref({
 });
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/nuevaTecnologia", "");
-  tecnologias.value = res;
+  let res = await sendRequest("GET", null, "/api/intranet/nt/cliente/form", "");
+  tecnologias.value = res.nt;
 };
 
 const validate = async () => {

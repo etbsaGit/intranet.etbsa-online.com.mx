@@ -1,147 +1,72 @@
 <template>
-  <q-item>
-    <q-btn
-      dense
-      label="Nuevo tipo de riego"
-      color="primary"
-      @click="openCreate"
-      icon="add_circle"
-    />
-  </q-item>
-  <q-item>
-    <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Tipos de riego"
-        :rows="crudStore.items"
-        :columns="columns"
-        row-key="name"
-        dense
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-name="props">
-          <q-td>
-            <q-item dense>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="red"
-                  flat
-                  icon="delete"
-                  @click="openDelete(props.row)"
-                />
-              </q-item-section>
-              <q-item-section avatar>
-                <q-btn
-                  dense
-                  color="blue"
-                  flat
-                  icon="edit_square"
-                  @click="openEdit(props.row)"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>
-                  {{ props.row.name }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-td>
-        </template>
-      </q-table>
-    </q-item-section>
-  </q-item>
-
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
-    <template #form>
-      <riego-form ref="add" />
+  <BaseCatalogo
+    title="Riegos"
+    :columns="columns"
+    url="/api/intranet/riegos"
+    :on-create="createItem"
+    :on-update="updateItem"
+    @delete="destroyItem"
+  >
+    <template #create-form>
+      <RiegoForm ref="add" />
     </template>
-  </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
-    <template #form>
-      <riego-form ref="edit" :riego="selectedItem" />
+    <template #edit-form="{ item }">
+      <RiegoForm ref="edit" :riego="item" />
     </template>
-  </BaseDialog>
-
-  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
-    <template #delete-message>
-      ¿Estás seguro que deseas eliminar este elemento?
-    </template>
-  </BaseDialog>
+  </BaseCatalogo>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
+
+import RiegoForm from "src/components/catalogos/RiegoForm.vue";
+import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 
 const crudStore = useCrudStore();
 
-import BaseDialog from "src/bases/BaseDialog.vue";
-import RiegoForm from "src/components/catalogos/RiegoForm.vue";
-
-const selectedItem = ref(null);
-const showAdd = ref(false);
 const add = ref(null);
-const showEdit = ref(false);
 const edit = ref(null);
-const showDelete = ref(false);
-
-const baseURL = ref("/api/intranet/riego");
 
 const columns = [
   {
-    name: "name",
+    name: "actions",
+    label: "",
+    field: "actions",
     align: "left",
+  },
+  {
+    name: "name",
+    label: "Nombre",
     field: "name",
+    align: "left",
   },
 ];
 
-const openCreate = () => {
-  selectedItem.value = null; // nuevo registro vacío
-  showAdd.value = true;
-};
+const BASE_URL = "/api/intranet/riego"; // singular para post/put/delete
 
-const openEdit = (item) => {
-  selectedItem.value = item;
-  showEdit.value = true;
-};
+const createItem = async () => {
+  const ok = await add.value.validate();
+  if (!ok) return false;
 
-const openDelete = (item) => {
-  selectedItem.value = item;
-  showDelete.value = true;
-};
-
-const getRows = async () => {
-  await crudStore.getItems(baseURL.value);
-};
-
-const postItem = () => {
   const data = { ...add.value.formRiego };
-  crudStore.postItem(baseURL.value, data, add.value.validate, () => {
-    showAdd.value = false;
-    getRows();
-  });
+  await crudStore.postItem(BASE_URL, data, add.value.validate);
+
+  return true;
 };
 
-const putItem = () => {
-  const data = { ...edit.value.formRiego };
-  crudStore.putItem(baseURL.value, data, edit.value.validate, () => {
-    showEdit.value = false;
-    getRows();
-  });
+const updateItem = async (item) => {
+  const ok = await edit.value.validate();
+  if (!ok) return false;
+
+  const data = { ...edit.value.formRiego, id: item.id };
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
 };
 
-const destroyItem = () => {
-  crudStore.deleteItem(baseURL.value, selectedItem.value.id, () => {
-    selectedItem.value = null;
-    showDelete.value = false;
-    getRows();
-  });
+const destroyItem = (item) => {
+  crudStore.deleteItem(BASE_URL, item.id);
 };
-
-onMounted(() => {
-  getRows();
-});
 </script>

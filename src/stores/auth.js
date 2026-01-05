@@ -1,6 +1,6 @@
-import axios from "axios";
 import { defineStore } from "pinia";
 import { LocalStorage, Notify } from "quasar";
+import { sendRequest } from "src/boot/functions";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -16,48 +16,51 @@ export const useAuthStore = defineStore("auth", {
   },
   actions: {
     async getToken() {
-      await axios.get("/sanctum/csrf-cookie");
+      // Sanctum CSRF cookie
+      await sendRequest("GET", null, "/sanctum/csrf-cookie");
     },
+
     async login(form) {
       await this.getToken();
-      try {
-        const res = await axios.post("/api/auth/login", form);
 
-        if (res.data.two_factor_required) {
-          // Usuario con email verificado → requiere 2FA
-          this.twoFactorUserId = res.data.user_id;
+      try {
+        const res = await sendRequest("POST", form, "/api/auth/login");
+
+        if (res?.two_factor_required) {
+          this.twoFactorUserId = res.user_id;
           this.awaitingTwoFactor = true;
+
           Notify.create({
             color: "info",
-            message: res.data.message || "Código 2FA enviado",
+            message: res.message || "Código 2FA enviado",
             icon: "mail",
           });
         } else {
-          // Usuario sin email verificado → login directo
-          this.authToken = res.data.token;
-          this.authUser = res.data.data;
+          this.authToken = res.token;
+          this.authUser = res.data;
           this.awaitingTwoFactor = false;
           this.twoFactorUserId = null;
+
           this.router.push("/");
         }
+
+        return res;
       } catch (error) {
         Notify.create({
           color: "negative",
-          message: error.response?.data || "Login fallido",
+          message: error?.response?.data || "Login fallido",
           icon: "report_problem",
         });
+        throw error;
       }
     },
 
     async sendEmailVerification() {
       try {
-        await axios.post(
-          "/api/auth/send-email-verification",
-          {},
-          {
-            headers: { Authorization: `Bearer ${this.authToken}` },
-          }
-        );
+        await sendRequest("POST", {}, "/api/auth/send-email-verification", {
+          headers: { Authorization: `Bearer ${this.authToken}` },
+        });
+
         Notify.create({
           color: "positive",
           message: "Correo de verificación enviado",
@@ -66,64 +69,78 @@ export const useAuthStore = defineStore("auth", {
       } catch (error) {
         Notify.create({
           color: "negative",
-          message: error.response?.data?.message || "Error enviando correo",
+          message: error?.response?.data?.message || "Error enviando correo",
           icon: "report_problem",
         });
+        throw error;
       }
     },
 
     async confirmEmailVerification(id, hash) {
       try {
-        const res = await axios.get(`/api/auth/verify-email/${id}/${hash}`);
+        const res = await sendRequest(
+          "GET",
+          null,
+          `/api/auth/verify-email/${id}/${hash}`
+        );
+
         Notify.create({
           color: "positive",
-          message: res.data.message,
+          message: res?.message || "Correo verificado",
           icon: "check",
         });
+
+        return res;
       } catch (error) {
         Notify.create({
           color: "negative",
-          message: error.response?.data?.message || "Error verificando correo",
+          message: error?.response?.data?.message || "Error verificando correo",
           icon: "report_problem",
         });
+        throw error;
       }
     },
 
     async verifyTwoFactor(code) {
       try {
-        const res = await axios.post("/api/auth/verify", {
-          user_id: this.twoFactorUserId,
-          two_factor_code: code,
-        });
-        this.authToken = res.data.token;
-        this.authUser = res.data.data;
+        const res = await sendRequest(
+          "POST",
+          {
+            user_id: this.twoFactorUserId,
+            two_factor_code: code,
+          },
+          "/api/auth/verify"
+        );
+
+        this.authToken = res.token;
+        this.authUser = res.data;
         this.awaitingTwoFactor = false;
         this.twoFactorUserId = null;
+
         this.router.push("/");
+        return res;
       } catch (error) {
         throw error; // se maneja en el componente
       }
     },
+
     async logout() {
-      // Primero, elimina los datos del almacenamiento local
-      LocalStorage.remove("auth");
-      localStorage.clear();
-
-      // Configura el encabezado de autorización para la solicitud de cierre de sesión
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${this.authToken}`;
-
-      // Opcionalmente, limpia los datos de autenticación en la aplicación
-      this.authToken = null;
-      this.authUser = null;
-
       try {
-        // Realiza la solicitud de cierre de sesión
-        await axios.post("/api/auth/logout");
+        // intenta avisar al backend antes de limpiar (opcional, pero recomendado)
+        await sendRequest("POST", {}, "/api/auth/logout", {
+          headers: { Authorization: `Bearer ${this.authToken}` },
+        });
       } catch (error) {
+        // si falla, igual limpiamos local
       } finally {
-        // Recarga la página independientemente del resultado de la solicitud
+        LocalStorage.remove("auth");
+        localStorage.clear();
+
+        this.authToken = null;
+        this.authUser = null;
+        this.awaitingTwoFactor = false;
+        this.twoFactorUserId = null;
+
         location.reload();
       }
     },

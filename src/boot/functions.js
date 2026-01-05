@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "src/stores/auth";
 import { Loading, QSpinnerGears, Notify } from "quasar";
+import { api } from "src/boot/axios";
 
 export function show_notify(msj, icon, color, focus = "") {
   if (focus !== "") {
@@ -27,53 +28,100 @@ const sleep = (miliseconds) => {
   return new Promise((resolve) => setTimeout(resolve, miliseconds));
 };
 
-export async function sendRequest(method, params, url, redirect = "") {
-  const authStore = useAuthStore();
-  axios.defaults.headers.common[
-    "Authorization"
-  ] = `Bearer ${authStore.authToken}`;
+// export async function sendRequest(method, params, url, redirect = "") {
+//   const authStore = useAuthStore();
+//   axios.defaults.headers.common[
+//     "Authorization"
+//   ] = `Bearer ${authStore.authToken}`;
+//   try {
+//     Loading.show({
+//       spinner: QSpinnerGears,
+//     });
+//     const response = await axios({ method: method, url: url, data: params });
+//     const data = response.data;
+//     if (method == "POST" || method == "PUT") {
+//       show_notify("Registro cargado", "publish", "blue", "");
+//     }
+//     if (method == "GET") {
+//       show_notify("Informacion cargada del servidor", "download", "green", "");
+//     }
+//     if (method == "DELETE") {
+//       show_notify("Registro borrado", "delete", "orange", "");
+//     }
+//     if (!!redirect) {
+//       await sleep(2000);
+//       window.location.href = redirect;
+//     }
+//     Loading.hide();
+//     return data;
+//   } catch (err) {
+//     Loading.hide();
+//     const errorMessage = err.response.data;
+//     if (err.response.status === 401 || errorMessage === "Unauthorized") {
+//       localStorage.clear();
+//       location.reload();
+//       await sleep(2000);
+//     }
+//     if (typeof errorMessage === "object" && errorMessage !== null) {
+//       let errorMessages = [];
+//       for (const key in errorMessage) {
+//         if (Object.hasOwnProperty.call(errorMessage, key)) {
+//           const error = errorMessage[key];
+//           errorMessages.push(`Error en ${key}: ${error}`);
+//         }
+//       }
+//       show_notify(errorMessages.join("\n"), "error", "red", "");
+//     } else {
+//       show_notify("Error desconocido: " + errorMessage, "check", "red", "");
+//     }
+//     throw err;
+//   }
+// }
+
+export async function sendRequest(method, params, url) {
   try {
+    // 🔄 Mostrar spinner
     Loading.show({
       spinner: QSpinnerGears,
     });
-    const response = await axios({ method: method, url: url, data: params });
-    const data = response.data;
-    if (method == "POST" || method == "PUT") {
-      show_notify("Registro cargado", "publish", "blue", "");
+
+    const { data } = await api({
+      method,
+      url,
+      data: params,
+    });
+
+    // ✅ Mensaje siempre desde backend
+    if (data?.message) {
+      show_notify(data.message, "check", "green", "");
     }
-    if (method == "GET") {
-      show_notify("Informacion cargada del servidor", "download", "green", "");
-    }
-    if (method == "DELETE") {
-      show_notify("Registro borrado", "delete", "orange", "");
-    }
-    if (!!redirect) {
-      await sleep(2000);
-      window.location.href = redirect;
-    }
-    Loading.hide();
-    return data;
+
+    return data?.data;
   } catch (err) {
-    Loading.hide();
-    const errorMessage = err.response.data;
-    if (err.response.status === 401 || errorMessage === "Unauthorized") {
+    const res = err.response?.data;
+
+    // ❌ Mensaje general
+    if (res?.message) {
+      show_notify(res.message, "error", "red", "");
+    }
+
+    // ❌ Errores de validación
+    if (res?.errors) {
+      const errors = Object.values(res.errors).flat().join("\n");
+
+      show_notify(errors, "error", "red", "");
+    }
+
+    // 🔐 Sesión expirada
+    if (err.response?.status === 401) {
       localStorage.clear();
       location.reload();
-      await sleep(2000);
     }
-    if (typeof errorMessage === "object" && errorMessage !== null) {
-      let errorMessages = [];
-      for (const key in errorMessage) {
-        if (Object.hasOwnProperty.call(errorMessage, key)) {
-          const error = errorMessage[key];
-          errorMessages.push(`Error en ${key}: ${error}`);
-        }
-      }
-      show_notify(errorMessages.join("\n"), "error", "red", "");
-    } else {
-      show_notify("Error desconocido: " + errorMessage, "check", "red", "");
-    }
+
     throw err;
+  } finally {
+    // 🔄 Ocultar spinner SIEMPRE
+    Loading.hide();
   }
 }
 

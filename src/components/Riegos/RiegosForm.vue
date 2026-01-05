@@ -11,6 +11,7 @@
           option-disable="inactive"
           emit-value
           map-options
+          options-dense
           transition-show="jump-up"
           transition-hide="jump-up"
           filled
@@ -69,8 +70,13 @@ const formRiego = ref({
 });
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/riego", "");
-  riegos.value = res;
+  let res = await sendRequest(
+    "GET",
+    null,
+    "/api/intranet/clienteRiego/cliente/form",
+    ""
+  );
+  riegos.value = res.riegos;
 };
 
 const validate = async () => {

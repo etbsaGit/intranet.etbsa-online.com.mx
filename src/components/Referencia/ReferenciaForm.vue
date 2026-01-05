@@ -68,8 +68,13 @@ const formReferencia = ref({
 });
 
 const getOptions = async () => {
-  let res = await sendRequest("GET", null, "/api/intranet/kinship", "");
-  kinships.value = res;
+  let res = await sendRequest(
+    "GET",
+    null,
+    "/api/intranet/referencia/cliente/form",
+    ""
+  );
+  kinships.value = res.kinships;
 };
 
 const validate = async () => {

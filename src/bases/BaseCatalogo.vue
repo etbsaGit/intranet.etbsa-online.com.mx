@@ -13,6 +13,7 @@
         :columns="columns"
         :row-key="rowKey"
         hide-pagination
+        :dense="$q.screen.lt.md"
         :rows-per-page-options="[0]"
         :loading="crud.loading"
       >
@@ -63,6 +64,7 @@
               </q-btn>
 
               <q-btn
+                v-if="$props.onDelete"
                 round
                 dense
                 flat
@@ -96,11 +98,25 @@
     </q-item-section>
   </q-item>
 
-  <BaseDialog v-model="showAdd" mode="create" @submit="handleCreate">
+  <BaseDialog
+    :maximized="props.Maximized"
+    :fullHeight="props.FullHeight"
+    :fullWidth="props.FullWidth"
+    v-model="showAdd"
+    mode="create"
+    @submit="handleCreate"
+  >
     <template #form><slot name="create-form" /></template>
   </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="handleUpdate">
+  <BaseDialog
+    :maximized="props.Maximized"
+    :fullHeight="props.FullHeight"
+    :fullWidth="props.FullWidth"
+    v-model="showEdit"
+    mode="edit"
+    @submit="handleUpdate"
+  >
     <template #form><slot name="edit-form" :item="selected" /></template>
   </BaseDialog>
 
@@ -128,6 +144,11 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
   onCreate: { type: Function, required: true },
   onUpdate: { type: Function, required: true },
+  // ÚNICO PROP PARA CREATE Y EDIT
+  Maximized: { type: [Boolean, null], default: false },
+  FullHeight: { type: [Boolean, null], default: false },
+  FullWidth: { type: [Boolean, null], default: false },
+  onDelete: { type: [Boolean, null], default: true },
 });
 
 const emit = defineEmits(["delete"]);

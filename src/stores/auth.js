@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { LocalStorage, Notify } from "quasar";
-import { sendRequest } from "src/boot/functions";
+import { sendRequest, show_notify } from "src/boot/functions";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -46,11 +46,6 @@ export const useAuthStore = defineStore("auth", {
 
         return res;
       } catch (error) {
-        Notify.create({
-          color: "negative",
-          message: error?.response?.data || "Login fallido",
-          icon: "report_problem",
-        });
         throw error;
       }
     },
@@ -67,11 +62,6 @@ export const useAuthStore = defineStore("auth", {
           icon: "mail",
         });
       } catch (error) {
-        Notify.create({
-          color: "negative",
-          message: error?.response?.data?.message || "Error enviando correo",
-          icon: "report_problem",
-        });
         throw error;
       }
     },

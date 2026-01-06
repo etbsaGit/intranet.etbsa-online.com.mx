@@ -1,4 +1,23 @@
 <template>
+  <!-- <BaseCatalogo
+    title="Pedidos"
+    createLabel="Nuevo pedido"
+    :columns="columns"
+    url="/api/intranet/sales"
+    :on-create="createItem"
+    :on-update="updateItem"
+    :on-delete="false"
+    FullWidth
+  >
+    <template #create-form>
+      <SaleForm ref="add" />
+    </template>
+
+    <template #edit-form="{ item }">
+      <SaleForm ref="edit" :sale="item" />
+    </template>
+  </BaseCatalogo> -->
+
   <q-item class="custom-item" align="center">
     <q-item-section>
       <q-item-label class="custom-label">-Pedidos-</q-item-label>
@@ -16,7 +35,6 @@
         :dense="$q.screen.lt.md"
         :rows-per-page-options="[0]"
       >
-        <!-- Top-left buttons -->
         <template v-slot:top-left>
           <q-item>
             <q-item-section>
@@ -42,7 +60,6 @@
           </q-item>
         </template>
 
-        <!-- Top-right admin button -->
         <template v-slot:top-right>
           <q-item v-if="checkRole('Admin')">
             <q-item-section>
@@ -58,7 +75,6 @@
           </q-item>
         </template>
 
-        <!-- Bottom pagination -->
         <template v-slot:bottom>
           <base-pagination
             :pagination="crud.pagination"
@@ -242,6 +258,8 @@ import SaleForm from "src/components/Sale/SaleForm.vue";
 import SaleValidateForm from "src/components/Sale/SaleValidateForm.vue";
 import SaleEditValidateForm from "src/components/Sale/SaleEditValidateForm.vue";
 
+import BaseCatalogo from "src/bases/BaseCatalogo.vue";
+
 const crud = useCrudStore();
 const selectedItem = ref(null);
 const showAdd = ref(false);
@@ -334,18 +352,12 @@ const renderValidated = (row) => {
 // -------------------- COLUMNAS --------------------
 const columns = [
   {
-    name: "editar",
-    label: "Detalle",
+    name: "actions",
+    label: "",
+    field: "actions",
     align: "left",
-    field: (row) =>
-      h(QBtn, {
-        dense: true,
-        color: "primary",
-        flat: true,
-        icon: "loupe",
-        onClick: () => openEdit(row),
-      }),
   },
+
   {
     name: "economic",
     label: "# Económico",
@@ -487,6 +499,28 @@ onMounted(() => {
   getRows();
   crud.getItems(baseURL + "/options");
 });
+
+const BASE_URL = "/api/intranet/sale"; // singular para post/put/delete
+
+const createItem = async () => {
+  const ok = await add.value.validate();
+  if (!ok) return false;
+
+  const data = { ...add.value.saleForm };
+  await crud.postItem(BASE_URL, data, add.value.validate);
+
+  return true;
+};
+
+const updateItem = async (item) => {
+  const ok = await edit.value.validate();
+  if (!ok) return false;
+
+  const data = { ...edit.value.saleForm, id: item.id };
+  await crud.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
+};
 </script>
 
 <style scoped>

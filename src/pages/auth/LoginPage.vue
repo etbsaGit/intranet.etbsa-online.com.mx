@@ -95,7 +95,6 @@
 <script setup>
 import { ref } from "vue";
 import { useAuthStore } from "src/stores/auth";
-import { Notify } from "quasar";
 
 const auth = useAuthStore();
 
@@ -113,18 +112,7 @@ const submitLogin = async () => {
   loading.value = true;
   try {
     await auth.login(form.value);
-
-    if (auth.isTwoFactorPending) {
-      showTwoFactor.value = true;
-    } else {
-      // Login completo, redirecciona si quieres
-    }
-  } catch (error) {
-    Notify.create({
-      color: "negative",
-      message: error.message,
-      icon: "report_problem",
-    });
+    showTwoFactor.value = auth.isTwoFactorPending;
   } finally {
     loading.value = false;
   }
@@ -135,12 +123,7 @@ const submit2FACode = async () => {
   try {
     await auth.verifyTwoFactor(code.value);
     showTwoFactor.value = false;
-  } catch (error) {
-    Notify.create({
-      color: "negative",
-      message: "Código inválido o expirado",
-      icon: "report_problem",
-    });
+    code.value = "";
   } finally {
     verifying.value = false;
   }

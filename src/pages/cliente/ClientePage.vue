@@ -430,25 +430,23 @@ const postItem = async () => {
 };
 
 const getItem = async (rfc) => {
-  try {
-    const res = await sendRequest(
-      "GET",
-      null,
-      "/api/intranet/cliente/rfc/" + rfc,
-      ""
-    );
-    const cliente = res?.cliente || res?.data?.cliente;
+  const res = await sendRequest(
+    "GET",
+    null,
+    `/api/intranet/cliente/rfc/${rfc}`,
+    ""
+  );
+  const cliente = res?.cliente || res?.data?.cliente;
 
-    selectedItem.value = cliente;
-    showEdit.value = true;
+  if (!cliente) {
+    showAdd.value = true;
     showRFC.value = false;
-  } catch (error) {
-    const status = error?.response?.status;
-    if (status === 404) {
-      showAdd.value = true;
-      showRFC.value = false;
-    }
+    return;
   }
+
+  selectedItem.value = cliente;
+  showEdit.value = true;
+  showRFC.value = false;
 };
 
 const asyncCustomers = async () => {

@@ -47,6 +47,37 @@
               </template>
             </q-input>
           </q-item-section>
+          <!-- <q-item-section side>
+            <q-input
+              v-model="formAnalitica.fecha"
+              filled
+              dense
+              readonly
+              label="Fecha referencia"
+              :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
+            >
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    cover
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date minimal v-model="formAnalitica.fecha">
+                      <div class="row items-center justify-end">
+                        <q-btn
+                          v-close-popup
+                          label="Cerrar"
+                          color="primary"
+                          flat
+                        />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </q-item-section> -->
         </q-item>
         <q-item>
           <q-item-section>

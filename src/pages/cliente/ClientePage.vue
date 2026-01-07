@@ -61,16 +61,11 @@
         </template>
         <template v-slot:body-cell-vendedor="props">
           <q-td :props="props">
-            <q-chip
-              v-for="emp in props.row.empleados"
-              :key="emp.id"
-              color="primary"
-              text-color="white"
-              dense
-              class="q-mr-xs"
-            >
-              {{ emp.nombreCompleto }}
-            </q-chip>
+            <div v-for="emp in props.row.empleados" :key="emp.id">
+              <q-chip color="primary" text-color="white" dense class="q-mr-xs">
+                {{ emp.nombreCompleto }}
+              </q-chip>
+            </div>
           </q-td>
         </template>
       </q-table>

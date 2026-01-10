@@ -60,9 +60,7 @@
                 <q-item-label caption>
                   {{ props.row.inv_category?.inv_group.name }}
                 </q-item-label>
-                <q-item-label caption>
-                  {{ props.row.inv_category?.status.nombre }}
-                </q-item-label>
+
                 <q-item-label>
                   {{ props.row.inv_category?.name }}
                 </q-item-label>

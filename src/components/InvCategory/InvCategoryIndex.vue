@@ -13,24 +13,7 @@
         </template>
       </q-input>
     </q-item-section>
-    <q-item-section>
-      <q-select
-        v-model="filterForm.status_id"
-        :options="estatus"
-        label="Tipo"
-        option-value="id"
-        option-label="nombre"
-        option-disable="inactive"
-        emit-value
-        map-options
-        transition-show="jump-up"
-        transition-hide="jump-up"
-        outlined
-        dense
-        clearable
-        @update:model-value="onInputChange"
-      />
-    </q-item-section>
+
     <q-item-section>
       <q-select
         v-model="filterForm.inv_group_id"
@@ -145,7 +128,6 @@ const estatus = ref([]);
 const filterForm = ref({
   search: null,
   inv_group_id: null,
-  status_id: null,
 });
 
 const columns = [
@@ -166,12 +148,6 @@ const columns = [
     label: "Grupo",
     align: "left",
     field: (row) => row.inv_group?.name,
-  },
-  {
-    name: "status",
-    label: "Tipo",
-    align: "left",
-    field: (row) => row.status?.nombre,
   },
 ];
 

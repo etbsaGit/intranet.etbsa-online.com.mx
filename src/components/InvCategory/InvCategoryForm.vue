@@ -32,25 +32,6 @@
           :rules="[(val) => val !== null || 'Obligatorio']"
         />
       </q-item-section>
-      <q-item-section>
-        <q-select
-          v-model="formCategory.status_id"
-          :options="estatus"
-          label="Tipo"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          outlined
-          dense
-          options-dense
-          clearable
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        />
-      </q-item-section>
     </q-item>
     <!-- <q-item>
       <q-item-section>
@@ -77,7 +58,6 @@ const { invCategory } = defineProps(["invCategory"]);
 const myForm = ref(null);
 
 const invGroups = ref([]);
-const estatus = ref([]);
 
 const getOptions = async () => {
   let res = await sendRequest(
@@ -87,14 +67,12 @@ const getOptions = async () => {
     ""
   );
   invGroups.value = res.invGroups;
-  estatus.value = res.estatus;
 };
 
 const formCategory = ref({
   id: invCategory ? invCategory.id : null,
   name: invCategory ? invCategory.name : null,
   description: invCategory ? invCategory.description : null,
-  status_id: invCategory ? invCategory.status_id : null,
   inv_group_id: invCategory ? invCategory.inv_group_id : null,
 });
 

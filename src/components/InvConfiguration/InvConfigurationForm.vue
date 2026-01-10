@@ -72,11 +72,7 @@
                   {{ scope.opt.name }}
                 </q-item-label>
               </q-item-section>
-              <q-item-section>
-                <q-item-label caption>
-                  {{ scope.opt.status?.nombre }}
-                </q-item-label>
-              </q-item-section>
+
               <q-item-section>
                 <q-item-label caption>
                   {{ scope.opt.inv_group?.name }}

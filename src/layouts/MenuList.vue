@@ -1,5 +1,5 @@
 <template>
-  <q-list bordered padding class="rounded-borders text-primary">
+  <q-list bordered padding dense class="rounded-borders text-primary">
     <q-item
       v-if="checkRole('Intranet.sales')"
       clickable
@@ -61,6 +61,20 @@
       group="somegroup"
       v-if="checkRole('Admin')"
     >
+      <q-item
+        clickable
+        v-ripple
+        to="invItems"
+        :active="link === 'invItems'"
+        @click="link = 'invItems'"
+        active-class="my-menu-link"
+      >
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-box-open" />
+        </q-item-section>
+
+        <q-item-section>Existencias</q-item-section>
+      </q-item>
       <q-item
         clickable
         v-ripple

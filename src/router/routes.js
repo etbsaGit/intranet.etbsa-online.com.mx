@@ -44,6 +44,10 @@ const routes = [
         path: "/invCatalogos",
         component: () => import("src/pages/Inv/InvCatalogos.vue"),
       },
+      {
+        path: "/invItems",
+        component: () => import("src/pages/InvItem/InvItemIndex.vue"),
+      },
     ],
   },
 

@@ -22,6 +22,14 @@
         @click="showAdd = true"
       />
     </q-item-section>
+    <q-item-section side>
+      <q-btn
+        dense
+        color="green"
+        @click="getReportExcel"
+        icon="fa-solid fa-file-arrow-down"
+      />
+    </q-item-section>
   </q-item>
 
   <q-item>
@@ -97,6 +105,7 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { useCrudStore } from "src/stores/crud";
+import { sendRequest } from "src/boot/functions";
 
 import BasePagination from "src/bases/BasePagination.vue";
 import BaseDialog from "src/bases/BaseDialog.vue";
@@ -213,6 +222,26 @@ const onInputChange = () => {
 
 const openWindow = (item) => {
   window.open(item.realpath, "_blank");
+};
+
+const getReportExcel = async () => {
+  const res = await sendRequest(
+    "GET",
+    null,
+    "/api/intranet/invModel/report",
+    ""
+  );
+  const base64Response = await fetch(
+    `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${res.file_base64}`
+  );
+  const blob = await base64Response.blob();
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = res.file_name;
+  link.click();
+  URL.revokeObjectURL(url);
 };
 
 onMounted(() => {

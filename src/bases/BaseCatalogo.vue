@@ -36,14 +36,34 @@
                 </template>
               </q-input>
 
+              <!-- ✅ SLOT OPCIONAL: si el padre no lo manda, no se renderiza -->
+              <slot
+                name="filters-extra"
+                v-bind="{
+                  filters,
+                  reload,
+                  onSearchChange,
+                }"
+              />
+
               <q-btn
                 unelevated
-                :label="createLabel"
                 color="primary"
                 icon="add"
                 class="catalogo-create"
                 @click="openCreate"
-              />
+              >
+                <q-tooltip
+                  class="bg-primary text-body2"
+                  transition-show="rotate"
+                  transition-hide="rotate"
+                  anchor="center left"
+                  self="center right"
+                  :offset="[10, 10]"
+                >
+                  {{ createLabel }}
+                </q-tooltip>
+              </q-btn>
             </div>
           </div>
         </template>

@@ -10,6 +10,7 @@
     <q-tab name="configuration" label="Configuraciones" />
     <q-tab name="categories" label="Categorias" />
     <q-tab name="groups" label="Grupos" />
+    <q-tab name="factory" label="Proveedores" />
   </q-tabs>
 
   <q-separator />
@@ -30,6 +31,10 @@
     <q-tab-panel name="groups">
       <inv-group-index />
     </q-tab-panel>
+
+    <q-tab-panel name="factory">
+      <inv-factory-index />
+    </q-tab-panel>
   </q-tab-panels>
 </template>
 
@@ -38,6 +43,7 @@ import InvCategoryIndex from "src/components/InvCategory/InvCategoryIndex.vue";
 import InvConfigurationIndex from "src/components/InvConfiguration/InvConfigurationIndex.vue";
 import InvModelIndex from "src/components/InvModel/InvModelIndex.vue";
 import InvGroupIndex from "src/components/InvGroup/InvGroupIndex.vue";
+import InvFactoryIndex from "src/components/InvFactory/InvFactoryIndex.vue";
 
 import { ref } from "vue";
 

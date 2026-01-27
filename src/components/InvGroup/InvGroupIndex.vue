@@ -1,116 +1,42 @@
 <template>
-  <q-item>
-    <q-item-section>
-      <q-input
-        outlined
-        dense
-        label="Buscar por nombre"
-        v-model="filterForm.search"
-        @update:model-value="onInputChange"
-      >
-        <template v-slot:prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-    </q-item-section>
-    <q-item-section side>
-      <q-btn
-        label="Agregar"
-        icon="fa-solid fa-plus"
-        dense
-        color="blue"
-        @click="showAdd = true"
-      />
-    </q-item-section>
-  </q-item>
-
-  <q-item>
-    <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Grupos"
-        :rows="crud.paginatedItems"
-        :columns="columns"
-        row-key="id"
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-editar="props">
-          <q-td :props="props">
-            <q-btn
-              dense
-              flat
-              color="negative"
-              icon="fa-solid fa-trash"
-              @click="openDelete(props.row)"
-            />
-            <q-btn
-              dense
-              flat
-              color="green"
-              icon="fa-solid fa-pen-to-square"
-              @click="openEdit(props.row)"
-            />
-          </q-td>
-        </template>
-        <template v-slot:bottom>
-          <BasePagination
-            :pagination="crud.pagination"
-            @update:currentPage="(val) => (crud.pagination.currentPage = val)"
-          />
-        </template>
-      </q-table>
-    </q-item-section>
-  </q-item>
-
-  <BaseDialog v-model="showAdd" mode="create" @submit="postItem">
-    <template #form>
-      <inv-group-form ref="add" />
+  <BaseCatalogo
+    title="Grupos"
+    :columns="columns"
+    url="/api/intranet/invGroups"
+    :on-create="createItem"
+    :on-update="updateItem"
+    @delete="destroyItem"
+    :on-delete="true"
+  >
+    <template #create-form>
+      <InvGroupForm ref="add" />
     </template>
-  </BaseDialog>
 
-  <BaseDialog v-model="showEdit" mode="edit" @submit="putItem">
-    <template #form>
-      <inv-group-form ref="edit" :invGroup="selectedItem" />
+    <template #edit-form="{ item }">
+      <InvGroupForm ref="edit" :invGroup="item" />
     </template>
-  </BaseDialog>
-
-  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
-    <template #delete-message>
-      ¿Estás seguro que deseas eliminar este elemento?
-    </template>
-  </BaseDialog>
+  </BaseCatalogo>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
 
-import BasePagination from "src/bases/BasePagination.vue";
-import BaseDialog from "src/bases/BaseDialog.vue";
+import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import InvGroupForm from "src/components/InvGroup/InvGroupForm.vue";
 
-const crud = useCrudStore();
+const crudStore = useCrudStore();
 
-const selectedItem = ref(null);
-const showAdd = ref(false);
 const add = ref(null);
-const showEdit = ref(false);
 const edit = ref(null);
-const showDelete = ref(false);
 
-const baseURL = ref("/api/intranet/invGroup");
-
-const filterForm = ref({
-  search: null,
-});
+const BASE_URL = "/api/intranet/invGroup";
 
 const columns = [
   {
-    name: "editar",
+    name: "actions",
     align: "left",
-    label: "Borrar editar",
-    field: "editar",
+    field: "actions",
   },
   {
     name: "name",
@@ -120,66 +46,27 @@ const columns = [
   },
 ];
 
-const openEdit = (item) => {
-  selectedItem.value = item;
-  showEdit.value = true;
-};
+const createItem = async () => {
+  const ok = await add.value.validate();
+  if (!ok) return false;
 
-const openDelete = (item) => {
-  selectedItem.value = item;
-  showDelete.value = true;
-};
-
-const getRows = async () => {
-  const filtersWithPage = {
-    ...filterForm.value,
-    page: crud.pagination.currentPage,
-  };
-  await crud.getPaginatedItems(baseURL.value + "s", filtersWithPage);
-};
-
-const postItem = async () => {
   const data = { ...add.value.formGroup };
-  await crud.postItem(baseURL.value, data, add.value.validate, (res) => {
-    showAdd.value = false;
-    getRows();
-  });
+  await crudStore.postItem(BASE_URL, data, add.value.validate);
+
+  return true;
 };
 
-const putItem = async () => {
-  const data = { ...edit.value.formGroup };
-  await crud.putItem(baseURL.value, data, edit.value.validate, () => {
-    showEdit.value = false;
-    getRows();
-  });
+const updateItem = async (item) => {
+  const ok = await edit.value.validate();
+  if (!ok) return false;
+
+  const data = { ...edit.value.formGroup, id: item.id };
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
 };
 
-const destroyItem = async () => {
-  await crud.deleteItem(baseURL.value, selectedItem.value.id, () => {
-    selectedItem.value = null;
-    showDelete.value = false;
-    getRows();
-  });
+const destroyItem = (item) => {
+  crudStore.deleteItem(BASE_URL, item.id);
 };
-
-watch(
-  () => crud.pagination.currentPage,
-  () => {
-    getRows();
-  }
-);
-
-let timeout = null;
-
-const onInputChange = () => {
-  clearTimeout(timeout);
-
-  timeout = setTimeout(() => {
-    getRows();
-  }, 1000);
-};
-
-onMounted(() => {
-  getRows();
-});
 </script>

@@ -1,139 +1,68 @@
 <template>
-  <q-item>
-    <q-item-section>
-      <q-input
-        outlined
-        dense
-        label="Buscar por nombre"
-        v-model="filterForm.search"
-        @update:model-value="onInputChange"
-      >
-        <template v-slot:prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-    </q-item-section>
-    <q-item-section side>
-      <q-btn
-        label="Agregar"
-        icon="fa-solid fa-plus"
-        dense
-        color="blue"
-        @click="showAdd = true"
-      />
-    </q-item-section>
-    <q-item-section side>
+  <BaseCatalogo
+    title="Modelos"
+    :columns="columns"
+    url="/api/intranet/invModels"
+    :on-create="createItem"
+    :on-update="updateItem"
+    @delete="destroyItem"
+    :on-delete="true"
+    Maximized
+  >
+    <template #create-form>
+      <InvModelForm ref="add" />
+    </template>
+
+    <template #edit-form="{ item }">
+      <InvModelForm ref="edit" :invModel="item" />
+    </template>
+
+    <template #filters-extra="{}">
       <q-btn
         dense
         color="green"
         @click="getReportExcel"
         icon="fa-solid fa-file-arrow-down"
       />
-    </q-item-section>
-  </q-item>
-
-  <q-item>
-    <q-item-section>
-      <q-table
-        flat
-        bordered
-        title="Modelos"
-        :rows="crud.paginatedItems"
-        :columns="columns"
-        row-key="id"
-        :rows-per-page-options="[0]"
-      >
-        <template v-slot:body-cell-editar="props">
-          <q-td :props="props">
-            <q-btn
-              dense
-              flat
-              color="negative"
-              icon="fa-solid fa-trash"
-              @click="openDelete(props.row)"
-            />
-            <q-btn
-              dense
-              flat
-              color="green"
-              icon="fa-solid fa-pen-to-square"
-              @click="openEdit(props.row)"
-            />
-          </q-td>
-        </template>
-        <template v-slot:body-cell-doc="props">
-          <q-td :props="props">
-            <q-btn
-              v-if="props.row.realpath"
-              dense
-              color="primary"
-              flat
-              icon="description"
-              @click="openWindow(props.row)"
-            />
-          </q-td>
-        </template>
-        <template v-slot:bottom>
-          <BasePagination
-            :pagination="crud.pagination"
-            @update:currentPage="(val) => (crud.pagination.currentPage = val)"
-          />
-        </template>
-      </q-table>
-    </q-item-section>
-  </q-item>
-
-  <BaseDialog maximized v-model="showAdd" mode="create" @submit="postItem">
-    <template #form>
-      <inv-model-form ref="add" />
     </template>
-  </BaseDialog>
 
-  <BaseDialog maximized v-model="showEdit" mode="edit" @submit="putItem">
-    <template #form>
-      <inv-model-form ref="edit" :invModel="selectedItem" />
+    <template v-slot:body-cell-doc="props">
+      <q-td :props="props">
+        <q-btn
+          v-if="props.row.realpath"
+          dense
+          color="primary"
+          flat
+          icon="description"
+          @click="openWindow(props.row)"
+        />
+      </q-td>
     </template>
-  </BaseDialog>
-
-  <BaseDialog v-model="showDelete" mode="delete" @submit="destroyItem">
-    <template #delete-message>
-      ¿Estás seguro que deseas eliminar este elemento?
-    </template>
-  </BaseDialog>
+  </BaseCatalogo>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
 
-import BasePagination from "src/bases/BasePagination.vue";
-import BaseDialog from "src/bases/BaseDialog.vue";
 import InvModelForm from "src/components/InvModel/InvModelForm.vue";
+import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 
 import { formatCurrency } from "src/boot/format";
 
-const crud = useCrudStore();
+const crudStore = useCrudStore();
 
-const selectedItem = ref(null);
-const showAdd = ref(false);
 const add = ref(null);
-const showEdit = ref(false);
 const edit = ref(null);
-const showDelete = ref(false);
 
-const baseURL = ref("/api/intranet/invModel");
-
-const filterForm = ref({
-  search: null,
-});
+const BASE_URL = "/api/intranet/invModel";
 
 const columns = [
   {
-    name: "editar",
+    name: "actions",
     align: "left",
-    label: "Borrar Editar",
-    field: "editar",
+    field: "actions",
   },
   {
     name: "code",
@@ -173,63 +102,28 @@ const columns = [
   },
 ];
 
-const openEdit = (item) => {
-  selectedItem.value = item;
-  showEdit.value = true;
-};
+const createItem = async () => {
+  const ok = await add.value.validate();
+  if (!ok) return false;
 
-const openDelete = (item) => {
-  selectedItem.value = item;
-  showDelete.value = true;
-};
-
-const getRows = async () => {
-  const filtersWithPage = {
-    ...filterForm.value,
-    page: crud.pagination.currentPage,
-  };
-  await crud.getPaginatedItems(baseURL.value + "s", filtersWithPage);
-};
-
-const postItem = async () => {
   const data = { ...add.value.formModel };
-  await crud.postItem(baseURL.value, data, add.value.validate, () => {
-    showAdd.value = false;
-    getRows();
-  });
+  await crudStore.postItem(BASE_URL, data, add.value.validate);
+
+  return true;
 };
 
-const putItem = async () => {
-  const data = { ...edit.value.formModel };
-  await crud.putItem(baseURL.value, data, edit.value.validate, () => {
-    showEdit.value = false;
-    getRows();
-  });
+const updateItem = async (model) => {
+  const ok = await edit.value.validate();
+  if (!ok) return false;
+
+  const data = { ...edit.value.formModel, id: model.id };
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
 };
 
-const destroyItem = async () => {
-  await crud.deleteItem(baseURL.value, selectedItem.value.id, () => {
-    selectedItem.value = null;
-    showDelete.value = false;
-    getRows();
-  });
-};
-
-watch(
-  () => crud.pagination.currentPage,
-  () => {
-    getRows();
-  }
-);
-
-let timeout = null;
-
-const onInputChange = () => {
-  clearTimeout(timeout);
-
-  timeout = setTimeout(() => {
-    getRows();
-  }, 1000);
+const destroyItem = (item) => {
+  crudStore.deleteItem(BASE_URL, item.id);
 };
 
 const openWindow = (item) => {
@@ -255,8 +149,4 @@ const getReportExcel = async () => {
   link.click();
   URL.revokeObjectURL(url);
 };
-
-onMounted(() => {
-  getRows();
-});
 </script>

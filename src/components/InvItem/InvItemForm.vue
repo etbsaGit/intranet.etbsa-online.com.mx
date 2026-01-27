@@ -136,13 +136,13 @@
             <q-input
               v-model="formItem.purchase_cost"
               prefix="$"
-              mask="###,###,###"
-              reverse-fill-mask
-              unmasked-value
               outlined
               dense
               label="Costo"
               hint
+              mask="###,###,###.##"
+              reverse-fill-mask
+              input-class="text-right"
             />
           </q-item-section>
           <q-item-section>
@@ -305,7 +305,11 @@
       </q-tab-panel>
 
       <q-tab-panel name="configirations">
-        <q-splitter v-model="splitterModel" class="splitter">
+        <q-splitter
+          v-model="splitterModel"
+          class="splitter"
+          style="height: 77vh"
+        >
           <!-- ASIGNADAS -->
           <template #before>
             <div class="panel">
@@ -352,7 +356,6 @@
             </div>
           </template>
 
-          <!-- DISPONIBLES -->
           <!-- DISPONIBLES -->
           <template #after>
             <div class="panel">
@@ -755,7 +758,7 @@ defineExpose({
 // statuses ...
 const shippingStatuses = ref([
   { id: null, name: "En camino" },
-  { id: 0, name: "En sucursal" },
+  { id: 0, name: "En Inventario" },
   { id: 1, name: "Vendido" },
 ]);
 const paidStatuses = ref([
@@ -781,7 +784,7 @@ const financingStatuses = ref([{ id: 0, name: "Deposito" }]);
 
 /* Splitter */
 .splitter {
-  margin-top: 24px;
+  margin-top: 10px;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #e0e0e0;

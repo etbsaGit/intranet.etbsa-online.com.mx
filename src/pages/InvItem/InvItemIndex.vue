@@ -5,7 +5,7 @@
     url="/api/intranet/invItems"
     :on-create="createItem"
     :on-update="updateItem"
-    :onDelete="false"
+    :on-delete="false"
     Maximized
     :initialFilters="{ shipping_status: null }"
   >
@@ -31,7 +31,7 @@
         v-model="filters.shipping_status"
         :options="[
           { id: null, name: 'En camino' },
-          { id: 0, name: 'En sucursal' },
+          { id: 0, name: 'En inventario' },
           { id: 1, name: 'Vendido' },
         ]"
         @update:model-value="onSearchChange"

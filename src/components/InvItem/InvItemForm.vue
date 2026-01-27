@@ -91,6 +91,7 @@
               option-disable="inactive"
               emit-value
               map-options
+              :disable="invItem != null"
               transition-show="jump-up"
               transition-hide="jump-up"
               outlined
@@ -102,11 +103,11 @@
           </q-item-section>
           <q-item-section>
             <q-select
-              v-model="formItem.tipo_equipo_id"
-              :options="tiposEquipo"
-              label="Tipo de equipo"
+              v-model="formItem.sucursal_id"
+              :options="sucursales"
+              label="Sucursal"
               option-value="id"
-              option-label="name"
+              option-label="nombre"
               option-disable="inactive"
               emit-value
               map-options
@@ -352,19 +353,37 @@
           </template>
 
           <!-- DISPONIBLES -->
+          <!-- DISPONIBLES -->
           <template #after>
             <div class="panel">
               <div class="panel-title">Configuraciones disponibles</div>
 
+              <!-- 🔎 Buscador -->
+              <q-input
+                v-model="searchDisponibles"
+                dense
+                outlined
+                clearable
+                debounce="250"
+                placeholder="Buscar por código o nombre..."
+                class="q-mb-sm"
+              >
+                <template #append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+
               <div
-                v-if="configuracionesDisponiblesPorCategoria.length === 0"
+                v-if="
+                  configuracionesDisponiblesPorCategoriaFiltradas.length === 0
+                "
                 class="text-grey-7"
               >
                 No hay configuraciones disponibles.
               </div>
 
               <q-expansion-item
-                v-for="grupo in configuracionesDisponiblesPorCategoria"
+                v-for="grupo in configuracionesDisponiblesPorCategoriaFiltradas"
                 :key="'disp-' + grupo.id"
                 expand-separator
                 default-opened
@@ -455,7 +474,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { checkRole, sendRequest } from "src/boot/functions";
 
 const { invItem } = defineProps(["invItem"]);
 
@@ -464,9 +483,9 @@ const splitterModel = ref(50);
 const tab = ref("general");
 
 const invCategory = ref([]);
-const tiposEquipo = ref([]);
 const invModels = ref([]);
 const invFactories = ref([]);
+const sucursales = ref([]);
 
 const assignedConfigurations = ref([]); // objetos asignados (para pintar panel izq)
 const selectedConfigurations = ref([]); // IDs seleccionados (truth)
@@ -488,7 +507,7 @@ const formItem = ref({
   gps: invItem ? invItem.gps : null,
   notes: invItem ? invItem.notes : null,
   inv_model_id: invItem ? invItem.inv_model_id : null,
-  tipo_equipo_id: invItem ? invItem.tipo_equipo_id : null,
+  sucursal_id: invItem ? invItem.sucursal_id : null,
   inv_configurations: invItem
     ? invItem.inv_configurations.map((c) => c.id)
     : [],
@@ -532,9 +551,9 @@ const convertirFile = (event) => {
 
 const getOptions = async () => {
   const res = await sendRequest("GET", null, "/api/intranet/invItem/forms", "");
-  tiposEquipo.value = res.tiposEquipo;
   invModels.value = res.invModels;
   invFactories.value = res.invFactories;
+  sucursales.value = res.sucursales;
 };
 
 const getForModel = async (id) => {
@@ -597,8 +616,11 @@ const hydrateFromInvItem = () => {
 
 // ✅ init “real”: si existe invItem, carga options con su modelo y luego hidrata
 const init = async () => {
-  const modelId = invItem?.inv_model_id ?? "";
-  await getOptions(modelId);
+  // const modelId = invItem?.inv_model_id ?? "";
+  if (invItem) {
+    getForModel(invItem.inv_model_id);
+  }
+  await getOptions();
   hydrateFromInvItem();
 };
 
@@ -607,19 +629,19 @@ onMounted(async () => {
 });
 
 // si cambias el modelo manualmente, recarga opciones (y NO destruyas selección)
-watch(
-  () => formItem.value.inv_model_id,
-  async (val, oldVal) => {
-    if (val === oldVal) return;
-    await getOptions(val);
+// watch(
+//   () => formItem.value.inv_model_id,
+//   async (val, oldVal) => {
+//     if (val === oldVal) return;
+//     await getOptions(val);
 
-    // re-hidrata asignadas con lo nuevo que llegó en invCategory,
-    // pero conserva selectedConfigurations
-    assignedConfigurations.value = selectedConfigurations.value
-      .map((id) => allConfigsById.value.get(id))
-      .filter(Boolean);
-  }
-);
+//     // re-hidrata asignadas con lo nuevo que llegó en invCategory,
+//     // pero conserva selectedConfigurations
+//     assignedConfigurations.value = selectedConfigurations.value
+//       .map((id) => allConfigsById.value.get(id))
+//       .filter(Boolean);
+//   }
+// );
 
 const configuracionesAsignadasPorCategoria = computed(() => {
   const grupos = {};
@@ -682,6 +704,39 @@ watch(selectedConfigurations, (newVal, oldVal = []) => {
   );
 
   formItem.value.inv_configurations = newVal;
+});
+
+const searchDisponibles = ref("");
+
+const normalizar = (s) =>
+  (s ?? "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // quita acentos
+
+const configuracionesDisponiblesPorCategoriaFiltradas = computed(() => {
+  const q = normalizar(searchDisponibles.value).trim();
+  if (!q)
+    return (
+      configuracionesDisponiblesPorCategoria.value ??
+      configuracionesDisponiblesPorCategoria
+    );
+
+  const source =
+    configuracionesDisponiblesPorCategoria.value ??
+    configuracionesDisponiblesPorCategoria;
+
+  return (source || [])
+    .map((grupo) => {
+      const items = (grupo.items || []).filter((conf) => {
+        const code = normalizar(conf.code);
+        const name = normalizar(conf.name);
+        return code.includes(q) || name.includes(q);
+      });
+      return { ...grupo, items };
+    })
+    .filter((grupo) => grupo.items.length > 0);
 });
 
 const validate = async () => {

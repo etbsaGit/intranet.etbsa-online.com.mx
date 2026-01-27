@@ -108,10 +108,10 @@ const columns = [
     field: (row) => row.inv_model?.name,
   },
   {
-    name: "tipo_equipo",
-    label: "Tipo de equipo",
+    name: "sucursal",
+    label: "Sucursal",
     align: "left",
-    field: (row) => row.tipo_equipo?.name,
+    field: (row) => row.sucursal?.nombre,
   },
   {
     name: "shipping_status",

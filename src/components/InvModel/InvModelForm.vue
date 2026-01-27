@@ -28,6 +28,43 @@
 
     <q-item class="form-row">
       <q-item-section>
+        <q-select
+          v-model="formModel.clas_equipo_id"
+          :options="clasEquipos"
+          label="Clasificacion"
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          outlined
+          dense
+          options-dense
+          :rules="[(val) => val !== null || 'Obligatorio']"
+        />
+      </q-item-section>
+      <q-item-section>
+        <q-select
+          v-model="formModel.tipo_equipo_id"
+          :options="tiposEquipo"
+          label="Tipo de equipo"
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          outlined
+          dense
+          options-dense
+          :rules="[(val) => val !== null || 'Obligatorio']"
+        />
+      </q-item-section>
+
+      <q-item-section>
         <q-input
           v-model="formModel.price"
           outlined
@@ -123,6 +160,7 @@
             option-label="name"
             emit-value
             map-options
+            options-dense
             outlined
             dense
             clearable
@@ -191,6 +229,8 @@ const selectedConfigurations = ref([]); // IDs asignados (truth)
 const myForm = ref(null);
 const model = ref(null);
 const invCategories = ref([]);
+const tiposEquipo = ref([]);
+const clasEquipos = ref([]);
 const selectedCategory = ref(null);
 
 const formModel = ref({
@@ -198,6 +238,8 @@ const formModel = ref({
   code: invModel ? invModel.code : null,
   name: invModel ? invModel.name : null,
   price: invModel ? invModel.price : null,
+  clas_equipo_id: invModel ? invModel.clas_equipo_id : null,
+  tipo_equipo_id: invModel ? invModel.tipo_equipo_id : null,
   description: invModel ? invModel.description : null,
   inv_configurations: invModel
     ? invModel.inv_configurations.map((c) => c.id)
@@ -227,6 +269,8 @@ const getOptions = async () => {
     ""
   );
   invCategories.value = res.invCategories;
+  tiposEquipo.value = res.tiposEquipo;
+  clasEquipos.value = res.clasEquipos;
 };
 
 const getConfigurations = async (categoryId) => {

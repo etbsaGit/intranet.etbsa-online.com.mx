@@ -148,6 +148,18 @@ const columns = [
     field: "name",
   },
   {
+    name: "clas_equipo",
+    label: "Clasificacion de equipo",
+    align: "left",
+    field: (row) => row.clas_equipo?.name,
+  },
+  {
+    name: "tipo_equipo",
+    label: "Tipo de equipo",
+    align: "left",
+    field: (row) => row.tipo_equipo?.name,
+  },
+  {
     name: "price",
     label: "Precio $",
     align: "left",

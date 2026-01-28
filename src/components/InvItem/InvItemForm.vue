@@ -176,6 +176,37 @@
               </template>
             </q-input>
           </q-item-section>
+          <q-item-section>
+            <q-input
+              v-model="formItem.paid_date"
+              outlined
+              dense
+              readonly
+              label="Vencimiento de pago"
+              hint
+            >
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy
+                    cover
+                    transition-show="scale"
+                    transition-hide="scale"
+                  >
+                    <q-date minimal v-model="formItem.paid_date">
+                      <div class="row items-center justify-end">
+                        <q-btn
+                          v-close-popup
+                          label="Cerrar"
+                          color="primary"
+                          flat
+                        />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </q-item-section>
         </q-item>
         <q-item>
           <q-item-section>
@@ -505,6 +536,7 @@ const formItem = ref({
   e_n: invItem ? invItem.e_n : null,
   financing: invItem ? invItem.financing : null,
   invoice_date: invItem ? invItem.invoice_date : null,
+  paid_date: invItem ? invItem.paid_date : null,
   purchase_cost: invItem ? invItem.purchase_cost : null,
   is_paid: invItem ? invItem.is_paid : 0,
   gps: invItem ? invItem.gps : null,
@@ -759,7 +791,6 @@ defineExpose({
 const shippingStatuses = ref([
   { id: null, name: "En camino" },
   { id: 0, name: "En Inventario" },
-  { id: 1, name: "Vendido" },
 ]);
 const paidStatuses = ref([
   { id: 0, name: "Pendiente" },

@@ -32,7 +32,6 @@
         :options="[
           { id: null, name: 'En camino' },
           { id: 0, name: 'En inventario' },
-          { id: 1, name: 'Vendido' },
         ]"
         @update:model-value="onSearchChange"
       />
@@ -120,7 +119,6 @@ const columns = [
     field: (row) => {
       if (row.shipping_status === null) return "En camino";
       if (row.shipping_status === 0) return "En sucursal";
-      if (row.shipping_status === 1) return "Vendido";
       return "Desconocido"; // por si llega otro valor
     },
   },

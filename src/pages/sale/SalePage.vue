@@ -354,8 +354,15 @@ const columns = [
   {
     name: "actions",
     label: "",
-    field: "actions",
     align: "left",
+    field: (row) =>
+      h(QBtn, {
+        dense: true,
+        color: "blue",
+        flat: true,
+        icon: "edit",
+        onClick: () => openEdit(row),
+      }),
   },
 
   {

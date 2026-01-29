@@ -59,7 +59,6 @@
       icon="fa-solid fa-boxes-stacked"
       label="Inventarios"
       group="somegroup"
-      v-if="checkRole('Admin')"
     >
       <q-item
         clickable
@@ -68,6 +67,7 @@
         :active="link === 'invItems'"
         @click="link = 'invItems'"
         active-class="my-menu-link"
+        v-if="checkRole('Intranet.invItem')"
       >
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box-open" />
@@ -82,6 +82,7 @@
         :active="link === 'invCatalogos'"
         @click="link = 'invCatalogos'"
         active-class="my-menu-link"
+        v-if="checkRole('Admin')"
       >
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box" />

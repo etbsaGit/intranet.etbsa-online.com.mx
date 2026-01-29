@@ -21,22 +21,22 @@
         <q-item>
           <q-item-section>
             <q-input
-              v-model="formItem.rd"
-              outlined
               dense
+              outlined
               label="RD"
               lazy-rules
               class="form-input"
+              v-model="formItem.rd"
               :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
             />
           </q-item-section>
           <q-item-section>
             <q-input
-              v-model="formItem.shipping_date"
-              outlined
               dense
+              outlined
               readonly
               label="Fecha de RD"
+              v-model="formItem.shipping_date"
               :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
             >
               <template v-slot:append>
@@ -63,19 +63,19 @@
           </q-item-section>
           <q-item-section>
             <q-select
-              v-model="formItem.inv_factory_id"
-              :options="invFactories"
-              label="Fabrica y/o proveedor"
-              option-value="id"
-              option-label="name"
-              option-disable="inactive"
+              dense
+              outlined
               emit-value
               map-options
+              options-dense
+              option-value="id"
+              option-label="name"
+              :options="invFactories"
               transition-show="jump-up"
               transition-hide="jump-up"
-              outlined
-              dense
-              options-dense
+              option-disable="inactive"
+              label="Fabrica y/o proveedor"
+              v-model="formItem.inv_factory_id"
               :rules="[(val) => val !== null || 'Obligatorio']"
             />
           </q-item-section>
@@ -84,17 +84,21 @@
           <q-item-section>
             <q-select
               v-model="formItem.inv_model_id"
-              :options="invModels"
+              :options="filterModel"
               label="Modelo"
               option-value="id"
               option-label="name"
               option-disable="inactive"
               emit-value
               map-options
+              use-input
+              @filter="filterFn"
+              input-debounce="0"
               :disable="invItem != null"
               transition-show="jump-up"
               transition-hide="jump-up"
               outlined
+              clearable
               dense
               options-dense
               :rules="[(val) => val !== null || 'Obligatorio']"
@@ -552,6 +556,24 @@ const formItem = ref({
   file: [],
 });
 
+const filterModel = ref(null);
+
+const filterFn = (val, update) => {
+  if (val === "") {
+    update(() => {
+      filterModel.value = invModels.value;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterModel.value = invModels.value.filter(
+      (customer) => customer.name.toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
+
 const deleteDoc = async (id) => {
   let res = await sendRequest(
     "DELETE",
@@ -592,13 +614,17 @@ const getOptions = async () => {
 };
 
 const getForModel = async (id) => {
-  const res = await sendRequest(
-    "GET",
-    null,
-    "/api/intranet/invItem/invModel/" + (id ?? ""),
-    ""
-  );
-  invCategory.value = res.invCategory;
+  if (id) {
+    const res = await sendRequest(
+      "GET",
+      null,
+      "/api/intranet/invItem/invModel/" + (id ?? ""),
+      ""
+    );
+    invCategory.value = res.invCategory;
+  } else {
+    invCategory.value = [];
+  }
 };
 
 const allConfigsById = computed(() => {

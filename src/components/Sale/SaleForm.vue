@@ -2,39 +2,16 @@
   <q-form ref="myForm" greedy>
     <q-item>
       <q-item-section>
-        <q-select
-          v-model="formSale.cliente_id"
-          :options="filterClientes"
-          label="Cliente"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          outlined
-          dense
-          clearable
-          options-dense
-          use-input
-          @filter="filterFn"
-          input-debounce="0"
-          behavior="menu"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-          @update:model-value="updateRefe(formSale.cliente_id)"
-        >
+        <q-select v-model="formSale.cliente_id" :options="filterClientes" label="Cliente" option-value="id"
+          option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
+          transition-hide="jump-up" outlined dense clearable options-dense use-input @filter="filterFn"
+          input-debounce="0" behavior="menu" :rules="[(val) => val !== null || 'Obligatorio']"
+          @update:model-value="updateRefe(formSale.cliente_id)">
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">
-                <q-btn
-                  outline
-                  dense
-                  color="primary"
-                  icon="add"
-                  label="Click para agregar cliente nuevo"
-                  @click="showAdd = true"
-                />
+                <q-btn outline dense color="primary" icon="add" label="Click para agregar cliente nuevo"
+                  @click="showAdd = true" />
               </q-item-section>
             </q-item>
           </template>
@@ -77,23 +54,9 @@
     </q-item>
     <q-item v-if="selectedCliente">
       <q-item-section>
-        <q-select
-          v-model="formSale.referencia_id"
-          :options="referencias"
-          label="Contacto"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          outlined
-          dense
-          clearable
-          options-dense
-          hint
-        >
+        <q-select v-model="formSale.referencia_id" :options="referencias" label="Contacto" option-value="id"
+          option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
+          transition-hide="jump-up" outlined dense clearable options-dense hint>
           <template v-slot:after>
             <q-item>
               <q-item-section v-if="selectedRefe" side>
@@ -103,14 +66,8 @@
                 </q-item-label>
               </q-item-section>
               <q-item-section class="text-grey">
-                <q-btn
-                  outline
-                  dense
-                  color="primary"
-                  icon="add"
-                  label="Click para agrgear referencia"
-                  @click="showRefe = true"
-                />
+                <q-btn outline dense color="primary" icon="add" label="Click para agrgear referencia"
+                  @click="showRefe = true" />
               </q-item-section>
             </q-item>
           </template>
@@ -130,20 +87,11 @@
     </q-item>
     <q-item>
       <q-item-section>
-        <q-input
-          dense
-          outlined
-          v-model="formSale.date"
-          label="Fecha del pedido"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        >
+        <q-input dense outlined v-model="formSale.date" label="Fecha del pedido"
+          :rules="[(val) => val !== null || 'Obligatorio']">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                 <q-date minimal v-model="formSale.date" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
@@ -155,113 +103,41 @@
         </q-input>
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-model="formSale.order"
-          outlined
-          dense
-          label="Pedido"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        <q-input v-model="formSale.order" outlined dense label="Pedido" lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-model="formSale.serial"
-          outlined
-          dense
-          label="# de serie"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        <q-input v-model="formSale.serial" outlined dense label="# de serie" lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-model="formSale.economic"
-          outlined
-          dense
-          label="# economico"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        <q-input v-model="formSale.economic" outlined dense label="# economico" lazy-rules
+          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
       </q-item-section>
       <q-item-section>
-        <q-select
-          v-model="formSale.status_id"
-          :options="statuses"
-          label="Tipo de pedido"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          clearable
-          outlined
-          dense
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        />
+        <q-select v-model="formSale.status_id" :options="statuses" label="Tipo de pedido" option-value="id"
+          option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
+          transition-hide="jump-up" clearable outlined dense :rules="[(val) => val !== null || 'Obligatorio']" />
       </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
-        <q-input
-          v-model="formSale.invoice"
-          outlined
-          dense
-          label="Factura"
-          lazy-rules
-          hint
-        />
+        <q-input v-model="formSale.invoice" outlined dense label="Factura" lazy-rules hint />
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-model="formSale.folio"
-          outlined
-          dense
-          label="Folio"
-          lazy-rules
-          hint
-        />
+        <q-input v-model="formSale.folio" outlined dense label="Folio" lazy-rules hint />
       </q-item-section>
       <q-item-section>
-        <q-input
-          outlined
-          dense
-          v-model="formSale.amount"
-          prefix="$"
-          label="Monto"
-          hint
-          mask="#.##"
-          fill-mask="0"
-          reverse-fill-mask
-          input-class="text-right"
-        />
+        <q-input outlined dense v-model="formSale.amount" prefix="$" label="Monto" hint mask="#.##" fill-mask="0"
+          reverse-fill-mask input-class="text-right" />
       </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
-        <q-select
-          v-model="formSale.empleado_id"
-          :options="filterEmpleados"
-          label="Vendedor"
-          option-value="id"
-          option-label="apellidoCompleto"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          outlined
-          dense
-          clearable
-          options-dense
-          use-input
-          @filter="filterFnE"
-          input-debounce="0"
-          behavior="menu"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        >
+        <q-select v-model="formSale.empleado_id" :options="filterEmpleados" label="Vendedor" option-value="id"
+          option-label="apellidoCompleto" option-disable="inactive" emit-value map-options transition-show="jump-up"
+          transition-hide="jump-up" outlined dense clearable options-dense use-input @filter="filterFnE"
+          input-debounce="0" behavior="menu" :rules="[(val) => val !== null || 'Obligatorio']">
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey"> No result </q-item-section>
@@ -270,72 +146,29 @@
         </q-select>
       </q-item-section>
       <q-item-section>
-        <q-select
-          v-model="formSale.sucursal_id"
-          :options="sucursales"
-          label="Sucursal"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          clearable
-          outlined
-          dense
-          :rules="[(val) => val !== null || 'Obligatorio']"
-        />
+        <q-select v-model="formSale.sucursal_id" :options="sucursales" label="Sucursal" option-value="id"
+          option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
+          transition-hide="jump-up" clearable outlined dense :rules="[(val) => val !== null || 'Obligatorio']" />
       </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
-        <q-input
-          v-model="formSale.comments"
-          outlined
-          dense
-          label="Comentarios"
-          lazy-rules
-          hint
-        />
+        <q-input v-model="formSale.comments" outlined dense label="Comentarios" lazy-rules hint />
       </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
-        <q-toggle
-          :color="formSale.cancellation == 1 ? 'red' : 'green'"
-          keep-color
-          v-model="formSale.cancellation"
-          label="Cancelada"
-          checked-icon="close"
-          unchecked-icon="check"
-          indeterminate-icon="error"
-          :true-value="1"
-          :false-value="0"
-        />
+        <q-toggle :color="formSale.cancellation == 1 ? 'red' : 'green'" keep-color v-model="formSale.cancellation"
+          label="Cancelada" checked-icon="close" unchecked-icon="check" indeterminate-icon="error" :true-value="1"
+          :false-value="0" />
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-if="formSale.cancellation == 1"
-          dense
-          outlined
-          v-model="formSale.cancellation_date"
-          label="Fecha de cancelacion"
-          :rules="[(val) => val !== null || 'Obligatorio']"
-          readonly=""
-        >
+        <q-input v-if="formSale.cancellation == 1" dense outlined v-model="formSale.cancellation_date"
+          label="Fecha de cancelacion" :rules="[(val) => val !== null || 'Obligatorio']" readonly="">
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">
-              <q-popup-proxy
-                cover
-                transition-show="scale"
-                transition-hide="scale"
-              >
-                <q-date
-                  minimal
-                  v-model="formSale.cancellation_date"
-                  mask="YYYY-MM-DD"
-                >
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date minimal v-model="formSale.cancellation_date" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
                     <q-btn v-close-popup label="Close" color="primary" flat />
                   </div>
@@ -346,26 +179,13 @@
         </q-input>
       </q-item-section>
       <q-item-section>
-        <q-input
-          v-if="formSale.cancellation == 1"
-          v-model="formSale.cancellation_folio"
-          outlined
-          dense
-          label="Folio de cancelacion"
-          lazy-rules
-          :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"
-        />
+        <q-input v-if="formSale.cancellation == 1" v-model="formSale.cancellation_folio" outlined dense
+          label="Folio de cancelacion" lazy-rules :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
       </q-item-section>
     </q-item>
   </q-form>
 
-  <q-dialog
-    v-model="showAdd"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-    full-width
-  >
+  <q-dialog v-model="showAdd" transition-show="slide-up" transition-hide="slide-down" persistent full-width>
     <q-card>
       <q-item class="text-white bg-primary">
         <q-item-section>
@@ -387,12 +207,7 @@
     </q-card>
   </q-dialog>
 
-  <q-dialog
-    v-model="showRefe"
-    transition-show="slide-up"
-    transition-hide="slide-down"
-    persistent
-  >
+  <q-dialog v-model="showRefe" transition-show="slide-up" transition-hide="slide-down" persistent>
     <q-card style="width: 100%">
       <q-item class="text-white bg-primary">
         <q-item-section>

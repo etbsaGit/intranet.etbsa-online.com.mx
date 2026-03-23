@@ -10,22 +10,6 @@
 
     </q-item>
 
-    <!-- <q-item
-      v-if="checkRole('Intranet.sales')"
-      clickable
-      v-ripple
-      to="/sale-tractor"
-      :active="link === 'sale-tractor'"
-      @click="link = 'sale-tractor'"
-      active-class="my-menu-link"
-    >
-      <q-item-section avatar>
-        <q-icon name="agriculture" />
-      </q-item-section>
-
-      <q-item-section>Pedidos Tractor</q-item-section>
-    </q-item> -->
-
     <q-item v-if="checkRole('Intranet.clientes')" clickable v-ripple to="/cliente" :active="link === 'cliente'"
       @click="link = 'cliente'" active-class="my-menu-link">
       <q-item-section avatar>
@@ -36,10 +20,10 @@
     </q-item>
 
     <!-- Módulo Productos -->
-    <q-item  clickable v-ripple to="/productos" :active="link === 'productos'"
+    <q-item  v-if="checkRole('Intranet.products')" clickable v-ripple to="/productos" :active="link === 'productos'"
       @click="link = 'productos'" active-class="my-menu-link">
       <q-item-section avatar>
-        <q-icon name="people" />
+        <q-icon name="agriculture" />
       </q-item-section>
 
       <q-item-section>Productos</q-item-section>

@@ -79,6 +79,36 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
+      middlewares: [sales],
+    },
+    children: [
+      {
+        path: "/sale-tractor",
+        component: () => import("src/pages/SaleTractor/SaleTractorPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "/",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      // middlewares: [],
+    },
+    children: [
+      {
+        path: "productos",
+        component: () => import("src/pages/Productos/ProductosPage.vue"),
+      },
+    ],
+  },
+
+
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
       middlewares: [invItem],
     },
     children: [

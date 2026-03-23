@@ -1,29 +1,33 @@
 <template>
   <q-list bordered padding dense class="rounded-borders text-primary">
-    <q-item
-      v-if="checkRole('Intranet.sales')"
-      clickable
-      v-ripple
-      to="/sale"
-      :active="link === 'sale'"
-      @click="link = 'sale'"
-      active-class="my-menu-link"
-    >
+    <q-item v-if="checkRole('Intranet.sales')" clickable v-ripple to="/sale" :active="link === 'sale'"
+      @click="link = 'sale'" active-class="my-menu-link">
       <q-item-section avatar>
         <q-icon name="point_of_sale" />
       </q-item-section>
 
       <q-item-section>Pedidos</q-item-section>
+
     </q-item>
-    <q-item
-      v-if="checkRole('Intranet.clientes')"
+
+    <!-- <q-item
+      v-if="checkRole('Intranet.sales')"
       clickable
       v-ripple
-      to="/cliente"
-      :active="link === 'cliente'"
-      @click="link = 'cliente'"
+      to="/sale-tractor"
+      :active="link === 'sale-tractor'"
+      @click="link = 'sale-tractor'"
       active-class="my-menu-link"
     >
+      <q-item-section avatar>
+        <q-icon name="agriculture" />
+      </q-item-section>
+
+      <q-item-section>Pedidos Tractor</q-item-section>
+    </q-item> -->
+
+    <q-item v-if="checkRole('Intranet.clientes')" clickable v-ripple to="/cliente" :active="link === 'cliente'"
+      @click="link = 'cliente'" active-class="my-menu-link">
       <q-item-section avatar>
         <q-icon name="people" />
       </q-item-section>
@@ -31,21 +35,20 @@
       <q-item-section>Clientes</q-item-section>
     </q-item>
 
-    <q-expansion-item
-      expand-separator
-      icon="fa-solid fa-microchip"
-      label="Nuevas Tecnologias"
-      group="somegroup"
-      v-if="checkRole('Intranet.nt')"
-    >
-      <q-item
-        clickable
-        v-ripple
-        to="/nt/hectareas"
-        :active="link === 'nt'"
-        @click="link = 'nt'"
-        active-class="my-menu-link"
-      >
+    <!-- Módulo Productos -->
+    <q-item  clickable v-ripple to="/productos" :active="link === 'productos'"
+      @click="link = 'productos'" active-class="my-menu-link">
+      <q-item-section avatar>
+        <q-icon name="people" />
+      </q-item-section>
+
+      <q-item-section>Productos</q-item-section>
+    </q-item>
+
+    <q-expansion-item expand-separator icon="fa-solid fa-microchip" label="Nuevas Tecnologias" group="somegroup"
+      v-if="checkRole('Intranet.nt')">
+      <q-item clickable v-ripple to="/nt/hectareas" :active="link === 'nt'" @click="link = 'nt'"
+        active-class="my-menu-link">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-globe" />
         </q-item-section>
@@ -54,36 +57,19 @@
       </q-item>
     </q-expansion-item>
 
-    <q-expansion-item
-      expand-separator
-      icon="fa-solid fa-boxes-stacked"
-      label="Inventarios"
-      group="somegroup"
-    >
-      <q-item
-        clickable
-        v-ripple
-        to="invItems"
-        :active="link === 'invItems'"
-        @click="link = 'invItems'"
-        active-class="my-menu-link"
-        v-if="checkRole('Intranet.invItem')"
-      >
+
+
+    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup">
+      <q-item clickable v-ripple to="invItems" :active="link === 'invItems'" @click="link = 'invItems'"
+        active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box-open" />
         </q-item-section>
 
         <q-item-section>Existencias</q-item-section>
       </q-item>
-      <q-item
-        clickable
-        v-ripple
-        to="invCatalogos"
-        :active="link === 'invCatalogos'"
-        @click="link = 'invCatalogos'"
-        active-class="my-menu-link"
-        v-if="checkRole('Admin')"
-      >
+      <q-item clickable v-ripple to="invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
+        active-class="my-menu-link" v-if="checkRole('Admin')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box" />
         </q-item-section>
@@ -92,15 +78,8 @@
       </q-item>
     </q-expansion-item>
 
-    <q-item
-      v-if="checkRole('Admin')"
-      clickable
-      v-ripple
-      to="/catalogos"
-      :active="link === 'catalogos'"
-      @click="link = 'catalogos'"
-      active-class="my-menu-link"
-    >
+    <q-item v-if="checkRole('Admin')" clickable v-ripple to="/catalogos" :active="link === 'catalogos'"
+      @click="link = 'catalogos'" active-class="my-menu-link">
       <q-item-section avatar>
         <q-icon name="list" />
       </q-item-section>

@@ -6,8 +6,8 @@
       <CategoriasForm ref="add" />
     </template>
 
-    <template #edit-form="{item}">
-      <CategoriasForm ref="edit" :categoria="item"/>
+    <template #edit-form="{ item }">
+      <CategoriasForm ref="edit" :categoria="item" />
     </template>
 
   </BaseCatalogo>
@@ -25,6 +25,7 @@ import CategoriasForm from "src/components/Productos/Categorias/CategoriasForm.v
 const crudStore = useCrudStore();
 const add = ref(null);
 const edit = ref(null);
+const condicionesPago = ref([]);
 
 const BASE_URL = "/api/intranet/product-categorium"
 
@@ -40,15 +41,22 @@ const columns = [
     align: "left",
     field: "name"
   },
+  {
+    name: "condiciones",
+    label: "Condiciones de Pago",
+    align: "left",
+    field: (row) =>
+      row.condiciones_pago?.map((c) => c.name).join(", ") || "-", // Muestra todas las condiciones separadas por coma
+  },
 ];
 
 // funciones
 const createItem = async () => {
   const ok = await add.value.validate();
-  if(!ok) return false;
+  if (!ok) return false;
 
-  const data = {...add.value.formCategoria};
-  await crudStore.postItem(BASE_URL,data,add.value.validate);
+  const data = { ...add.value.formCategoria };
+  await crudStore.postItem(BASE_URL, data, add.value.validate);
 
   return true;
 }

@@ -36,10 +36,13 @@ const parseNumber = (val) => {
 };
 
 const cleanInput = (val) => {
-  if (!val) return '';
+  if (val === null || val === undefined) return '';
+
+  // 🔥 convertir a string SIEMPRE
+  let clean = String(val);
 
   // 1. quitar todo lo que no sea número o punto
-  let clean = val.replace(/[^\d.]/g, '');
+  clean = clean.replace(/[^\d.]/g, '');
 
   // 2. evitar más de un punto decimal
   const firstDotIndex = clean.indexOf('.');
@@ -47,7 +50,7 @@ const cleanInput = (val) => {
     const beforeDot = clean.slice(0, firstDotIndex);
     const afterDot = clean
       .slice(firstDotIndex + 1)
-      .replace(/\./g, ''); // elimina otros puntos
+      .replace(/\./g, '');
 
     clean = beforeDot + '.' + afterDot;
   }
@@ -64,7 +67,7 @@ const cleanInput = (val) => {
 // 👉 mientras escribe (SIN formato)
 watch(inputValue, (val) => {
   if (isFocused.value) {
-    const clean = cleanInput(val);
+    const clean = cleanInput(val ?? '');
     inputValue.value = clean;
     emit('update:modelValue', parseNumber(clean));
   }
@@ -101,7 +104,12 @@ const rules = computed(() => [
   },
   val => {
     if (!val) return true;
-    return Number(val) >= 0 || 'No puede ser negativo';
+
+    const num = Number(val);
+
+    if (isNaN(num)) return true; // 👈 clave
+
+    return num >= 0 || 'No puede ser negativo';
   }
 ]);
 </script>

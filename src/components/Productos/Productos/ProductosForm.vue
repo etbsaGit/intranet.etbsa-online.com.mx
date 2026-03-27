@@ -104,7 +104,7 @@ const subcategorias = ref([]);
 const sucursales = ref([]);
 const marcas = ref([]);
 const proveedores = ref([]);
-const precios = ref([]);
+const precios = ref({});
 
 const getOptions = async () => {
   let res = await sendRequest(
@@ -161,6 +161,7 @@ const formProducto = ref({
   category_id: producto ? producto.category_id : null,
   subcategory_id: producto ? producto.subcategory_id : null,
   agency_id: producto ? producto.agency_id : null,
+
 });
 
 const validate = async () => {
@@ -215,6 +216,7 @@ onMounted(() => {
 
 defineExpose({
   formProducto,
+  precios,
   validate,
 });
 </script>

@@ -118,18 +118,36 @@ const createItem = async () => {
   const ok = await add.value.validate();
   if (!ok) return false;
 
-  const data = { ...add.value.formProducto };
+  const data = {
+    ...add.value.formProducto,
+    precios: Object.entries(add.value.precios)
+      .filter(([_, precio]) => precio !== null && precio !== "")
+      .map(([condicion_id, precio]) => ({
+        condicion_pago_id: Number(condicion_id),
+        precio: Number(precio)
+      }))
+  };
+
   await crudStore.postItem(BASE_URL, data, add.value.validate);
   return true;
+
 };
 
 const updateItem = async (item) => {
   const ok = await edit.value.validate();
   if (!ok) return false;
 
-  const data = { ...edit.value.formProducto, id: item.id };
-  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+  const data = {
+    ...edit.value.formProducto,
+    precios: Object.entries(edit.value.precios)
+      .filter(([_, precio]) => precio !== null && precio !== "")
+      .map(([condicion_id, precio]) => ({
+        condicion_pago_id: Number(condicion_id),
+        precio: Number(precio)
+      }))
+  };
 
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
   return true;
 };
 

@@ -82,38 +82,8 @@
     </q-item>
 
     <!-- precios -->
-    <q-item-section>
-
-      <price-input :required="false" v-model="formProducto.price_1" label="Precio lista"/>
-
-      <price-input :required="false" v-model="formProducto.price_2" label="Precio contado" />
-
-      <price-input :required="false" v-model="formProducto.price_3" label="Precio financiamiento a 2 años" />
-
-      <price-input :required="false" v-model="formProducto.price_4" label="Precio financiamiento a 3 años sin intereses" />
-
-      <price-input :required="false" v-model="formProducto.price_5" label="Precio financiamiento a 5 años" />
-
-      <price-input :required="false" v-model="formProducto.price_6" label="Precio EXPO" />
-
-      <price-input :required="false" v-model="formProducto.price_7" label="Precio por volumen" />
-
-      <price-input :required="false" v-model="formProducto.price_8" label="Precio Renta/Arrendamiento 1 mes" />
-
-      <price-input :required="false" v-model="formProducto.price_9" label="Precio Renta/Arrendamiento 2 meses" />
-
-      <price-input :required="false" v-model="formProducto.price_10" label="Precio Renta/Arrendamiento 3 meses" />
-
-      <price-input :required="false" v-model="formProducto.price_11" label="Precio Crédito 30 días" />
-
-      <price-input :required="false" v-model="formProducto.price_12" label="Precio a Arrendadoras" />
-
-      <price-input :required="false" v-model="formProducto.price_13"
-        label="Financiado 24-0% / 12-1% / 24-5.45% / 36-7.75% / 48-9.15% / 60-10.05%" />
-
-      <price-input :required="false" v-model="formProducto.price_14"
-        label="Financiado 12-5.40% / 24-8.45% / 36-9.99% / 48-10.9% / 60-11.55%" />
-
+    <q-item-section v-for="condicion in condicionesFiltradas" :key="condicion.id">
+      <price-input :required="false"  :label="condicion.name" v-model="precios[condicion.id] "/>
     </q-item-section>
 
   </q-form>
@@ -134,6 +104,7 @@ const subcategorias = ref([]);
 const sucursales = ref([]);
 const marcas = ref([]);
 const proveedores = ref([]);
+const precios = ref([]);
 
 const getOptions = async () => {
   let res = await sendRequest(
@@ -156,6 +127,25 @@ const subcategoriasFiltradas = computed(() =>{
   );
 });
 
+const loadProducto = (producto) => {
+  formProducto.value = producto;
+
+  // limpiar
+  precios.value = {};
+
+  // mapear precios existentes
+  producto.precios.forEach(p => {
+    precios.value[p.condicion_pago_id] = Number(p.precio);
+  });
+
+  // asegurar que todas las condiciones existan (aunque no tengan precio)
+  producto.category.condiciones_pago.forEach(cond => {
+    if (!(cond.id in precios.value)) {
+      precios.value[cond.id] = null;
+    }
+  });
+};
+
 const formProducto = ref({
   id: producto ? producto.id : null,
   name: producto ? producto.name : null,
@@ -168,21 +158,6 @@ const formProducto = ref({
   is_dollar: producto?.is_dollar ?? 0,
   active: producto?.active ?? 0,
   currency_id: producto?.currency_id ?? (producto?.is_dollar ? 2 : 1),
-
-  price_1: producto ? producto.price_1: null,
-  price_2: producto ? producto.price_2: null,
-  price_3: producto ? producto.price_3: null,
-  price_4: producto ? producto.price_4: null,
-  price_5: producto ? producto.price_5: null,
-  price_6: producto ? producto.price_6: null,
-  price_7: producto ? producto.price_7: null,
-  price_8: producto ? producto.price_8: null,
-  price_9: producto ? producto.price_9: null,
-  price_10: producto ? producto.price_10: null,
-  price_11: producto ? producto.price_11: null,
-  price_12: producto ? producto.price_12: null,
-  price_13: producto ? producto.price_13: null,
-  price_14: producto ? producto.price_14: null,
   category_id: producto ? producto.category_id : null,
   subcategory_id: producto ? producto.subcategory_id : null,
   agency_id: producto ? producto.agency_id : null,
@@ -191,6 +166,15 @@ const formProducto = ref({
 const validate = async () => {
   return await myForm.value.validate();
 };
+
+const condicionesFiltradas = computed(() => {
+  if(!formProducto.value.category_id) return [];
+
+  const categoria = categorias.value.find(
+    c => c.id === formProducto.value.category_id
+  );
+  return categoria?.condiciones_pago || [];
+});
 
 
 watch(
@@ -210,8 +194,23 @@ watch(
   }
 );
 
+watch(() => formProducto.value.category_id, (newVal, oldVal) => {
+  // solo limpiar si el usuario cambia manualmente
+  if (oldVal !== null && newVal !== oldVal) {
+    precios.value = {};
+
+    condicionesFiltradas.value.forEach(cond => {
+      precios.value[cond.id] = null;
+    });
+  }
+});
+
 onMounted(() => {
   getOptions();
+
+  if (producto) {
+    loadProducto(producto);
+  }
 });
 
 defineExpose({

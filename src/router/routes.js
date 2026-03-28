@@ -1,4 +1,4 @@
-import { auth, guest, admin, clientes, sales, NT, invItem } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT, invItem, products } from "./middleware";
 
 const routes = [
   {
@@ -74,6 +74,22 @@ const routes = [
       },
     ],
   },
+
+  {
+    path: "/",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+       middlewares: [products],
+    },
+    children: [
+      {
+        path: "productos",
+        component: () => import("src/pages/Productos/ProductosPage.vue"),
+      },
+    ],
+  },
+
+
 
   {
     path: "",

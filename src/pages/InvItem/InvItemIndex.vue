@@ -5,7 +5,7 @@
     url="/api/intranet/invItems"
     :on-create="createItem"
     :on-update="updateItem"
-    :on-delete="false"
+    @delete="destroyItem"
     Maximized
     :initialFilters="{ shipping_status: null }"
   >

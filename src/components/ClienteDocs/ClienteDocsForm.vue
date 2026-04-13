@@ -27,7 +27,8 @@
           filled
           v-model="formDoc.expiration_date"
           label="Fecha de vencimiento"
-          :rules="[(val) => val !== null || 'Obligatorio']"
+          clearable
+
         >
           <template v-slot:append>
             <q-icon name="event" class="cursor-pointer">

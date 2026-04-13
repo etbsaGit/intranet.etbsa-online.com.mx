@@ -14,10 +14,18 @@
     </q-item>
 
     <!-- Filas -->
-    <q-item
+
+    <!-- ANTES <q-item
       align="center"
       v-for="(item, index) in items"
       :key="index"
+      :class="getRowClass(item)"
+    > -->
+    <!-- después -->
+    <q-item
+      align="center"
+      v-for="(item, index) in items"
+      :key="item.id || index"
       :class="getRowClass(item)"
     >
       <q-item-section

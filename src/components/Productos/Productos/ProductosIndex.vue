@@ -75,16 +75,16 @@ const columns = [
     align: "left",
     field: (row) => row.agency?.nombre,
   },
-  {
-    name: "precio",
-    label: "Precio Sugerido",
-    align: "left",
-    field: "price_1",
-    format: (val, row) => {
-      const price = parseFloat(val || 0).toFixed(2);
-      return `$ ${price} ${row.currency?.name ?? ''}`;
-    }
-  },
+  // {
+  //   name: "precio",
+  //   label: "Precio Sugerido",
+  //   align: "left",
+  //   field: (row) => row.precios[0]?.precio,
+  //   format: (val, row) => {
+  //     const price = parseFloat(val || 0).toFixed(2);
+  //     return `$ ${price} ${row.currency?.name ?? ''}`;
+  //   }
+  // },
   {
     name: "activo",
     label: "Activo",

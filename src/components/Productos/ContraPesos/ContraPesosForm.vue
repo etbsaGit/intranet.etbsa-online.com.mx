@@ -12,12 +12,9 @@
           :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
 
         <!-- Trasero/Delantero -->
-        <q-select v-model="formContraPeso.trasero_delantero" use-input hide-selected clearable outlined dense
-          label="Ubicación" :options="[
-            { label: 'Delantero', value: 'delantero' },
-            { label: 'Trasero', value: 'trasero' },
-          ]" option-label="label" option-value="value" emit-value map-options behavior="menu" menu-anchor="bottom left" menu-self="top left"
-          input-debounce="0" />
+        <q-select v-model="formContraPeso.trasero_delantero" outlined dense clearable label="Ubicación"
+          :options="opcionesUbicacion" option-label="label" option-value="value" emit-value map-options behavior="menu"
+          menu-anchor="bottom left" menu-self="top left" />
         <q-item>
           <q-item-section>
             <!-- costo -->
@@ -57,6 +54,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { sendRequest } from "src/boot/functions";
+import { watch } from "vue";
 
 const { contrapeso } = defineProps(["contrapeso"]);
 
@@ -68,8 +66,20 @@ const tractoresFiltrados = ref([]);
 const tractorSeleccionado = ref(null);
 
 const tractoresSeleccionados = ref(
-  contrapeso?.tractores || []
+  contrapeso?.tractor_contrapesos
+    ? contrapeso.tractor_contrapesos.map((tractor) => ({
+      label: `${tractor.sku} - ${tractor.name}`,
+      value: tractor.id,
+      sku: tractor.sku,
+      name: tractor.name
+    }))
+    : []
 );
+
+const opcionesUbicacion = [
+  { label: "Delantero", value: "delantero" },
+  { label: "Trasero", value: "trasero" }
+];
 
 const formContraPeso = ref({
   id: contrapeso ? contrapeso.id : null,
@@ -79,6 +89,10 @@ const formContraPeso = ref({
   costo: contrapeso ? contrapeso.costo : null,
   precio: contrapeso ? contrapeso.precio : null,
 });
+
+const validate = async () => {
+  return await myForm.value.validate();
+}
 
 const getTractores = async () => {
   let res = await sendRequest(
@@ -136,10 +150,30 @@ const eliminarTractor = (id) => {
     );
 };
 
+watch(
+  () => contrapeso,
+  (nuevo) => {
+    if (!nuevo) return;
+
+    formContraPeso.value = {
+      id: nuevo.id,
+      nro_parte: nuevo.nro_parte,
+      descripcion: nuevo.descripcion,
+      trasero_delantero: nuevo.trasero_delantero
+        ?.trim()
+        .toLowerCase(),
+      costo: nuevo.costo,
+      precio: nuevo.precio
+    };
+  },
+  { immediate: true }
+);
+
 defineExpose({
   myForm,
   formContraPeso,
-  tractoresSeleccionados
+  tractoresSeleccionados,
+  validate,
 });
 
 onMounted(() => {

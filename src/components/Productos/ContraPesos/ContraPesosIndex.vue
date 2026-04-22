@@ -1,9 +1,12 @@
 <template>
-  <BaseCatalogo title="Contra Pesos" :columns="columns" url="/api/intranet/tractor-contrapesos"
-    :on-create="createItem"
-  >
+  <BaseCatalogo title="Contra Pesos" :columns="columns" url="/api/intranet/tractor-contrapesos" :on-create="createItem"
+    :on-update="updateItem" :on-delete="true" @delete="destroyItem">
     <template #create-form>
       <contra-pesos-form ref="add" />
+    </template>
+
+    <template #edit-form="{ item }">
+      <contra-pesos-form ref="edit" :contrapeso="item" />
     </template>
 
   </BaseCatalogo>
@@ -76,4 +79,27 @@ const createItem = async () => {
 
   return true;
 };
+
+
+const updateItem = async (item) => {
+  const ok = await edit.value.myForm.validate();
+  if (!ok) return false;
+
+  const data = {
+    ...edit.value.formContraPeso,
+    id: item.id,
+    tractores: edit.value.tractoresSeleccionados.map((tractor) => ({
+      id: tractor.value
+    }))
+  };
+
+  await crudStore.putItem(BASE_URL, data, edit.value.validate);
+
+  return true;
+};
+
+const destroyItem = (item) => {
+  crudStore.deleteItem(BASE_URL, item.id);
+};
+
 </script>

@@ -7,6 +7,7 @@
     narrow-indicator
   >
     <q-tab name="products" label="Productos" />
+    <q-tab name="contra_pesos" label="Contra Pesos" />
     <q-tab name="condiciones" label="Condición Pago" />
     <q-tab name="categories" label="Categorías" />
     <q-tab name="subcategories" label="Sub Categorías" />
@@ -19,6 +20,9 @@
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="products">
       <productos-index/>
+    </q-tab-panel>
+    <q-tab-panel name="contra_pesos">
+      <contra-pesos-index/>
     </q-tab-panel>
     <q-tab-panel name="condiciones">
       <condicion-pago-index/>
@@ -46,6 +50,7 @@ import CategoriasIndex from "src/components/Productos/Categorias/CategoriasIndex
 import SubCategoriasIndex from "src/components/Productos/Categorias/SubCategoriasIndex.vue";
 import ProductosIndex from "src/components/Productos/Productos/ProductosIndex.vue";
 import CondicionPagoIndex from "src/components/Productos/CondicionPago/CondicionPagoIndex.vue";
+import ContraPesosIndex from "src/components/Productos/ContraPesos/ContraPesosIndex.vue";
 
 import { ref } from "vue";
 

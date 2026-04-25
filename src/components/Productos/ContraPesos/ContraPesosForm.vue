@@ -14,7 +14,7 @@
         <!-- Trasero/Delantero -->
         <q-select v-model="formContraPeso.trasero_delantero" outlined dense clearable label="Ubicación"
           :options="opcionesUbicacion" option-label="label" option-value="value" emit-value map-options behavior="menu"
-          menu-anchor="bottom left" menu-self="top left" />
+          menu-anchor="bottom left" menu-self="top left" :rules="[(val) => (val && val.length > 0) || 'Obligatorio']"/>
         <q-item>
           <q-item-section>
             <!-- costo -->
@@ -25,6 +25,13 @@
             <!-- precio -->
             <q-input v-model="formContraPeso.precio" outlined dense label="Precio" lazy-rules class="q-mt-sm"
               :rules="[(val) => (val && val.length > 0) || 'Obligatorio']" />
+          </q-item-section>
+          <q-item-section>
+            <!-- moneda -->
+            <q-select v-model="formContraPeso.currency_id" :options="monedas" label="Moneda" option-value="id"
+              option-label="name" option-disable="inactive" emit-value map-options transition-show="jump-up"
+              transition-hide="jump-up" outlined dense options-dense clearable
+              :rules="[(val) => val !== null || 'Obligatorio']" class="q-mt-sm"/>
           </q-item-section>
         </q-item>
         <!-- Buscador de tractores -->
@@ -60,6 +67,7 @@ const { contrapeso } = defineProps(["contrapeso"]);
 
 const myForm = ref(null);
 
+const monedas = ref([]);
 const tractores = ref([]);
 const tractoresFiltrados = ref([]);
 
@@ -88,25 +96,28 @@ const formContraPeso = ref({
   trasero_delantero: contrapeso ? contrapeso.trasero_delantero : null,
   costo: contrapeso ? contrapeso.costo : null,
   precio: contrapeso ? contrapeso.precio : null,
+  currency_id: contrapeso ? contrapeso.currency_id : null,
 });
 
 const validate = async () => {
   return await myForm.value.validate();
 }
 
-const getTractores = async () => {
+const getOptions = async () => {
   let res = await sendRequest(
     "GET",
     null,
     "/api/intranet/tractor-contrapesos/options"
   );
 
-  tractores.value = res.map((trac) => ({
+  tractores.value = res.tractores.map((trac) => ({
     label: `${trac.sku} - ${trac.name}`,
     value: trac.id,
     sku: trac.sku,
     name: trac.name
   }));
+
+  monedas.value = res.monedas;
 
   tractoresFiltrados.value = tractores.value;
 };
@@ -163,7 +174,8 @@ watch(
         ?.trim()
         .toLowerCase(),
       costo: nuevo.costo,
-      precio: nuevo.precio
+      precio: nuevo.precio,
+      currency_id: nuevo.currency_id
     };
   },
   { immediate: true }
@@ -177,6 +189,6 @@ defineExpose({
 });
 
 onMounted(() => {
-  getTractores();
+  getOptions();
 });
 </script>

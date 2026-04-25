@@ -41,7 +41,6 @@ import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
-import SubCategoriasForm from "src/components/Productos/Categorias/SubCategoriasForm.vue";
 import ProductosForm from "src/components/Productos/Productos/ProductosForm.vue";
 
 const crudStore = useCrudStore();

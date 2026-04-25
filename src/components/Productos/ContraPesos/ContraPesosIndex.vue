@@ -49,13 +49,13 @@ const columns = [
     name: "costo",
     label: "Costo",
     align: "left",
-    field: "costo"
+    field: (row) => `${row.costo} ${row.currency.name}`
   },
   {
     name: "precio",
     label: "Precio",
     align: "left",
-    field: "precio"
+    field: (row) => `${row.precio} ${row.currency.name}`
   },
 ];
 

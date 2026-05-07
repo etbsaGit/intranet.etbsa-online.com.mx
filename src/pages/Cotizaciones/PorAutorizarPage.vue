@@ -16,9 +16,11 @@
   </BaseCatalogo>
 
   <!-- modal detalles -->
-  <template>
-    <DetallesModal v-model="showDetails" :cotizacion="item" />
-  </template>
+  <BaseDialog full-width v-model="showDetails" mode="edit">
+    <template #form>
+      <DetallesModal :cotizacion="item" @success="onSuccess" />
+    </template>
+  </BaseDialog>
 
 </template>
 
@@ -27,14 +29,25 @@ import { ref, onMounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
 import { api } from "src/boot/axios"
+import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import DetallesModal from "src/components/Cotizaciones/DetallesModal.vue";
 
 const showDetails = ref(false);
 const item = ref(null);
+const edit = ref(null);
+
+const crud = useCrudStore();
+
+const baseURL = "/api/intranet/trackingAutorizaciones";
 
 const loadingPdfId = ref(false);
+
+const onSuccess = async () => {
+  showDetails.value = false;
+  await crud.getPaginatedItems(baseURL);
+};
 
 const columns = [
   {
@@ -93,35 +106,24 @@ const verDetalles = (row) => {
 };
 
 const descargarPDF = async (row) => {
-
   try {
-
     loadingPdfId.value = row.id;
-
     const response = await api.get(
       `/api/intranet/tracking/print-quote/${row.id}`,
       {
         responseType: "blob"
       }
     );
-
     const file = new Blob(
       [response.data],
       { type: "application/pdf" }
     );
-
     const fileURL = URL.createObjectURL(file);
-
     window.open(fileURL, "_blank");
-
   } catch (error) {
-
     console.error(error);
-
   } finally {
-
     loadingPdfId.value = null;
-
   }
 };
 

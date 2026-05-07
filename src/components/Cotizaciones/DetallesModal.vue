@@ -1,104 +1,141 @@
 <template>
-  <BaseDialog v-model="dialog" mode="edit" titleEdit="Detalles de cotización">
-    <!-- 👇 SLOT form -->
-    <template #form>
+  <q-form ref="myForm">
 
-      <div class="q-pa-md">
 
-        <div class="text-h5 q-mb-md">
-          Folio: #{{ cotizacion?.folio }}
-        </div>
+    <q-item-section>
 
-        <div class="q-mb-sm">
-          <strong>Cliente:</strong> {{ cotizacion?.cliente?.nombre }}
-        </div>
+      <div class="text-h5 q-mb-md">
+        Folio: #{{ cotizacion?.folio }}
+      </div>
 
-        <div class="q-mb-sm">
-          <strong>Categoría:</strong> {{ cotizacion?.categoria?.name }}
-        </div>
+      <div class="">
+        <strong>Cliente:</strong> {{ cotizacion?.cliente?.nombre }}
+      </div>
 
-        <div class="q-mb-sm">
-          <strong>Sucursal:</strong> {{ cotizacion?.sucursal?.nombre }}
-        </div>
+      <div class="">
+        <strong>Categoría:</strong> {{ cotizacion?.categoria?.name }}
+      </div>
 
-        <div class="q-mb-sm">
-          <strong>Vendedor:</strong> {{ cotizacion?.vendedor?.nombreCompleto }}
-        </div>
+      <div class="">
+        <strong>Sucursal:</strong> {{ cotizacion?.sucursal?.nombre }}
+      </div>
 
-        <div class="q-mb-sm">
-          <strong>Departamento:</strong> {{ cotizacion?.depto?.nombre }}
-        </div>
+      <div class="">
+        <strong>Vendedor:</strong> {{ cotizacion?.vendedor?.nombreCompleto }}
+      </div>
 
-        <div class="text-h6 q-mt-lg q-mb-sm">
-          Productos Cotizados
-        </div>
+      <div class="">
+        <strong>Departamento:</strong> {{ cotizacion?.depto?.nombre }}
+      </div>
 
-        <q-table flat bordered dense :rows="cotizacion?.detalles || []" :columns="columnsProductos" row-key="id"
-          hide-pagination />
+      <div class="text-h6 q-mt-lg">
+        Productos Cotizados
+      </div>
 
-        <div class="text-h6 q-mt-xl q-mb-sm">
-          Extras
-        </div>
+      <q-table flat bordered dense :rows="cotizacion?.detalles || []" :columns="columnsProductos" row-key="id"
+        hide-pagination />
 
-        <q-table flat bordered dense :rows="cotizacion?.extras || []" :columns="columnsExtras" row-key="id"
-          hide-pagination />
+      <div class="text-h6 q-mt-lg ">
+        Extras
+      </div>
 
-        <div class="row q-mt-xl">
-          <div style="min-width: 320px;">
+      <q-table flat bordered dense :rows="cotizacion?.extras || []" :columns="columnsExtras" row-key="id"
+        hide-pagination />
 
-            <div class="q-mb-sm">
-              <strong>Subtotal:</strong>
-              ${{ formatMoney(cotizacion?.subtotal) }}
-              {{ cotizacion?.currency?.name }}
-            </div>
+      <div class="row q-mt-xl">
+        <div style="min-width: 320px;">
 
-            <div class="q-mb-sm">
-              <strong>IVA:</strong>
-              ${{ formatMoney(cotizacion?.iva_monto) }}
-              {{ cotizacion?.currency?.name }}
-            </div>
-
-            <div class="q-mb-sm">
-              <strong>Descuento:</strong>
-              ${{ formatMoney(cotizacion?.descuento) }}
-              {{ cotizacion?.currency?.name }}
-            </div>
-
-            <div class="q-mb-sm text-h6">
-              <strong>Total:</strong>
-              ${{ formatMoney(cotizacion?.total) }}
-              {{ cotizacion?.currency?.name }}
-            </div>
-
-            <div class="q-mb-sm">
-              <strong>Anticipo:</strong>
-              ${{ formatMoney(cotizacion?.anticipo_monto) }}
-              {{ cotizacion?.currency?.name }}
-            </div>
-
+          <div class="q-mb-sm">
+            <strong>Subtotal:</strong>
+            ${{ formatMoney(cotizacion?.subtotal) }}
+            {{ cotizacion?.currency?.name }}
           </div>
+
+          <div class="q-mb-sm">
+            <strong>IVA:</strong>
+            ${{ formatMoney(cotizacion?.iva_monto) }}
+            {{ cotizacion?.currency?.name }}
+          </div>
+
+          <div class="q-mb-sm">
+            <strong>Descuento:</strong>
+            ${{ formatMoney(cotizacion?.descuento) }}
+            {{ cotizacion?.currency?.name }}
+          </div>
+
+          <div class="q-mb-sm text-h6">
+            <strong>Total:</strong>
+            ${{ formatMoney(cotizacion?.total) }}
+            {{ cotizacion?.currency?.name }}
+          </div>
+
+          <div class="q-mb-sm">
+            <strong>Anticipo:</strong>
+            ${{ formatMoney(cotizacion?.anticipo_monto) }}
+            {{ cotizacion?.currency?.name }}
+          </div>
+
+        </div>
+      </div>
+
+    </q-item-section>
+
+    <q-item-section>
+
+      <div class="text-h5">
+        Autorización:
+      </div>
+
+      <div class="row items-center q-col-gutter-md q-mt-md">
+
+        <div class="col">
+          <q-input outlined dense v-model="feedback" label="Retroalimentación" :rules="[
+            val => validation !== 0 || !!val || 'La retroalimentación es obligatoria'
+          ]" />
+        </div>
+
+        <div class="col-auto">
+
+          <q-toggle v-model="validation" :true-value="1" :false-value="0" checked-icon="check" unchecked-icon="close"
+            :color="validation === 1 ? 'green' : 'red'" size="lg" keep-color />
+
+        </div>
+
+        <div class="col-auto">
+
+          <div class="text-weight-bold" :class="validation === 1
+            ? 'text-green'
+            : validation === 0 ? 'text-red' : 'text-grey'
+            ">
+            {{ validation === 1 ? 'AUTORIZADO' : validation === 0 ? 'RECHAZADO' : 'PENDIENTE' }}
+          </div>
+
         </div>
 
       </div>
+      <div class="row justify-end q-mt-lg">
+        <q-btn color="primary" label="Guardar Validación" @click="autorizarPedido" />
+      </div>
+    </q-item-section>
 
-    </template>
-  </BaseDialog>
+  </q-form>
 </template>
 
+
+
 <script setup>
-import { computed } from "vue";
-import BaseDialog from "src/bases/BaseDialog.vue";
+import { ref, watch } from "vue";
+import { useCrudStore } from "src/stores/crud";
+
+const feedback = ref("");
+const validation = ref(null);
+const myForm = ref(null);
+const crud = useCrudStore();
+
+const baseURL = "/api/intranet/trackingAutorizacion";
 
 const props = defineProps({
-  modelValue: Boolean,
   cotizacion: Object
-});
-
-const emit = defineEmits(["update:modelValue"]);
-
-const dialog = computed({
-  get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val)
 });
 
 const columnsProductos = [
@@ -177,4 +214,47 @@ const formatMoney = (value) => {
     maximumFractionDigits: 2,
   });
 };
+
+const emit = defineEmits([
+  "success"
+]);
+
+const autorizarPedido = async () => {
+
+  const ok = await myForm.value.validate();
+
+  if (!ok) return;
+
+  if (validation.value === null) return;
+
+  const situacion =
+    validation.value === 1
+      ? "Autorizado"
+      : "Sin Formalizar";
+
+  const data = {
+    comentario: feedback.value,
+    validation: validation.value
+  };
+
+  await crud.postItem(
+    `${baseURL}/autorizarPedido/${props.cotizacion.id}/${situacion}`,
+    data,
+    () => myForm.value.validate(),
+    () => {
+      emit("success");
+    }
+  );
+};
+
+
+watch(
+  () => props.cotizacion,
+  () => {
+    validation.value = null;
+    feedback.value = "";
+  },
+  { immediate: true }
+);
+
 </script>

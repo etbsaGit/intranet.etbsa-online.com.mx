@@ -20,7 +20,7 @@
     </q-item>
 
     <!-- Módulo Productos -->
-    <q-item  v-if="checkRole('Intranet.products')" clickable v-ripple to="/productos" :active="link === 'productos'"
+    <q-item v-if="checkRole('Intranet.products')" clickable v-ripple to="/productos" :active="link === 'productos'"
       @click="link = 'productos'" active-class="my-menu-link">
       <q-item-section avatar>
         <q-icon name="agriculture" />
@@ -29,6 +29,19 @@
       <q-item-section>Productos</q-item-section>
     </q-item>
 
+    <!-- módulo Cotización -->
+    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup">
+      <q-item clickable v-ripple to="/cotizaciones/porAutorizar" :active="link === 'porAutorizar'" @click="link = 'porAutorizar'"
+        active-class="my-menu-link">
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-hourglass-half" />
+        </q-item-section>
+
+        <q-item-section>Por Autorizar</q-item-section>
+      </q-item>
+    </q-expansion-item>
+
+    <!-- módulo Nuevas Tecnologías -->
     <q-expansion-item expand-separator icon="fa-solid fa-microchip" label="Nuevas Tecnologias" group="somegroup"
       v-if="checkRole('Intranet.nt')">
       <q-item clickable v-ripple to="/nt/hectareas" :active="link === 'nt'" @click="link = 'nt'"
@@ -40,8 +53,6 @@
         <q-item-section>Hectareas conectadas</q-item-section>
       </q-item>
     </q-expansion-item>
-
-
 
     <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup">
       <q-item clickable v-ripple to="invItems" :active="link === 'invItems'" @click="link = 'invItems'"

@@ -89,6 +89,20 @@ const routes = [
     ],
   },
 
+  {
+    path: "/",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      //  middlewares: [products],
+    },
+    children: [
+      {
+        path: "cotizaciones/porAutorizar",
+        component: () => import("src/pages/Cotizaciones/PorAutorizarPage.vue"),
+      },
+    ],
+  },
+
 
 
   {

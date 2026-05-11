@@ -76,36 +76,36 @@ const routes = [
   },
 
   {
-    path: "/",
+    path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
        middlewares: [products],
     },
     children: [
       {
-        path: "productos",
+        path: "/productos",
         component: () => import("src/pages/Productos/ProductosPage.vue"),
       },
     ],
   },
 
   {
-    path: "/",
+    path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
       //  middlewares: [products],
     },
     children: [
       {
-        path: "cotizaciones/pedidosFormalizados",
+        path: "/cotizaciones/pedidosFormalizados",
         component: () => import("src/pages/Cotizaciones/PedidosFormalizadosPage.vue"),
       },
       {
-        path: "cotizaciones/pedidosAutorizados",
+        path: "/cotizaciones/pedidosAutorizados",
         component: () => import("src/pages/Cotizaciones/PedidosAutorizadosPage.vue"),
       },
       {
-        path: "cotizaciones/asignacionSerie",
+        path: "/cotizaciones/asignacionSerie",
         component: () => import("src/pages/Cotizaciones/AsignacionSeriePage.vue"),
       },
     ],

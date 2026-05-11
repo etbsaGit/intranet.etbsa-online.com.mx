@@ -42,42 +42,6 @@
       <q-table flat bordered dense :rows="cotizacion?.extras || []" :columns="columnsExtras" row-key="id"
         hide-pagination />
 
-      <div class="row q-mt-xl">
-        <div style="min-width: 320px;">
-
-          <div class="q-mb-sm">
-            <strong>Subtotal:</strong>
-            ${{ formatMoney(cotizacion?.subtotal) }}
-            {{ cotizacion?.currency?.name }}
-          </div>
-
-          <div class="q-mb-sm">
-            <strong>IVA:</strong>
-            ${{ formatMoney(cotizacion?.iva_monto) }}
-            {{ cotizacion?.currency?.name }}
-          </div>
-
-          <div class="q-mb-sm">
-            <strong>Descuento:</strong>
-            ${{ formatMoney(cotizacion?.descuento) }}
-            {{ cotizacion?.currency?.name }}
-          </div>
-
-          <div class="q-mb-sm text-h6">
-            <strong>Total:</strong>
-            ${{ formatMoney(cotizacion?.total) }}
-            {{ cotizacion?.currency?.name }}
-          </div>
-
-          <div class="q-mb-sm">
-            <strong>Anticipo:</strong>
-            ${{ formatMoney(cotizacion?.anticipo_monto) }}
-            {{ cotizacion?.currency?.name }}
-          </div>
-
-        </div>
-      </div>
-
       <div class="text-h6 q-mt-lg ">
         Notas del Vendedor:
       </div>
@@ -88,38 +52,18 @@
     <q-item-section>
 
       <div class="text-h5">
-        Autorización:
+        Asignación:
       </div>
 
-      <div class="row items-center q-col-gutter-md q-mt-md">
+      <div class="row items-center q-col-gutter-md ">
 
         <div class="col">
-          <q-input outlined dense v-model="feedback" label="Retroalimentación" :rules="[
-            val => validation !== 0 || !!val || 'La retroalimentación es obligatoria'
+          <q-input outlined dense v-model="feedback" label="Número de Serie" :rules="['El número de serie es obligatorio'
           ]" />
         </div>
-
-        <div class="col-auto">
-
-          <q-toggle v-model="validation" :true-value="1" :false-value="0" checked-icon="check" unchecked-icon="close"
-            :color="validation === 1 ? 'green' : 'red'" size="lg" keep-color />
-
-        </div>
-
-        <div class="col-auto">
-
-          <div class="text-weight-bold" :class="validation === 1
-            ? 'text-green'
-            : validation === 0 ? 'text-red' : 'text-grey'
-            ">
-            {{ validation === 1 ? 'AUTORIZADO' : validation === 0 ? 'RECHAZADO' : 'PENDIENTE' }}
-          </div>
-
-        </div>
-
       </div>
-      <div class="row justify-end q-mt-lg">
-        <q-btn color="primary" label="Guardar Validación" @click="autorizarPedido" />
+      <div class="row justify-end ">
+        <q-btn color="primary" label="Asignar Número de Serie" @click="autorizarPedido" />
       </div>
     </q-item-section>
 
@@ -162,20 +106,20 @@ const columnsProductos = [
     align: "center",
     field: "cantidad"
   },
-  {
-    name: "precio",
-    label: "Precio",
-    align: "right",
-    field: row =>
-      `$${formatMoney(row.precio_unidad)} ${props.cotizacion?.currency?.name || ""}`
-  },
-  {
-    name: "subtotal",
-    label: "Subtotal",
-    align: "right",
-    field: row =>
-      `$${formatMoney(row.subtotal)} ${props.cotizacion?.currency?.name || ""}`
-  }
+  // {
+  //   name: "precio",
+  //   label: "Precio",
+  //   align: "right",
+  //   field: row =>
+  //     `$${formatMoney(row.precio_unidad)} ${props.cotizacion?.currency?.name || ""}`
+  // },
+  // {
+  //   name: "subtotal",
+  //   label: "Subtotal",
+  //   align: "right",
+  //   field: row =>
+  //     `$${formatMoney(row.subtotal)} ${props.cotizacion?.currency?.name || ""}`
+  // }
 ];
 
 const columnsExtras = [
@@ -197,20 +141,20 @@ const columnsExtras = [
     align: "center",
     field: "cantidad"
   },
-  {
-    name: "precio",
-    label: "Precio",
-    align: "right",
-    field: row =>
-      `$${formatMoney(row.precio_unidad)} ${props.cotizacion?.currency?.name || ""}`
-  },
-  {
-    name: "subtotal",
-    label: "Subtotal",
-    align: "right",
-    field: row =>
-      `$${formatMoney(row.subtotal)} ${props.cotizacion?.currency?.name || ""}`
-  }
+  // {
+  //   name: "precio",
+  //   label: "Precio",
+  //   align: "right",
+  //   field: row =>
+  //     `$${formatMoney(row.precio_unidad)} ${props.cotizacion?.currency?.name || ""}`
+  // },
+  // {
+  //   name: "subtotal",
+  //   label: "Subtotal",
+  //   align: "right",
+  //   field: row =>
+  //     `$${formatMoney(row.subtotal)} ${props.cotizacion?.currency?.name || ""}`
+  // }
 ];
 
 const formatMoney = (value) => {
@@ -234,8 +178,8 @@ const autorizarPedido = async () => {
 
   const situacion =
     validation.value === 1
-      ? "Autorizado"
-      : "Sin Formalizar";
+      ? "Para Asignar"
+      : "Formalizado";
 
   const data = {
     comentario: feedback.value,

@@ -1,5 +1,5 @@
 <template>
-  <BaseCatalogo title="Cotizaciones Formalizadas" :columns="columns"
+  <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
     url="/api/intranet/trackingAutorizaciones/Formalizado">
 
     <template v-slot:body-cell-detalles="props">

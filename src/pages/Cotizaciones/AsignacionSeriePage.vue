@@ -19,7 +19,7 @@
   <!-- modal detalles -->
   <BaseDialog full-width v-model="showDetails" mode="edit">
     <template #form>
-      <DetallesAutorizadoModal :cotizacion="item" @success="onSuccess" />
+      <AsignacionSerieModal :cotizacion="item" @success="onSuccess" />
     </template>
   </BaseDialog>
 
@@ -33,7 +33,7 @@ import { api } from "src/boot/axios"
 import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
-import DetallesAutorizadoModal from "src/components/Cotizaciones/DetallesAutorizadoModal.vue";
+import AsignacionSerieModal from "src/components/Cotizaciones/AsignacionSerieModal.vue";
 
 const showDetails = ref(false);
 const item = ref(null);

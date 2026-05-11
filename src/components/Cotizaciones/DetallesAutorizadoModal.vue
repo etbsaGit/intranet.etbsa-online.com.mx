@@ -77,6 +77,10 @@
 
         </div>
       </div>
+      <div class="text-h6 q-mt-lg ">
+        Notas del Vendedor:
+      </div>
+      {{ cotizacion?.notas || "Sin notas" }}
 
     </q-item-section>
 

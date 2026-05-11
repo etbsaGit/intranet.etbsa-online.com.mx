@@ -74,7 +74,7 @@
     </q-expansion-item>
 
     <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup">
-      <q-item clickable v-ripple to="invItems" :active="link === 'invItems'" @click="link = 'invItems'"
+      <q-item clickable v-ripple to="/invItems" :active="link === 'invItems'" @click="link = 'invItems'"
         active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box-open" />
@@ -82,7 +82,7 @@
 
         <q-item-section>Existencias</q-item-section>
       </q-item>
-      <q-item clickable v-ripple to="invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
+      <q-item clickable v-ripple to="/invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
         active-class="my-menu-link" v-if="checkRole('Admin')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box" />

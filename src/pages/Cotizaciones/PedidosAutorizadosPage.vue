@@ -1,5 +1,6 @@
 <template>
-  <BaseCatalogo title="Cotizaciones" :columns="columns" url="/api/intranet/trackingAutorizaciones">
+  <BaseCatalogo title="Cotizaciones Autorizadas" :columns="columns"
+    url="/api/intranet/trackingAutorizaciones/Autorizado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
@@ -18,7 +19,7 @@
   <!-- modal detalles -->
   <BaseDialog full-width v-model="showDetails" mode="edit">
     <template #form>
-      <DetallesModal :cotizacion="item" @success="onSuccess" />
+      <DetallesAutorizadoModal :cotizacion="item" @success="onSuccess" />
     </template>
   </BaseDialog>
 
@@ -32,7 +33,7 @@ import { api } from "src/boot/axios"
 import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
-import DetallesModal from "src/components/Cotizaciones/DetallesModal.vue";
+import DetallesAutorizadoModal from "src/components/Cotizaciones/DetallesAutorizadoModal.vue";
 
 const showDetails = ref(false);
 const item = ref(null);
@@ -40,7 +41,7 @@ const edit = ref(null);
 
 const crud = useCrudStore();
 
-const baseURL = "/api/intranet/trackingAutorizaciones";
+const baseURL = "/api/intranet/trackingAutorizaciones/Autorizado";
 
 const loadingPdfId = ref(false);
 

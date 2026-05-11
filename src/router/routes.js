@@ -97,8 +97,16 @@ const routes = [
     },
     children: [
       {
-        path: "cotizaciones/porAutorizar",
-        component: () => import("src/pages/Cotizaciones/PorAutorizarPage.vue"),
+        path: "cotizaciones/pedidosFormalizados",
+        component: () => import("src/pages/Cotizaciones/PedidosFormalizadosPage.vue"),
+      },
+      {
+        path: "cotizaciones/pedidosAutorizados",
+        component: () => import("src/pages/Cotizaciones/PedidosAutorizadosPage.vue"),
+      },
+      {
+        path: "cotizaciones/asignacionSerie",
+        component: () => import("src/pages/Cotizaciones/AsignacionSeriePage.vue"),
       },
     ],
   },

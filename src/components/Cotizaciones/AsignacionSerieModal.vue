@@ -60,6 +60,9 @@
         <div class="col">
           <q-input outlined dense v-model="feedback" label="Número de Serie" :rules="['El número de serie es obligatorio'
           ]" />
+          <q-select v-model="item_id" :options="items" label="Sucursal" option-value="id"
+            option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
+            transition-hide="jump-up" outlined dense options-dense :rules="[(val) => val !== null || 'Obligatorio']" />
         </div>
       </div>
       <div class="row justify-end ">
@@ -73,15 +76,22 @@
 
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
+
 
 const feedback = ref("");
 const validation = ref(null);
 const myForm = ref(null);
 const crud = useCrudStore();
+const inventario = ref([]);
 
 const baseURL = "/api/intranet/trackingAutorizacion";
+
+const getInventario = async () => {
+  const res = await crud.get("/api/intranet/invItem/inventario");
+  inventario.value = res.items || [];
+};
 
 const props = defineProps({
   cotizacion: Object
@@ -206,4 +216,7 @@ watch(
   { immediate: true }
 );
 
+onMounted(() => {
+  getInventario();
+});
 </script>

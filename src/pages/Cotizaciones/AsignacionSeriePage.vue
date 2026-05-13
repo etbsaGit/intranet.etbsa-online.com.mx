@@ -1,6 +1,6 @@
 <template>
   <BaseCatalogo title="Cotizaciones Autorizadas" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Para Asignar">
+    url="/api/intranet/trackingAutorizaciones/Para Asignar/Asignado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
@@ -41,7 +41,7 @@ const edit = ref(null);
 
 const crud = useCrudStore();
 
-const baseURL = "/api/intranet/trackingAutorizaciones/Para Asignar";
+const baseURL = "/api/intranet/trackingAutorizaciones/Para Asignar/Asignado";
 
 const loadingPdfId = ref(false);
 

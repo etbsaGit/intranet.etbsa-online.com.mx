@@ -57,7 +57,9 @@
 
       <div class="row items-center q-col-gutter-md ">
         <div class="col">
-          <q-btn outline color="primary" icon="search" label="Seleccionar Tractor" @click="dialogInventario = true" />
+
+          <q-btn outline color="primary" icon="search" :label="selectedItem ? 'Cambiar Tractor' : 'Seleccionar Tractor'"
+            @click="dialogInventario = true" />
 
           <div v-if="selectedItem" class="q-mt-md">
 
@@ -66,13 +68,18 @@
               <q-card-section>
 
                 <div>
+                  <strong>Producto:</strong>
+                  {{ selectedItem.inv_model?.name }}
+                </div>
+
+                <div>
                   <strong>Serie:</strong>
                   {{ selectedItem.s_n }}
                 </div>
 
                 <div>
-                  <strong>Modelo:</strong>
-                  {{ selectedItem.inv_model?.code }}
+                  <strong>RD:</strong>
+                  {{ selectedItem.rd }}
                 </div>
 
                 <div>
@@ -80,15 +87,25 @@
                   {{ selectedItem.sucursal?.nombre }}
                 </div>
 
+                <div>
+                  <strong>Fecha Ingreso:</strong>
+                  {{ selectedItem.shipping_date }}
+                </div>
+
               </q-card-section>
 
             </q-card>
 
           </div>
+
+          <q-input v-if="selectedItem" outlined dense v-model="feedback" label="Comentarios (Opcional)" />
+
         </div>
       </div>
       <div class="row justify-end ">
-        <q-btn color="primary" label="Asignar Número de Serie" @click="autorizarPedido" />
+        <q-btn color="primary" icon="save" :label="selectedItem ? 'Actualizar Asignación' : 'Asignar Número de Serie'"
+          @click="asignarSerie" />
+
       </div>
     </q-item-section>
 
@@ -116,7 +133,8 @@
 
           <!-- tabla -->
           <q-table flat bordered dense separator="cell" :rows="inventario" :columns="columnsInventario" row-key="id"
-            :filter="filter" :filter-method="filterMethod" :pagination="{ rowsPerPage: 15 }" v-model:selected="selected">
+            :filter="filter" :filter-method="filterMethod" :pagination="{ rowsPerPage: 15 }"
+            v-model:selected="selected">
 
             <template v-slot:body-cell-actions="props">
               <q-td align="center">
@@ -160,17 +178,15 @@
 
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
 
 
 const feedback = ref("");
-const validation = ref(null);
 const myForm = ref(null);
 const crud = useCrudStore();
 const inventario = ref([]);
-const items = ref([]);
 const item_id = ref(null);
 
 const dialogInventario = ref(false);
@@ -198,6 +214,12 @@ const columnsInventario = [
     align: "left"
   },
   {
+    name: "fecha",
+    label: "Fecha Ingreso",
+    field: row => row.shipping_date || "-",
+    align: "left"
+  },
+  {
     name: "estatus",
     label: "Estatus",
     field: row => row.estatus?.nombre || "-",
@@ -220,7 +242,6 @@ const baseURL = "/api/intranet/trackingAutorizacion";
 
 const getInventario = async () => {
   const res = await sendRequest("GET", null, "/api/intranet/invItem/inventario");
-  console.log(res.items);
   inventario.value = res.items || [];
 };
 
@@ -328,25 +349,19 @@ const emit = defineEmits([
   "success"
 ]);
 
-const autorizarPedido = async () => {
+const asignarSerie = async () => {
 
   const ok = await myForm.value.validate();
 
   if (!ok) return;
 
-  if (!item_id.value) {
-    crud.showError("Selecciona un tractor");
-    return;
-  }
-
   const data = {
-    comentario: feedback.value,
-    validation: validation.value,
-    item_id: item_id.value
+    comentarios: feedback.value,
+    inv_item_id: item_id.value
   };
 
   await crud.postItem(
-    `${baseURL}/autorizarPedido/${props.cotizacion.id}/${situacion}`,
+    `${baseURL}/asignar-serie/${props.cotizacion.id}`,
     data,
     () => myForm.value.validate(),
     () => {
@@ -356,7 +371,7 @@ const autorizarPedido = async () => {
 };
 
 watch(
-  () => props.cotizacion?.id,
+  () => props.cotizacion,
   async (val) => {
 
     if (!val) return;
@@ -364,6 +379,18 @@ watch(
     item_id.value = null;
 
     await getInventario();
+
+    const asignacion = val?.asignacion?.[0];
+
+    if (asignacion) {
+
+      item_id.value = asignacion.inv_item_id;
+
+      feedback.value = asignacion.comentarios || "";
+
+      selectedItem.value = asignacion.inv_item;
+
+    }
 
   },
   { immediate: true }

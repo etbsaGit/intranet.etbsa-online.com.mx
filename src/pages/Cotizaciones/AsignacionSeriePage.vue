@@ -14,6 +14,13 @@
 
       </q-td>
     </template>
+
+    <template #body-cell-asignado="props">
+      <q-td :props="props">
+        <q-icon :name="props.value === 'Asignado' ? 'check_circle' : 'cancel'"
+          :color="props.value === 'Asignado' ? 'positive' : 'grey'" size="md" />
+      </q-td>
+    </template>
   </BaseCatalogo>
 
   <!-- modal detalles -->
@@ -92,6 +99,12 @@ const columns = [
     label: "Notificado",
     align: "left",
     field: row => row.notificado?.nombreCompleto || "",
+  },
+  {
+    name: "asignado",
+    label: "Asignado",
+    align: "left",
+    field: row => row.situacion?.nombre || "",
   },
   {
     name: "detalles",

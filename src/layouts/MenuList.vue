@@ -83,7 +83,7 @@
         <q-item-section>Existencias</q-item-section>
       </q-item>
       <q-item clickable v-ripple to="/invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
-        active-class="my-menu-link" v-if="checkRole('Admin')">
+        active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box" />
         </q-item-section>

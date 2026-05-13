@@ -33,7 +33,7 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-      middlewares: [admin],
+      middlewares: [invItem],
     },
     children: [
       {
@@ -93,7 +93,7 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-      //  middlewares: [products],
+       middlewares: [products],
     },
     children: [
       {

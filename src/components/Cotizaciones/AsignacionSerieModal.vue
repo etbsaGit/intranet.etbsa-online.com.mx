@@ -56,13 +56,35 @@
       </div>
 
       <div class="row items-center q-col-gutter-md ">
-
         <div class="col">
-          <q-input outlined dense v-model="feedback" label="Número de Serie" :rules="['El número de serie es obligatorio'
-          ]" />
-          <q-select v-model="item_id" :options="items" label="Sucursal" option-value="id"
-            option-label="nombre" option-disable="inactive" emit-value map-options transition-show="jump-up"
-            transition-hide="jump-up" outlined dense options-dense :rules="[(val) => val !== null || 'Obligatorio']" />
+          <q-btn outline color="primary" icon="search" label="Seleccionar Tractor" @click="dialogInventario = true" />
+
+          <div v-if="selectedItem" class="q-mt-md">
+
+            <q-card flat bordered>
+
+              <q-card-section>
+
+                <div>
+                  <strong>Serie:</strong>
+                  {{ selectedItem.s_n }}
+                </div>
+
+                <div>
+                  <strong>Modelo:</strong>
+                  {{ selectedItem.inv_model?.code }}
+                </div>
+
+                <div>
+                  <strong>Sucursal:</strong>
+                  {{ selectedItem.sucursal?.nombre }}
+                </div>
+
+              </q-card-section>
+
+            </q-card>
+
+          </div>
         </div>
       </div>
       <div class="row justify-end ">
@@ -70,7 +92,69 @@
       </div>
     </q-item-section>
 
+    <!-- modal -->
+    <q-dialog v-model="dialogInventario" maximized transition-show="slide-up" transition-hide="slide-down">
+      <q-card>
+
+        <q-card-section class="row items-center">
+          <div class="text-h6">
+            Seleccionar Tractor
+          </div>
+
+          <q-space />
+
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <!-- buscador -->
+          <q-input v-model="filter" outlined dense debounce="300" placeholder="Buscar" class="q-mb-md">
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+
+          <!-- tabla -->
+          <q-table flat bordered dense separator="cell" :rows="inventario" :columns="columnsInventario" row-key="id"
+            :filter="filter" :filter-method="filterMethod" :pagination="{ rowsPerPage: 15 }" v-model:selected="selected">
+
+            <template v-slot:body-cell-actions="props">
+              <q-td align="center">
+
+                <q-btn color="primary" label="Seleccionar" size="sm" @click="selectItem(props.row)" />
+
+              </q-td>
+            </template>
+
+            <template v-slot:body-cell-info="props">
+              <q-td>
+
+                <div>
+                  <strong>Serie:</strong>
+                  {{ props.row.s_n || "-" }}
+                </div>
+
+                <div>
+                  <strong>RD:</strong>
+                  {{ props.row.rd || "-" }}
+                </div>
+
+                <div>
+                  <strong>Eco:</strong>
+                  {{ props.row.e_n || "-" }}
+                </div>
+
+              </q-td>
+            </template>
+
+          </q-table>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
   </q-form>
+
+
 </template>
 
 
@@ -78,6 +162,7 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
+import { sendRequest } from "src/boot/functions";
 
 
 const feedback = ref("");
@@ -85,12 +170,77 @@ const validation = ref(null);
 const myForm = ref(null);
 const crud = useCrudStore();
 const inventario = ref([]);
+const items = ref([]);
+const item_id = ref(null);
 
+const dialogInventario = ref(false);
+const filter = ref("");
+const selected = ref([]);
+const selectedItem = ref(null);
+
+const columnsInventario = [
+  {
+    name: "info",
+    label: "Información",
+    field: "info",
+    align: "left"
+  },
+  {
+    name: "modelo",
+    label: "Modelo",
+    field: row => row.inv_model?.name || "-",
+    align: "left"
+  },
+  {
+    name: "sucursal",
+    label: "Sucursal",
+    field: row => row.sucursal?.nombre || "-",
+    align: "left"
+  },
+  {
+    name: "estatus",
+    label: "Estatus",
+    field: row => row.estatus?.nombre || "-",
+    align: "left"
+  },
+  {
+    name: "actions",
+    label: "Seleccionar",
+    field: "actions",
+    align: "center"
+  }
+];
+
+const selectItem = (row) => {
+  item_id.value = row.id;
+  selectedItem.value = row;
+  dialogInventario.value = false;
+}
 const baseURL = "/api/intranet/trackingAutorizacion";
 
 const getInventario = async () => {
-  const res = await crud.get("/api/intranet/invItem/inventario");
+  const res = await sendRequest("GET", null, "/api/intranet/invItem/inventario");
+  console.log(res.items);
   inventario.value = res.items || [];
+};
+
+const filterMethod = (rows, terms) => {
+
+  const search = terms.toLowerCase();
+
+  return rows.filter(row => {
+
+    return (
+      row.s_n?.toLowerCase().includes(search) ||
+      row.rd?.toLowerCase().includes(search) ||
+      row.e_n?.toLowerCase().includes(search) ||
+      row.inv_model?.name?.toLowerCase().includes(search) ||
+      row.sucursal?.nombre?.toLowerCase().includes(search) ||
+      row.estatus?.nombre?.toLowerCase().includes(search)
+    );
+
+  });
+
 };
 
 const props = defineProps({
@@ -184,16 +334,15 @@ const autorizarPedido = async () => {
 
   if (!ok) return;
 
-  if (validation.value === null) return;
-
-  const situacion =
-    validation.value === 1
-      ? "Para Asignar"
-      : "Formalizado";
+  if (!item_id.value) {
+    crud.showError("Selecciona un tractor");
+    return;
+  }
 
   const data = {
     comentario: feedback.value,
-    validation: validation.value
+    validation: validation.value,
+    item_id: item_id.value
   };
 
   await crud.postItem(
@@ -206,17 +355,19 @@ const autorizarPedido = async () => {
   );
 };
 
-
 watch(
-  () => props.cotizacion,
-  () => {
-    validation.value = null;
-    feedback.value = "";
+  () => props.cotizacion?.id,
+  async (val) => {
+
+    if (!val) return;
+
+    item_id.value = null;
+
+    await getInventario();
+
   },
   { immediate: true }
 );
 
-onMounted(() => {
-  getInventario();
-});
+
 </script>

@@ -1,9 +1,11 @@
 <template>
-  <BaseCatalogo title="Cotizaciones Autorizadas" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Autorizado">
+  <BaseCatalogo title="Pedidos Autorizados" :columns="columns" url="/api/intranet/trackingAutorizaciones/Autorizado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
+
+        <!-- historial -->
+        <q-btn flat round dense icon="history" color="blue" class="q-mr-sm" @click="verHistorial(props.row)" />
 
         <!-- Ver detalles -->
         <q-btn flat round dense icon="visibility" color="primary" class="q-mr-sm" @click="verDetalles(props.row)" />
@@ -23,6 +25,13 @@
     </template>
   </BaseDialog>
 
+  <!-- modal historial -->
+  <BaseDialog full-width full-height v-model="showHistorial" mode="">
+    <template #form>
+      <HistorialTrackingModal :cotizacion="item" />
+    </template>
+  </BaseDialog>
+
 </template>
 
 <script setup>
@@ -34,8 +43,10 @@ import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import DetallesAutorizadoModal from "src/components/Cotizaciones/DetallesAutorizadoModal.vue";
+import HistorialTrackingModal from "src/components/Cotizaciones/HistorialTrackingModal.vue";
 
 const showDetails = ref(false);
+const showHistorial = ref(false);
 const item = ref(null);
 const edit = ref(null);
 
@@ -104,6 +115,11 @@ const columns = [
 const verDetalles = (row) => {
   item.value = row;
   showDetails.value = true;
+};
+
+const verHistorial = (row) => {
+  item.value = row;
+  showHistorial.value = true;
 };
 
 const descargarPDF = async (row) => {

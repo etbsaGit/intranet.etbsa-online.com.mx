@@ -1,9 +1,10 @@
 <template>
-  <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Formalizado">
+  <BaseCatalogo title="Pedidos Formalizados" :columns="columns" url="/api/intranet/trackingAutorizaciones/Formalizado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
+        <!-- historial -->
+        <q-btn flat round dense icon="history" color="blue" class="q-mr-sm" @click="verHistorial(props.row)" />
 
         <!-- Ver detalles -->
         <q-btn flat round dense icon="visibility" color="primary" class="q-mr-sm" @click="verDetalles(props.row)" />
@@ -23,6 +24,13 @@
     </template>
   </BaseDialog>
 
+  <!-- modal historial -->
+  <BaseDialog full-width v-model="showHistorial" mode="">
+    <template #form>
+      <HistorialTrackingModal :cotizacion="item" />
+    </template>
+  </BaseDialog>
+
 </template>
 
 <script setup>
@@ -31,11 +39,13 @@ import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
 import { api } from "src/boot/axios"
 import BaseDialog from "src/bases/BaseDialog.vue";
+import HistorialTrackingModal from "../../components/Cotizaciones/HistorialTrackingModal.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import DetallesModal from "src/components/Cotizaciones/DetallesModal.vue";
 
 const showDetails = ref(false);
+const showHistorial = ref(false);
 const item = ref(null);
 const edit = ref(null);
 
@@ -50,6 +60,10 @@ const onSuccess = async () => {
   await crud.getPaginatedItems(baseURL);
 };
 
+const verHistorial = (row) => {
+  item.value = row;
+  showHistorial.value = true;
+};
 const columns = [
   {
     name: "folio",

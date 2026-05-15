@@ -380,7 +380,7 @@ watch(
 
     await getInventario();
 
-    const asignacion = val?.asignacion?.[0];
+    const asignacion = val?.asignacion;
 
     if (asignacion) {
 

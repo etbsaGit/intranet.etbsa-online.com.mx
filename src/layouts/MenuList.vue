@@ -30,9 +30,9 @@
     </q-item>
 
     <!-- módulo Cotización -->
-    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup">
+    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup" v-if="checkRole('Intranet.crm')">
       <q-item clickable v-ripple to="/cotizaciones/pedidosFormalizados" :active="link === 'pedidosFormalizados'" @click="link = 'pedidosFormalizados'"
-        active-class="my-menu-link">
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.formalizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -41,7 +41,7 @@
       </q-item>
 
       <q-item clickable v-ripple to="/cotizaciones/pedidosAutorizados" :active="link === 'pedidosAutorizados'" @click="link = 'pedidosAutorizados'"
-        active-class="my-menu-link">
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.autorizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -50,7 +50,7 @@
       </q-item>
 
       <q-item clickable v-ripple to="/cotizaciones/asignacionSerie" :active="link === 'asignacionSerie'" @click="link = 'asignacionSerie'"
-        active-class="my-menu-link">
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.asignacion_serie')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -73,7 +73,7 @@
       </q-item>
     </q-expansion-item>
 
-    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup">
+    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup" v-if="checkRole('Intranet.invItem')">
       <q-item clickable v-ripple to="/invItems" :active="link === 'invItems'" @click="link = 'invItems'"
         active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>

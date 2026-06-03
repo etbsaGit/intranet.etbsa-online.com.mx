@@ -30,15 +30,34 @@
     </q-item>
 
     <!-- módulo Cotización -->
-    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup">
-      <q-item clickable v-ripple to="/cotizaciones/porAutorizar" :active="link === 'porAutorizar'" @click="link = 'porAutorizar'"
-        active-class="my-menu-link">
+    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup" v-if="checkRole('Intranet.crm')">
+      <q-item clickable v-ripple to="/cotizaciones/pedidosFormalizados" :active="link === 'pedidosFormalizados'" @click="link = 'pedidosFormalizados'"
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.formalizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
 
-        <q-item-section>Por Autorizar</q-item-section>
+        <q-item-section>Formalizados</q-item-section>
       </q-item>
+
+      <q-item clickable v-ripple to="/cotizaciones/pedidosAutorizados" :active="link === 'pedidosAutorizados'" @click="link = 'pedidosAutorizados'"
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.autorizados')">
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-hourglass-half" />
+        </q-item-section>
+
+        <q-item-section>Autorizados</q-item-section>
+      </q-item>
+
+      <q-item clickable v-ripple to="/cotizaciones/asignacionSerie" :active="link === 'asignacionSerie'" @click="link = 'asignacionSerie'"
+        active-class="my-menu-link" v-if="checkRole('Intranet.crm.asignacion_serie')">
+        <q-item-section avatar>
+          <q-icon name="fa-solid fa-hourglass-half" />
+        </q-item-section>
+
+        <q-item-section>Asignación #Serie</q-item-section>
+      </q-item>
+
     </q-expansion-item>
 
     <!-- módulo Nuevas Tecnologías -->
@@ -54,8 +73,8 @@
       </q-item>
     </q-expansion-item>
 
-    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup">
-      <q-item clickable v-ripple to="invItems" :active="link === 'invItems'" @click="link = 'invItems'"
+    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup" v-if="checkRole('Intranet.invItem')">
+      <q-item clickable v-ripple to="/invItems" :active="link === 'invItems'" @click="link = 'invItems'"
         active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box-open" />
@@ -63,8 +82,8 @@
 
         <q-item-section>Existencias</q-item-section>
       </q-item>
-      <q-item clickable v-ripple to="invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
-        active-class="my-menu-link" v-if="checkRole('Admin')">
+      <q-item clickable v-ripple to="/invCatalogos" :active="link === 'invCatalogos'" @click="link = 'invCatalogos'"
+        active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-box" />
         </q-item-section>

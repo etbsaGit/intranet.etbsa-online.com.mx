@@ -1,4 +1,4 @@
-import { auth, guest, admin, clientes, sales, NT, invItem, products } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT, invItem, products, crm } from "./middleware";
 
 const routes = [
   {
@@ -33,7 +33,7 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-      middlewares: [admin],
+      middlewares: [invItem],
     },
     children: [
       {
@@ -76,29 +76,37 @@ const routes = [
   },
 
   {
-    path: "/",
+    path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
        middlewares: [products],
     },
     children: [
       {
-        path: "productos",
+        path: "/productos",
         component: () => import("src/pages/Productos/ProductosPage.vue"),
       },
     ],
   },
 
   {
-    path: "/",
+    path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-      //  middlewares: [products],
+       middlewares: [crm],
     },
     children: [
       {
-        path: "cotizaciones/porAutorizar",
-        component: () => import("src/pages/Cotizaciones/PorAutorizarPage.vue"),
+        path: "/cotizaciones/pedidosFormalizados",
+        component: () => import("src/pages/Cotizaciones/PedidosFormalizadosPage.vue"),
+      },
+      {
+        path: "/cotizaciones/pedidosAutorizados",
+        component: () => import("src/pages/Cotizaciones/PedidosAutorizadosPage.vue"),
+      },
+      {
+        path: "/cotizaciones/asignacionSerie",
+        component: () => import("src/pages/Cotizaciones/AsignacionSeriePage.vue"),
       },
     ],
   },

@@ -79,6 +79,23 @@ export function products(/* { to, from, next } */ { to, next }) {
   return next();
 }
 
+export function crm(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.crm")) {
+    return next("/");
+  }
+
+  return next();
+}
+
+
+
 export function NT(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();
 

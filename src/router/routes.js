@@ -1,4 +1,4 @@
-import { auth, guest, admin, clientes, sales, NT, invItem, products, crm } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT, invItem, products, crm, reporteCliente } from "./middleware";
 
 const routes = [
   {
@@ -139,6 +139,23 @@ const routes = [
         component: () =>
           import(
             "src/pages/NuevasTecnologias/HectareasConectadas/HectareasConectadasIndex.vue"
+          ),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [reporteCliente],
+    },
+    children: [
+      {
+        path: "/reportes",
+        component: () =>
+          import(
+            "src/pages/ReporteClientes/ReporteClientesPage.vue"
           ),
       },
     ],

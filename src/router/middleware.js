@@ -125,3 +125,18 @@ export function invItem(/* { to, from, next } */ { to, next }) {
 
   return next();
 }
+// report clientes
+export function reporteCliente(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.reporteCliente")) {
+    return next("/");
+  }
+
+  return next();
+}

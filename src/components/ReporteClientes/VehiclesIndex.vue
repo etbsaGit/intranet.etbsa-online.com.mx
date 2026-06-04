@@ -1,7 +1,7 @@
 <template>
   <q-item class="custom-item" align="center">
     <q-item-section>
-      <q-item-label class="custom-label">-Vehículos de Clientes-</q-item-label>
+      <q-item-label class="custom-label">-Maquinaria de Clientes-</q-item-label>
     </q-item-section>
   </q-item>
   <q-item>
@@ -12,6 +12,9 @@
           <q-item>
             <q-item-section side>
               <q-btn outline dense color="primary" icon="filter_alt" label="Filtros" @click="showFilters = true" />
+            </q-item-section>
+            <q-item-section side>
+              <q-btn color="green" icon="download" label="Excel" @click="exportReport" />
             </q-item-section>
           </q-item>
         </template>
@@ -29,11 +32,31 @@
             </div>
           </q-td>
         </template>
+
+        <template #body-cell-cliente="props">
+          <q-td :props="props">
+            <div class="text-weight-medium">
+              {{ props.row.cliente?.nombre }}
+            </div>
+
+            <div class="text-caption text-grey-7">
+              RFC: {{ props.row.cliente?.rfc }}
+            </div>
+            <div class="text-caption text-grey-7">
+              Teléfono: {{ props.row.cliente?.telefono }}
+            </div>
+            <div class="text-caption text-grey-7">
+              Ubicación: {{ props.row.cliente?.calle }} {{ props.row.cliente?.colonia }}
+            </div>
+          </q-td>
+        </template>
+
+
       </q-table>
     </q-item-section>
+
+
   </q-item>
-
-
 
   <q-dialog v-model="showFilters" position="top" full-width>
     <q-card style="width: 900px">
@@ -61,6 +84,10 @@
               <q-icon name="search" />
             </template>
           </q-input>
+        </q-item-section>
+        <q-item-section>
+          <q-select v-model="filterForm.anio" :options="anios" label="Año" emit-value map-options outlined dense
+            clearable />
         </q-item-section>
       </q-item>
       <q-item>
@@ -99,11 +126,13 @@
   </q-dialog>
 
 </template>
+
 <script setup>
 import { ref, onMounted, watch, h } from "vue";
 import { checkRole, sendRequest } from "src/boot/functions";
 import { formatPhoneNumber } from "src/boot/format.js";
 import { useCrudStore } from "src/stores/crud";
+import axios from "axios";
 
 import BasePagination from "src/bases/BasePagination.vue";
 
@@ -111,11 +140,12 @@ const crud = useCrudStore();
 
 const showFilters = ref(false);
 
-const baseURL = ref("/api/intranet/reporte_clientes/vehiculos");
+const baseURL = ref("/api/intranet/reporte_clientes/maquinaria");
 
 const current_page = ref(1);
 const towns = ref([]);
 const marcas = ref([]);
+const anios = ref([]);
 const condiciones = ref([]);
 const clasEquipos = ref([]);
 const tiposEquipo = ref([]);
@@ -129,6 +159,7 @@ const filterForm = ref({
   condicion_id: null,
   clas_equipo_id: null,
   tipo_equipo_id: null,
+  anio: null,
 });
 
 const columns = [
@@ -136,7 +167,7 @@ const columns = [
     name: "cliente",
     label: "Cliente",
     align: "left",
-    field: row => row.cliente?.nombre,
+    field: 'cliente',
     sortable: true,
   },
   {
@@ -186,10 +217,10 @@ const columns = [
     label: "Valor",
     align: "left",
     field: row =>
-      new Intl.NumberFormat('es-MX', {
+      `${new Intl.NumberFormat('es-MX', {
         style: 'currency',
         currency: 'MXN'
-      }).format(row.valor),
+      }).format(row.valor)} MXN`,
     sortable: true,
   },
 
@@ -204,11 +235,32 @@ const clearFilters = () => {
   filterForm.value.condicion_id = null;
   filterForm.value.clas_equipo_id = null;
   filterForm.value.tipo_equipo_id = null;
+  filterForm.value.anio = null;
   current_page.value = 1;
   towns.value = [];
   getRows();
 };
 
+const exportReport = async () => {
+  const final = {
+    ...filterForm.value,
+  };
+  let res = await sendRequest("POST", final, "/api/intranet/reporte_clientes/maquinaria/export", "");
+  const base64Response = await fetch(
+    `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${res.file_base64}`
+  );
+  const blob = await base64Response.blob();
+  const url = URL.createObjectURL(blob);
+
+  // Creación de un enlace temporal para descargar el archivo con un nombre específico
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = res.file_name ; // Nombre que se le asigna al archivo
+  link.click();
+
+  // Limpieza
+  URL.revokeObjectURL(url);
+};
 
 const updateTowns = (id) => {
   filterForm.value.town_id = null;
@@ -241,19 +293,20 @@ const getRows = async () => {
     baseURL.value,
   );
 
-  crud.paginatedItems = res.vehicles.data;
+  crud.paginatedItems = res.maquinas.data;
 
   marcas.value = res.filters.marcas;
   condiciones.value = res.filters.condiciones;
   clasEquipos.value = res.filters.clasEquipos;
   tiposEquipo.value = res.filters.tiposEquipo;
   states.value = res.filters.states;
+  anios.value = res.filters.anios;
 
   crud.pagination = {
-    currentPage: res.vehicles.current_page,
-    lastPage: res.vehicles.last_page,
-    perPage: res.vehicles.per_page,
-    total: res.vehicles.total,
+    currentPage: res.maquinas.current_page,
+    lastPage: res.maquinas.last_page,
+    perPage: res.maquinas.per_page,
+    total: res.maquinas.total,
   };
 };
 

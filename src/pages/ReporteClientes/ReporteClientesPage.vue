@@ -2,7 +2,7 @@
   <q-tabs v-model="tab" dense :class="$q.dark.isActive ? 'bg-grey-9' : 'bg-grey-3'" align="justify" narrow-indicator>
     <q-tab name="vehicles" label="vehicles" />
     <q-tab name="cultivos" label="cultivos" />
-    <q-tab name="cultivos" label="finas y terrenos" />
+    <q-tab name="riego" label="Riego" />
   </q-tabs>
 
   <q-separator />
@@ -12,7 +12,10 @@
       <vehicles-index />
     </q-tab-panel>
     <q-tab-panel name="cultivos">
-      <vehicles-index />
+      <cultivos-index />
+    </q-tab-panel>
+    <q-tab-panel name="riego">
+      <riego-index />
     </q-tab-panel>
   </q-tab-panels>
 </template>
@@ -20,8 +23,9 @@
 <script setup>
 
 import { ref } from "vue";
-import VehiclesIndex from "../../components/ReporteClientes/Vehicles/VehiclesIndex.vue"
-
+import VehiclesIndex from "../../components/ReporteClientes/VehiclesIndex.vue"
+import CultivosIndex from "../../components/ReporteClientes/CultivosIndex.vue"
+import RiegoIndex from "../../components/ReporteClientes/RiegoIndex.vue"
 
 const tab = ref("vehicles");
 </script>

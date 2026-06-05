@@ -134,6 +134,7 @@ const cultivo = ref([]);
 const tipoCultivo = ref([]);
 const ciclo = ref([]);
 const states = ref([]);
+const towns = ref([]);
 
 const filterForm = ref({
   search: null,

@@ -1,7 +1,7 @@
 <template>
   <q-item class="custom-item" align="center">
     <q-item-section>
-      <q-item-label class="custom-label">-Sistemas de Riego de Clientes-</q-item-label>
+      <q-item-label class="custom-label">-Tecnologías de Clientes-</q-item-label>
     </q-item-section>
   </q-item>
   <q-item>
@@ -51,6 +51,23 @@
           </q-td>
         </template>
 
+        <template #body-cell-hectareas="props">
+          <q-td :props="props">
+            <div class="text-weight-medium">
+             Conectadas: {{ props.row.cliente?.hectareasConectadas?.hectareas_conectadas }}
+            </div>
+
+            <div class="text-caption text-grey-7">
+              Propias: {{ props.row.cliente?.hectareasConectadas?.hectareas_propias }}
+            </div>
+            <div class="text-caption text-grey-7">
+              Rentadas: {{ props.row.cliente?.hectareasConectadas?.hectareas_rentadas }}
+            </div>
+            <div class="text-caption text-grey-7">
+              Sin Conectar: {{ props.row.cliente?.hectareasConectadas?.hectareas_sin_conectar }}
+            </div>
+          </q-td>
+        </template>
 
       </q-table>
     </q-item-section>
@@ -77,17 +94,12 @@
       <q-separator />
 
       <q-item>
-        <!-- <q-item-section>
-          <q-input outlined dense label="Buscar por modelo" v-model="filterForm.search"
-            @update:model-value="onInputChange">
-            <template v-slot:prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-        </q-item-section> -->
         <q-item-section>
-          <q-select v-model="filterForm.riego_id" :options="riegos" label="Sistemas de Riego" option-value="id"
+          <q-select v-model="filterForm.tecnologia_id" :options="tecnologias" label="Tecnología" option-value="id"
             option-label="name" emit-value map-options outlined dense clearable />
+        </q-item-section>
+        <q-item-section>
+          <q-select v-model="filterForm.capacidad" :options="capacidades" label="Capacidad Tecnológica" emit-value map-options outlined dense clearable />
         </q-item-section>
       </q-item>
       <q-item>
@@ -122,19 +134,19 @@ const crud = useCrudStore();
 
 const showFilters = ref(false);
 
-const baseURL = ref("/api/intranet/reporte_clientes/riego");
+const baseURL = ref("/api/intranet/reporte_clientes/tecnologia");
 
 const current_page = ref(1);
 const towns = ref([]);
 const states = ref([]);
-const town = ref([]);
-const riegos = ref([]);
+const capacidades = ref([]);
+const tecnologias = ref([]);
 
 const filterForm = ref({
   search: null,
   state_entity_id: null,
   town_id: null,
-  riego_id: null
+  tecnologia_id: null
 });
 
 const columns = [
@@ -146,24 +158,24 @@ const columns = [
     sortable: true,
   },
   {
-    name: "riego",
-    label: "Sistema de Riego",
+    name: "tecnologia",
+    label: "Tecnología",
     align: "left",
-    field: row => row.riego?.name,
+    field: row => row.nueva_tecnologia?.name,
     sortable: true,
   },
   {
-    name: "hpropias",
-    label: "Hectáreas Propias",
+    name: "hectareas",
+    label: "Hectáreas",
     align: "left",
-    field: row => row.hectareas_propias,
+    field: 'hectareas',
     sortable: true,
   },
   {
-    name: "hrentadas",
-    label: "Hectáreas Rentadas",
+    name: "adopcion",
+    label: "Adopción Tecnológica",
     align: "left",
-    field: row => row.hectareas_rentadas,
+    field: row => row.cliente?.currentClassTech,
     sortable: true,
   },
 ];
@@ -172,7 +184,7 @@ const clearFilters = () => {
   filterForm.value.search = null;
   filterForm.value.state_entity_id = null;
   filterForm.value.town_id = null;
-  filterForm.value.riego_id = null;
+  filterForm.value.tecnologia_id = null;
   current_page.value = 1;
   towns.value = [];
   getRows();
@@ -182,7 +194,7 @@ const exportReport = async () => {
   const final = {
     ...filterForm.value,
   };
-  let res = await sendRequest("POST", final, "/api/intranet/reporte_clientes/riego/export", "");
+  let res = await sendRequest("POST", final, "/api/intranet/reporte_clientes/tecnologia/export", "");
   const base64Response = await fetch(
     `data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,${res.file_base64}`
   );
@@ -230,16 +242,17 @@ const getRows = async () => {
     baseURL.value,
   );
 
-  crud.paginatedItems = res.riegos.data;
+  crud.paginatedItems = res.tech.data;
 
-  riegos.value = res.filters.riego;
+  tecnologias.value = res.filters.tecnologias;
   states.value = res.filters.states;
+  capacidades.value = res.filters.capacidades;
 
   crud.pagination = {
-    currentPage: res.riegos.current_page,
-    lastPage: res.riegos.last_page,
-    perPage: res.riegos.per_page,
-    total: res.riegos.total,
+    currentPage: res.tecnologias.current_page,
+    lastPage: res.tecnologias.last_page,
+    perPage: res.tecnologias.per_page,
+    total: res.tecnologias.total,
   };
 };
 

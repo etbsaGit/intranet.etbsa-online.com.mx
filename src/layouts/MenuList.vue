@@ -100,6 +100,16 @@
 
       <q-item-section>Catalogos</q-item-section>
     </q-item>
+
+    <!-- reportes clientes -->
+    <q-item v-if="checkRole('Admin')" clickable v-ripple to="/reportes" :active="link === 'reportes'"
+      @click="link = 'reportes'" active-class="my-menu-link">
+      <q-item-section avatar>
+        <q-icon name="archive" />
+      </q-item-section>
+
+      <q-item-section>Reportes</q-item-section>
+    </q-item>
   </q-list>
 </template>
 

@@ -1,8 +1,11 @@
 <template>
-  <BaseCatalogo title="Cotizaciones" :columns="columns" url="/api/intranet/trackingAutorizaciones">
+  <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
+    url="/api/intranet/trackingAutorizaciones/Para Asignar/Asignado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
+        <!-- Historial -->
+        <q-btn flat round dense icon="history" color="blue" class="q-mr-sm" @click="verHistorial(props.row)" />
 
         <!-- Ver detalles -->
         <q-btn flat round dense icon="visibility" color="primary" class="q-mr-sm" @click="verDetalles(props.row)" />
@@ -11,6 +14,15 @@
         <q-btn flat round dense icon="download" color="green" @click="descargarPDF(props.row)"
           :loading="loadingPdfId === props.row.id" />
 
+
+
+      </q-td>
+    </template>
+
+    <template #body-cell-asignado="props">
+      <q-td :props="props">
+        <q-icon :name="props.value === 'Asignado' ? 'check_circle' : 'cancel'"
+          :color="props.value === 'Asignado' ? 'positive' : 'grey'" size="md" />
       </q-td>
     </template>
   </BaseCatalogo>
@@ -18,7 +30,14 @@
   <!-- modal detalles -->
   <BaseDialog full-width v-model="showDetails" mode="edit">
     <template #form>
-      <DetallesModal :cotizacion="item" @success="onSuccess" />
+      <AsignacionSerieModal :cotizacion="item" @success="onSuccess" />
+    </template>
+  </BaseDialog>
+
+  <!-- modal historial -->
+  <BaseDialog full-width v-model="showHistorial" mode="">
+    <template #form>
+      <HistorialTrackingModal :cotizacion="item" />
     </template>
   </BaseDialog>
 
@@ -32,15 +51,17 @@ import { api } from "src/boot/axios"
 import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
-import DetallesModal from "src/components/Cotizaciones/DetallesModal.vue";
+import AsignacionSerieModal from "src/components/Cotizaciones/AsignacionSerieModal.vue";
+import HistorialTrackingModal from "src/components/Cotizaciones/HistorialTrackingModal.vue";
 
 const showDetails = ref(false);
+const showHistorial = ref(false);
 const item = ref(null);
 const edit = ref(null);
 
 const crud = useCrudStore();
 
-const baseURL = "/api/intranet/trackingAutorizaciones";
+const baseURL = "/api/intranet/trackingAutorizaciones/Para Asignar/Asignado";
 
 const loadingPdfId = ref(false);
 
@@ -93,6 +114,12 @@ const columns = [
     field: row => row.notificado?.nombreCompleto || "",
   },
   {
+    name: "asignado",
+    label: "Asignado",
+    align: "left",
+    field: row => row.situacion?.nombre || "",
+  },
+  {
     name: "detalles",
     label: "Detalles",
     align: "left",
@@ -103,6 +130,11 @@ const columns = [
 const verDetalles = (row) => {
   item.value = row;
   showDetails.value = true;
+};
+
+const verHistorial = (row) => {
+  item.value = row;
+  showHistorial.value = true;
 };
 
 const descargarPDF = async (row) => {

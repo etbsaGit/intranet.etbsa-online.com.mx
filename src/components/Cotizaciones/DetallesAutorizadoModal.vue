@@ -77,7 +77,6 @@
 
         </div>
       </div>
-
       <div class="text-h6 q-mt-lg ">
         Notas del Vendedor:
       </div>
@@ -234,8 +233,8 @@ const autorizarPedido = async () => {
 
   const situacion =
     validation.value === 1
-      ? "Autorizado"
-      : "Sin Formalizar";
+      ? "Para Asignar"
+      : "Formalizado";
 
   const data = {
     comentario: feedback.value,

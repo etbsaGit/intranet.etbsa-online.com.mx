@@ -1,14 +1,6 @@
 <template>
-  <BaseCatalogo
-    title="Inventario maquinaria"
-    :columns="columns"
-    url="/api/intranet/invItems"
-    :on-create="createItem"
-    :on-update="updateItem"
-    @delete="destroyItem"
-    Maximized
-    :initialFilters="{ shipping_status: null }"
-  >
+  <BaseCatalogo title="Inventario maquinaria" :columns="columns" url="/api/intranet/invItems" :on-create="createItem"
+    :on-update="updateItem" @delete="destroyItem" Maximized :initialFilters="{ shipping_status: 154 }">
     <template #create-form>
       <InvItemForm ref="add" />
     </template>
@@ -18,42 +10,18 @@
     </template>
 
     <template #filters-extra="{ filters, onSearchChange }">
-      <q-select
-        dense
-        outlined
-        emit-value
-        map-options
-        options-dense
-        option-value="id"
-        option-label="name"
-        style="width: 180px"
-        label="Disponiblidad"
-        v-model="filters.shipping_status"
-        :options="[
-          { id: null, name: 'En camino' },
-          { id: 0, name: 'En inventario' },
-        ]"
-        @update:model-value="onSearchChange"
-      />
+      <q-select dense outlined emit-value map-options options-dense option-value="id" option-label="nombre"
+        style="width: 180px" label="Disponibilidad" v-model="filters.shipping_status" :options="estatus"
+        @update:model-value="onSearchChange" />
     </template>
 
     <template v-slot:body-cell-inv_item_docs="props">
       <q-td :props="props">
         <div v-if="props.row.inv_item_docs">
-          <q-btn-dropdown
-            v-if="props.row.inv_item_docs.length"
-            dense
-            label="Documentos"
-            color="black"
-            outline
-          >
+          <q-btn-dropdown v-if="props.row.inv_item_docs.length" dense label="Documentos" color="black" outline>
             <q-list dense class="bg-primary" separator>
-              <q-item
-                v-for="(doc, index) in props.row.inv_item_docs"
-                :key="index"
-                clickable
-                @click="openFile(doc.realpath)"
-              >
+              <q-item v-for="(doc, index) in props.row.inv_item_docs" :key="index" clickable
+                @click="openFile(doc.realpath)">
                 <q-item-section>
                   <q-item-label class="text-white">
                     <q-icon name="fa-solid fa-file-arrow-down" size="xs" />
@@ -72,7 +40,8 @@
 <script setup>
 import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
-
+import { onMounted } from "vue";
+import { sendRequest } from "src/boot/functions";
 import InvItemForm from "src/components/InvItem/InvItemForm.vue";
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 
@@ -80,6 +49,8 @@ const crudStore = useCrudStore();
 
 const add = ref(null);
 const edit = ref(null);
+
+const estatus = ref([]);
 
 const columns = [
   {
@@ -116,11 +87,7 @@ const columns = [
     name: "shipping_status",
     label: "Disponibilidad",
     align: "left",
-    field: (row) => {
-      if (row.shipping_status === null) return "En camino";
-      if (row.shipping_status === 0) return "En sucursal";
-      return "Desconocido"; // por si llega otro valor
-    },
+    field: (row) => row.estatus?.nombre || "Desconocido",
   },
   {
     name: "inv_item_docs",
@@ -159,4 +126,14 @@ const openFile = (url) => {
 const destroyItem = (item) => {
   crudStore.deleteItem(BASE_URL, item.id);
 };
+
+const getOptions = async () => {
+  const res = await sendRequest("GET", null, `${BASE_URL}/forms`, "");
+  estatus.value = res.estatus;
+};
+
+onMounted(() => {
+  getOptions();
+})
+
 </script>

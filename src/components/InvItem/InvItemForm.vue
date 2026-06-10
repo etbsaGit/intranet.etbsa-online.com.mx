@@ -251,11 +251,12 @@
           <q-item-section>
             <q-select
               v-model="formItem.shipping_status"
-              :options="shippingStatuses"
+              :options="estatus"
               label="Estatus del envio"
+              :rules="[(val) => val !== null || 'Obligatorio']"
               option-disable="inactive"
               option-value="id"
-              option-label="name"
+              option-label="nombre"
               emit-value
               map-options
               transition-show="jump-up"
@@ -524,6 +525,7 @@ const invCategory = ref([]);
 const invModels = ref([]);
 const invFactories = ref([]);
 const sucursales = ref([]);
+const estatus = ref([]);
 
 const assignedConfigurations = ref([]); // objetos asignados (para pintar panel izq)
 const selectedConfigurations = ref([]); // IDs seleccionados (truth)
@@ -611,6 +613,7 @@ const getOptions = async () => {
   invModels.value = res.invModels;
   invFactories.value = res.invFactories;
   sucursales.value = res.sucursales;
+  estatus.value = res.estatus;
 };
 
 const getForModel = async (id) => {

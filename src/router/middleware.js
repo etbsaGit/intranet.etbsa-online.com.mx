@@ -140,3 +140,18 @@ export function reporteCliente(/* { to, from, next } */ { to, next }) {
 
   return next();
 }
+// historico ventas
+export function powerbi(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("powerbi")) {
+    return next("/");
+  }
+
+  return next();
+}

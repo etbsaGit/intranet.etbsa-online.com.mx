@@ -30,9 +30,10 @@
     </q-item>
 
     <!-- módulo Cotización -->
-    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup" v-if="checkRole('Intranet.crm')">
-      <q-item clickable v-ripple to="/cotizaciones/pedidosFormalizados" :active="link === 'pedidosFormalizados'" @click="link = 'pedidosFormalizados'"
-        active-class="my-menu-link" v-if="checkRole('Intranet.crm.formalizados')">
+    <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup"
+      v-if="checkRole('Intranet.crm')">
+      <q-item clickable v-ripple to="/cotizaciones/pedidosFormalizados" :active="link === 'pedidosFormalizados'"
+        @click="link = 'pedidosFormalizados'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.formalizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -40,8 +41,8 @@
         <q-item-section>Formalizados</q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple to="/cotizaciones/pedidosAutorizados" :active="link === 'pedidosAutorizados'" @click="link = 'pedidosAutorizados'"
-        active-class="my-menu-link" v-if="checkRole('Intranet.crm.autorizados')">
+      <q-item clickable v-ripple to="/cotizaciones/pedidosAutorizados" :active="link === 'pedidosAutorizados'"
+        @click="link = 'pedidosAutorizados'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.autorizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -49,8 +50,8 @@
         <q-item-section>Autorizados</q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple to="/cotizaciones/asignacionSerie" :active="link === 'asignacionSerie'" @click="link = 'asignacionSerie'"
-        active-class="my-menu-link" v-if="checkRole('Intranet.crm.asignacion_serie')">
+      <q-item clickable v-ripple to="/cotizaciones/asignacionSerie" :active="link === 'asignacionSerie'"
+        @click="link = 'asignacionSerie'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.asignacion_serie')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -73,7 +74,8 @@
       </q-item>
     </q-expansion-item>
 
-    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup" v-if="checkRole('Intranet.invItem')">
+    <q-expansion-item expand-separator icon="fa-solid fa-boxes-stacked" label="Inventarios" group="somegroup"
+      v-if="checkRole('Intranet.invItem')">
       <q-item clickable v-ripple to="/invItems" :active="link === 'invItems'" @click="link = 'invItems'"
         active-class="my-menu-link" v-if="checkRole('Intranet.invItem')">
         <q-item-section avatar>
@@ -110,6 +112,47 @@
 
       <q-item-section>Reportes</q-item-section>
     </q-item>
+
+    <q-expansion-item expand-separator icon="fa-solid fa-chart-column" label="Power BI" group="powerbi"
+      v-if="checkRole('powerbi')">
+
+      <q-expansion-item dense expand-separator icon="fa-solid fa-building" label="Dirección"
+        header-class="powerbi-category">
+
+        <q-item clickable v-ripple to="/powerbi/historico">
+          <q-item-section avatar>
+            <q-icon name="fa-solid fa-chart-line" />
+          </q-item-section>
+
+          <q-item-section>
+            Histórico
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/powerbi/ventas">
+          <q-item-section avatar>
+            <q-icon name="fa-solid fa-chart-column" />
+          </q-item-section>
+
+          <q-item-section>
+            Ventas
+          </q-item-section>
+        </q-item>
+
+        <q-item clickable v-ripple to="/powerbi/refacciones">
+          <q-item-section avatar>
+            <q-icon name="fa-solid fa-screwdriver-wrench" />
+          </q-item-section>
+
+          <q-item-section>
+            Refacciones
+          </q-item-section>
+        </q-item>
+
+      </q-expansion-item>
+
+    </q-expansion-item>
+
   </q-list>
 </template>
 
@@ -120,8 +163,23 @@ import { checkRole } from "../boot/functions";
 const link = ref("inbox");
 </script>
 
-<style lang="sass">
-.my-menu-link
-  color: black
+<style>
+.my-menu-link {
+  color: black;
   background: gray
+}
+
+.powerbi-category {
+  color: #616161;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.powerbi-category .q-item {
+  min-height: 40px;
+}
+
+.powerbi-category .q-icon {
+  font-size: 18px;
+}
 </style>

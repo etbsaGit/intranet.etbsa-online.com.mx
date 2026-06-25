@@ -1,4 +1,4 @@
-import { auth, guest, admin, clientes, sales, NT, invItem, products, crm, reporteCliente } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT, invItem, products, crm, reporteCliente, powerbi } from "./middleware";
 
 const routes = [
   {
@@ -156,6 +156,22 @@ const routes = [
         component: () =>
           import(
             "src/pages/ReporteClientes/ReporteClientesPage.vue"
+          ),
+      },
+    ],
+  },
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [powerbi],
+    },
+    children: [
+      {
+        path: "/powerbi/direccion",
+        component: () =>
+          import(
+            "src/pages/PowerBI/Direccion/DireccionPage.vue"
           ),
       },
     ],

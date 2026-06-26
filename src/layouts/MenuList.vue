@@ -113,40 +113,24 @@
       <q-item-section>Reportes</q-item-section>
     </q-item>
 
+    <!-- POWER BI -->
+    <!-- POWER BI -->
     <q-expansion-item expand-separator icon="fa-solid fa-chart-column" label="Power BI" group="powerbi"
       v-if="checkRole('powerbi')">
 
-      <q-expansion-item dense expand-separator icon="fa-solid fa-building" label="Dirección"
-        header-class="powerbi-category">
+      <q-expansion-item v-for="categoria in visiblePowerBiMenu" :key="categoria.label" dense expand-separator
+        :icon="categoria.icon" :label="categoria.label" header-class="powerbi-category" group="powerbi-categoria">
 
-        <q-item clickable v-ripple to="/powerbi/historico">
+        <q-item v-for="item in categoria.children" :key="item.to" clickable v-ripple :to="item.to"
+          :active="link === item.to" @click="link = item.to" active-class="my-menu-link" class="powerbi-subcategory">
           <q-item-section avatar>
-            <q-icon name="fa-solid fa-chart-line" />
+            <q-icon :name="item.icon" />
           </q-item-section>
 
           <q-item-section>
-            Histórico
-          </q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/powerbi/ventas">
-          <q-item-section avatar>
-            <q-icon name="fa-solid fa-chart-column" />
+            {{ item.label }}
           </q-item-section>
 
-          <q-item-section>
-            Ventas
-          </q-item-section>
-        </q-item>
-
-        <q-item clickable v-ripple to="/powerbi/refacciones">
-          <q-item-section avatar>
-            <q-icon name="fa-solid fa-screwdriver-wrench" />
-          </q-item-section>
-
-          <q-item-section>
-            Refacciones
-          </q-item-section>
         </q-item>
 
       </q-expansion-item>
@@ -157,10 +141,88 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { checkRole } from "../boot/functions";
 
 const link = ref("inbox");
+
+const powerBiMenu = [
+  {
+    label: 'Dirección',
+    icon: 'fa-solid fa-building',
+    role: 'powerbi',
+    children: [
+      {
+        label: 'Histórico',
+        icon: 'fa-solid fa-chart-line',
+        to: '/powerbi/historico',
+        role: 'powerbi'
+      },
+      {
+        label: 'Ventas',
+        icon: 'fa-solid fa-chart-column',
+        to: '/powerbi/ventas',
+        role: 'powerbi'
+      },
+      {
+        label: 'Refacciones',
+        icon: 'fa-solid fa-screwdriver-wrench',
+        to: '/powerbi/refacciones',
+        role: 'powerbi'
+      }
+    ]
+  },
+
+  {
+    label: 'Sucursales',
+    icon: 'fa-solid fa-store',
+    role: 'powerbi',
+    children: [
+      {
+        label: 'Celaya',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/celaya',
+        role: 'powerbi'
+      },
+      {
+        label: 'Irapuato',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      }
+    ]
+  },
+
+  {
+    label: 'Taller',
+    icon: 'fa-solid fa-screwdriver-wrench',
+    role: 'powerbi',
+    children: [
+      {
+        label: 'Tasa de conversiones',
+        icon: 'fa-solid fa-chart-line',
+        to: '/powerbi/taller/conversiones',
+        role: 'powerbi'
+      },
+      {
+        label: 'Pronóstico de servicios',
+        icon: 'fa-solid fa-chart-area',
+        to: '/powerbi/taller/pronosticos',
+        role: 'powerbi'
+      }
+    ]
+  }
+];
+const visiblePowerBiMenu = computed(() => {
+  return powerBiMenu
+    .filter(categoria => checkRole(categoria.role))
+    .map(categoria => ({
+      ...categoria,
+      children: categoria.children.filter(item => checkRole(item.role))
+    }))
+    .filter(categoria => categoria.children.length > 0);
+});
+
 </script>
 
 <style>
@@ -172,14 +234,16 @@ const link = ref("inbox");
 .powerbi-category {
   color: #616161;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
+  padding-left: 30px;
 }
 
-.powerbi-category .q-item {
-  min-height: 40px;
+.powerbi-subcategory {
+  min-height: 38px;
+  padding-left: 50px;
 }
 
-.powerbi-category .q-icon {
+.powerbi-subcategory .q-icon {
   font-size: 18px;
 }
 </style>

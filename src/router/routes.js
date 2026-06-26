@@ -168,7 +168,7 @@ const routes = [
     },
     children: [
       {
-        path: "/powerbi/direccion",
+        path: "/powerbi/historico",
         component: () =>
           import(
             "src/pages/PowerBI/Direccion/DireccionPage.vue"

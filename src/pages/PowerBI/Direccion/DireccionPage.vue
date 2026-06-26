@@ -35,5 +35,5 @@ import HistoricoDashboard from "./HistoricoDashboard.vue";
 
 
 
-const tab = ref("");
+const tab = ref("historico");
 </script>

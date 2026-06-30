@@ -87,14 +87,12 @@ export function crm(/* { to, from, next } */ { to, next }) {
     return next("/login");
   }
 
-  if (!checkRole("Intranet.crm")) {
+  if (!checkRole("crm")) {
     return next("/");
   }
 
   return next();
 }
-
-
 
 export function NT(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();

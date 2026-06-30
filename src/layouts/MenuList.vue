@@ -1,5 +1,28 @@
 <template>
   <q-list bordered padding dense class="rounded-borders text-primary">
+    <!-- POWER BI -->
+    <q-expansion-item expand-separator icon="fa-solid fa-chart-column" label="Power BI" group="powerbi"
+      v-if="checkRole('powerbi')">
+
+      <q-expansion-item v-for="categoria in visiblePowerBiMenu" :key="categoria.label" dense expand-separator
+        :icon="categoria.icon" :label="categoria.label" header-class="powerbi-category" group="powerbi-categoria">
+
+        <q-item v-for="item in categoria.children" :key="item.to" clickable v-ripple :to="item.to"
+          :active="link === item.to" @click="link = item.to" active-class="my-menu-link" class="powerbi-subcategory">
+          <q-item-section avatar>
+            <q-icon :name="item.icon" />
+          </q-item-section>
+
+          <q-item-section>
+            {{ item.label }}
+          </q-item-section>
+
+        </q-item>
+
+      </q-expansion-item>
+
+    </q-expansion-item>
+
     <q-item v-if="checkRole('Intranet.sales')" clickable v-ripple to="/sale" :active="link === 'sale'"
       @click="link = 'sale'" active-class="my-menu-link">
       <q-item-section avatar>
@@ -31,9 +54,9 @@
 
     <!-- módulo Cotización -->
     <q-expansion-item expand-separator icon="fa-solid fa-file-invoice-dollar" label="Cotizaciones" group="somegroup"
-      v-if="checkRole('Intranet.crm')">
+      v-if="checkRole('crm')">
       <q-item clickable v-ripple to="/cotizaciones/pedidosFormalizados" :active="link === 'pedidosFormalizados'"
-        @click="link = 'pedidosFormalizados'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.formalizados')">
+        @click="link = 'pedidosFormalizados'" active-class="my-menu-link" v-if="checkRole('crm.formalizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -42,7 +65,7 @@
       </q-item>
 
       <q-item clickable v-ripple to="/cotizaciones/pedidosAutorizados" :active="link === 'pedidosAutorizados'"
-        @click="link = 'pedidosAutorizados'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.autorizados')">
+        @click="link = 'pedidosAutorizados'" active-class="my-menu-link" v-if="checkRole('crm.autorizados')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -51,7 +74,7 @@
       </q-item>
 
       <q-item clickable v-ripple to="/cotizaciones/asignacionSerie" :active="link === 'asignacionSerie'"
-        @click="link = 'asignacionSerie'" active-class="my-menu-link" v-if="checkRole('Intranet.crm.asignacion_serie')">
+        @click="link = 'asignacionSerie'" active-class="my-menu-link" v-if="checkRole('crm.asignacion_serie')">
         <q-item-section avatar>
           <q-icon name="fa-solid fa-hourglass-half" />
         </q-item-section>
@@ -113,30 +136,6 @@
       <q-item-section>Reportes</q-item-section>
     </q-item>
 
-    <!-- POWER BI -->
-    <!-- POWER BI -->
-    <q-expansion-item expand-separator icon="fa-solid fa-chart-column" label="Power BI" group="powerbi"
-      v-if="checkRole('powerbi')">
-
-      <q-expansion-item v-for="categoria in visiblePowerBiMenu" :key="categoria.label" dense expand-separator
-        :icon="categoria.icon" :label="categoria.label" header-class="powerbi-category" group="powerbi-categoria">
-
-        <q-item v-for="item in categoria.children" :key="item.to" clickable v-ripple :to="item.to"
-          :active="link === item.to" @click="link = item.to" active-class="my-menu-link" class="powerbi-subcategory">
-          <q-item-section avatar>
-            <q-icon :name="item.icon" />
-          </q-item-section>
-
-          <q-item-section>
-            {{ item.label }}
-          </q-item-section>
-
-        </q-item>
-
-      </q-expansion-item>
-
-    </q-expansion-item>
-
   </q-list>
 </template>
 
@@ -189,7 +188,37 @@ const powerBiMenu = [
         icon: 'fa-solid fa-location-dot',
         to: '/powerbi/irapuato',
         role: 'powerbi'
-      }
+      },
+      {
+        label: 'Salamanca',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      },
+      {
+        label: 'Silao',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      },
+      {
+        label: 'Qro 5 de Febrero',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      },
+      {
+        label: 'Qro Colorado',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      },
+      {
+        label: 'San Luis Potosí',
+        icon: 'fa-solid fa-location-dot',
+        to: '/powerbi/irapuato',
+        role: 'powerbi'
+      },
     ]
   },
 

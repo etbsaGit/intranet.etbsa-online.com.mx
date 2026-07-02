@@ -21,8 +21,8 @@
 
     <template #body-cell-asignado="props">
       <q-td :props="props">
-        <q-icon :name="props.value === 'Asignado' ? 'check_circle' : 'cancel'"
-          :color="props.value === 'Asignado' ? 'positive' : 'grey'" size="md" />
+        <q-icon :name="props.value === 'Tractor Asignado' ? 'check_circle' : 'cancel'"
+          :color="props.value === 'Tractor Asignado' ? 'positive' : 'grey'" size="md" />
       </q-td>
     </template>
   </BaseCatalogo>

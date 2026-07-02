@@ -1,6 +1,6 @@
 <template>
   <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Para Asignar/Asignado">
+    url="/api/intranet/trackingAutorizaciones/Asignacion/Para Asignar/Tractor Asignado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">

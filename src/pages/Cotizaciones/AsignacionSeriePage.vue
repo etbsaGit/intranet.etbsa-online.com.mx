@@ -1,6 +1,6 @@
 <template>
   <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Asignacion/Para Asignar/Tractor Asignado">
+    url="/api/intranet/trackingAutorizaciones/Para Asignar/Tractor Asignado">
 
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
@@ -13,8 +13,6 @@
         <!-- Descargar PDF -->
         <q-btn flat round dense icon="download" color="green" @click="descargarPDF(props.row)"
           :loading="loadingPdfId === props.row.id" />
-
-
 
       </q-td>
     </template>

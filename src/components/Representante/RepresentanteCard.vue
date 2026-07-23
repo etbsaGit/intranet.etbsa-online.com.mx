@@ -47,25 +47,25 @@
           <q-item-section>
             <q-item-label>
               <strong>Estado:</strong>
-              {{ row.state_entity.name }}
+              {{ row?.state_entity?.name }}
             </q-item-label>
             <q-item-label>
               <strong>Ciudad:</strong>
-              {{ row.town.name }}
+              {{ row?.town?.name }}
             </q-item-label>
           </q-item-section>
           <q-item-section>
             <q-item-label>
               <strong>Colonia:</strong>
-              {{ row.colonia }}
+              {{ row?.colonia }}
             </q-item-label>
             <q-item-label>
               <strong>Calle:</strong>
-              {{ row.calle }}
+              {{ row?.calle }}
             </q-item-label>
             <q-item-label>
               <strong>Codigo postal:</strong>
-              {{ row.codigo_postal }}
+              {{ row?.codigo_postal }}
             </q-item-label>
           </q-item-section>
         </q-item>

@@ -117,6 +117,20 @@
           ]"
         />
       </q-item-section>
+      <q-item-section>
+        <q-input
+          filled
+          dense
+          v-model="formCliente.correo_institucional"
+          label="Correo Institucional"
+          :rules="[
+            (val) =>
+              !val ||
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ||
+              'Formato de correo inválido',
+          ]"
+        />
+      </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
@@ -306,6 +320,7 @@ const formCliente = ref({
   telefono: cliente ? cliente.telefono : null,
   telefono_casa: cliente ? cliente.telefono_casa : null,
   email: cliente ? cliente.email : null,
+  correo_institucional: cliente ? cliente.correo_institucional : null,
   state_entity_id: cliente ? cliente.state_entity_id : null,
   town_id: cliente ? cliente.town_id : null,
   colonia: cliente ? cliente.colonia : null,

@@ -1,4 +1,4 @@
-import { auth, guest, admin, clientes, sales, NT, invItem, products, crm, reporteCliente, powerbi } from "./middleware";
+import { auth, guest, admin, clientes, sales, NT, invItem, products, productsTractores, productsRiego, crm, reporteCliente, powerbi } from "./middleware";
 
 const routes = [
   {
@@ -79,12 +79,12 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-       middlewares: [products],
+      middlewares: [productsTractores],
     },
     children: [
       {
-        path: "/productos",
-        component: () => import("src/pages/Productos/ProductosPage.vue"),
+        path: "/productos-tractores",
+        component: () => import("src/pages/Productos/Tractores/ProductosTractoresPage.vue"),
       },
     ],
   },
@@ -93,7 +93,21 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
-       middlewares: [crm],
+      middlewares: [productsRiego],
+    },
+    children: [
+      {
+        path: "/productos-riego",
+        component: () => import("src/pages/Productos/Riego/ProductosRiegoPage.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      middlewares: [crm],
     },
     children: [
       {

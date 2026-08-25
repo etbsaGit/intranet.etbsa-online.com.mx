@@ -17,7 +17,21 @@
       <productos-form ref="edit" :producto="item" />
     </template>
 
-    <!-- ícono activo -->
+    <!-- Miniatura de foto -->
+    <template #body-cell-imagen="props">
+      <q-td :props="props">
+        <q-avatar
+          rounded
+          size="40px"
+          v-if="props.row.imagenes && props.row.imagenes.length > 0"
+        >
+          <img :src="props.row.imagenes[0].url" style="object-fit: cover" />
+        </q-avatar>
+        <q-icon v-else name="image_not_supported" color="grey-4" size="md" />
+      </q-td>
+    </template>
+
+    <!-- Ícono activo -->
     <template #body-cell-activo="props">
       <q-td :props="props">
         <q-icon
@@ -35,9 +49,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useCrudStore } from "src/stores/crud";
-import { sendRequest } from "src/boot/functions";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import ProductosForm from "src/components/Productos/Riego/ProductosRiegoForm.vue";
@@ -54,6 +67,12 @@ const columns = [
     name: "actions",
     align: "left",
     field: "actions",
+  },
+  {
+    name: "imagen",
+    label: "Foto",
+    align: "center",
+    field: "imagen",
   },
   {
     name: "name",
@@ -96,6 +115,7 @@ const createItem = async () => {
 
   const data = {
     ...add.value.formProducto,
+    imagenes: add.value.imagenesBase64,
     precios: Object.entries(add.value.precios)
       .filter(([_, precio]) => precio !== null && precio !== "")
       .map(([nivel_id, precio]) => ({
@@ -114,6 +134,7 @@ const updateItem = async (item) => {
 
   const data = {
     ...edit.value.formProducto,
+    imagenes: edit.value.imagenesBase64,
     precios: Object.entries(edit.value.precios)
       .filter(([_, precio]) => precio !== null && precio !== "")
       .map(([nivel_id, precio]) => ({

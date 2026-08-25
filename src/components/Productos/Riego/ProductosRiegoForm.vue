@@ -22,6 +22,7 @@
         />
       </q-item-section>
     </q-item>
+
     <!-- subcategoria -->
     <q-item>
       <q-item-section>
@@ -119,6 +120,7 @@
         />
       </q-item-section>
     </q-item>
+
     <!-- SKU -->
     <q-item>
       <q-item-section>
@@ -133,31 +135,139 @@
       </q-item-section>
     </q-item>
 
-    <q-select
-      v-model="formProducto.currency_id"
-      :options="monedas"
-      label="Moneda"
-      option-value="id"
-      option-label="name"
-      option-disable="inactive"
-      emit-value
-      map-options
-      transition-show="jump-up"
-      transition-hide="jump-up"
-      outlined
-      dense
-      options-dense
-      clearable
-      :rules="[(val) => val !== null || 'Obligatorio']"
-      class="q-mt-sm"
-    />
+    <!-- moneda -->
+    <q-item>
+      <q-item-section>
+        <q-select
+          v-model="formProducto.currency_id"
+          :options="monedas"
+          label="Moneda"
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          outlined
+          dense
+          options-dense
+          clearable
+          :rules="[(val) => val !== null || 'Obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+
     <!-- activo -->
-    <q-toggle
-      v-model="formProducto.active"
-      label="Activo"
-      :true-value="1"
-      :false-value="0"
-    />
+    <q-item>
+      <q-item-section>
+        <q-toggle
+          v-model="formProducto.active"
+          label="Activo"
+          :true-value="1"
+          :false-value="0"
+        />
+      </q-item-section>
+    </q-item>
+
+    <!-- FOTOS / IMÁGENES -->
+    <q-card flat bordered class="q-ma-sm q-pa-sm">
+      <div class="text-subtitle2 q-mb-sm text-grey-8">
+        <q-icon name="photo_library" size="sm" class="q-mr-xs text-primary" />
+        Fotografías del Producto
+      </div>
+
+      <!-- Input para subir fotos -->
+      <q-file
+        v-model="selectedFiles"
+        label="Seleccionar una o varias fotos"
+        outlined
+        dense
+        multiple
+        accept="image/*"
+        append
+        @update:model-value="onFilesSelected"
+      >
+        <template #prepend>
+          <q-icon name="add_a_photo" />
+        </template>
+      </q-file>
+
+      <!-- Vista previa de fotos nuevas por subir -->
+      <div v-if="imagenesBase64.length > 0" class="q-mt-sm">
+        <div class="text-caption text-primary text-weight-bold q-mb-xs">
+          Fotos nuevas por guardar ({{ imagenesBase64.length }}):
+        </div>
+        <div class="row q-gutter-sm">
+          <div
+            v-for="(img, idx) in imagenesBase64"
+            :key="idx"
+            class="relative-position"
+          >
+            <q-img
+              :src="img"
+              style="
+                width: 75px;
+                height: 75px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+              "
+              fit="cover"
+            />
+            <q-btn
+              round
+              dense
+              flat
+              size="xs"
+              color="red"
+              icon="cancel"
+              class="absolute-top-right bg-white"
+              style="top: -6px; right: -6px"
+              @click="removePendingImage(idx)"
+            >
+              <q-tooltip>Quitar foto</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </div>
+
+      <!-- Galería de fotos existentes en S3 -->
+      <div v-if="imagenesExistentes.length > 0" class="q-mt-md">
+        <div class="text-caption text-grey-8 text-weight-bold q-mb-xs">
+          Fotos guardadas actualmente:
+        </div>
+        <div class="row q-gutter-sm">
+          <div
+            v-for="img in imagenesExistentes"
+            :key="img.id"
+            class="relative-position"
+          >
+            <q-img
+              :src="img.url"
+              style="
+                width: 75px;
+                height: 75px;
+                border-radius: 8px;
+                border: 1px solid #1976d2;
+              "
+              fit="cover"
+            />
+            <q-btn
+              round
+              dense
+              size="xs"
+              color="red"
+              icon="delete"
+              class="absolute-top-right"
+              style="top: -6px; right: -6px"
+              @click="deleteExistingImage(img)"
+            >
+              <q-tooltip>Eliminar foto de S3</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </div>
+    </q-card>
 
     <!-- precios -->
     <q-item-section
@@ -194,6 +304,11 @@ const proveedores = ref([]);
 const nivelesPartner = ref([]);
 const precios = ref({});
 const monedas = ref([]);
+
+// Imágenes
+const selectedFiles = ref(null);
+const imagenesBase64 = ref([]);
+const imagenesExistentes = ref([]);
 
 const formProducto = ref({
   id: null,
@@ -232,6 +347,64 @@ const subcategoriasFiltradas = computed(() => {
   );
 });
 
+// Conversión y compresión a WebP
+const convertFileToWebp = (file, quality = 0.85) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        // Convertir a formato WebP con calidad 85%
+        const webpBase64 = canvas.toDataURL("image/webp", quality);
+        resolve(webpBase64);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+// Manejo de archivos a Base64 WebP
+const onFilesSelected = async (files) => {
+  if (!files) return;
+  const list = Array.isArray(files) ? files : [files];
+
+  for (const file of list) {
+    try {
+      const webpBase64 = await convertFileToWebp(file, 0.85);
+      imagenesBase64.value.push(webpBase64);
+    } catch (error) {
+      console.error("Error al convertir la imagen a WebP:", error);
+    }
+  }
+
+  selectedFiles.value = null; // limpia el input para permitir agregar más
+};
+
+const removePendingImage = (index) => {
+  imagenesBase64.value.splice(index, 1);
+};
+
+const deleteExistingImage = async (img) => {
+  await sendRequest(
+    "DELETE",
+    null,
+    `/api/intranet/product-riego-image/${img.id}`
+  );
+  imagenesExistentes.value = imagenesExistentes.value.filter(
+    (i) => i.id !== img.id
+  );
+};
+
 const loadProducto = (prod) => {
   if (!prod) return;
 
@@ -254,6 +427,12 @@ const loadProducto = (prod) => {
       precios.value[p.nivel_partner_id] = Number(p.precio);
     });
   }
+
+  // Cargar fotos existentes del producto
+  imagenesExistentes.value = Array.isArray(prod.imagenes)
+    ? [...prod.imagenes]
+    : [];
+  imagenesBase64.value = [];
 };
 
 const validate = async () => {
@@ -286,6 +465,7 @@ onMounted(() => {
 defineExpose({
   formProducto,
   precios,
+  imagenesBase64,
   validate,
 });
 </script>

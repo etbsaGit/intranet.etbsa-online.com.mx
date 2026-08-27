@@ -78,6 +78,35 @@ export function products(/* { to, from, next } */ { to, next }) {
 
   return next();
 }
+export function productsTractores(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.products.tractores")) {
+    return next("/");
+  }
+
+  return next();
+}
+
+export function productsRiego(/* { to, from, next } */ { to, next }) {
+  const auth = useAuthStore();
+
+  if (!auth.user) {
+    auth.returnUrl = to.fullPath;
+    return next("/login");
+  }
+
+  if (!checkRole("Intranet.products.riego")) {
+    return next("/");
+  }
+
+  return next();
+}
 
 export function crm(/* { to, from, next } */ { to, next }) {
   const auth = useAuthStore();

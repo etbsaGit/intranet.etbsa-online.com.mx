@@ -117,6 +117,20 @@
           ]"
         />
       </q-item-section>
+      <q-item-section>
+        <q-input
+          filled
+          dense
+          v-model="formCliente.correo_institucional"
+          label="Correo Institucional"
+          :rules="[
+            (val) =>
+              !val ||
+              /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ||
+              'Formato de correo inválido',
+          ]"
+        />
+      </q-item-section>
     </q-item>
     <q-item>
       <q-item-section>
@@ -277,6 +291,36 @@
         />
       </q-item-section>
     </q-item>
+
+    <!-- niveles de partner -->
+    <q-separator />
+    <q-item>
+      <q-item-section>
+        <q-item-label caption align="center">
+          -Niveles de Partner-
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-item>
+      <q-item-section>
+        <q-select
+          v-model="formCliente.nivel_partner_riego_id"
+          :options="crud.items.nivelesPartner"
+          label="Nivel de Partner Riego"
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          clearable
+        />
+      </q-item-section>
+    </q-item>
   </q-form>
 </template>
 
@@ -306,6 +350,7 @@ const formCliente = ref({
   telefono: cliente ? cliente.telefono : null,
   telefono_casa: cliente ? cliente.telefono_casa : null,
   email: cliente ? cliente.email : null,
+  correo_institucional: cliente ? cliente.correo_institucional : null,
   state_entity_id: cliente ? cliente.state_entity_id : null,
   town_id: cliente ? cliente.town_id : null,
   colonia: cliente ? cliente.colonia : null,
@@ -318,6 +363,7 @@ const formCliente = ref({
   construction_classification_id: cliente
     ? cliente.construction_classification_id
     : null,
+  nivel_partner_riego_id: cliente ? cliente.nivel_partner_riego_id : null,
 });
 
 const getOptions = async () => {

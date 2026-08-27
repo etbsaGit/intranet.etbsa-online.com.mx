@@ -19,16 +19,16 @@
 
   <q-tab-panels v-model="tab" animated>
     <q-tab-panel name="products">
-      <productos-index/>
+      <productos-index />
     </q-tab-panel>
     <q-tab-panel name="contra_pesos">
-      <contra-pesos-index/>
+      <contra-pesos-index />
     </q-tab-panel>
     <q-tab-panel name="condiciones">
-      <condicion-pago-index/>
+      <condicion-pago-index />
     </q-tab-panel>
     <q-tab-panel name="categories">
-      <categorias-index/>
+      <categorias-index />
     </q-tab-panel>
     <q-tab-panel name="subcategories">
       <sub-categorias-index />
@@ -37,23 +37,21 @@
       <marcas-index />
     </q-tab-panel>
     <q-tab-panel name="suppliers">
-      <proveedores-index/>
+      <proveedores-index />
     </q-tab-panel>
   </q-tab-panels>
 </template>
 
 <script setup>
-
 import ProveedoresIndex from "src/components/Productos/Proveedores/ProveedoresIndex.vue";
 import MarcasIndex from "src/components/Productos/Marcas/MarcasIndex.vue";
 import CategoriasIndex from "src/components/Productos/Categorias/CategoriasIndex.vue";
 import SubCategoriasIndex from "src/components/Productos/Categorias/SubCategoriasIndex.vue";
-import ProductosIndex from "src/components/Productos/Productos/ProductosIndex.vue";
+import ProductosIndex from "src/components/Productos/Tractores/ProductosIndex.vue";
 import CondicionPagoIndex from "src/components/Productos/CondicionPago/CondicionPagoIndex.vue";
 import ContraPesosIndex from "src/components/Productos/ContraPesos/ContraPesosIndex.vue";
 
 import { ref } from "vue";
-
 
 const tab = ref("products");
 </script>

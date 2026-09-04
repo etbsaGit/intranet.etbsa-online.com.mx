@@ -91,8 +91,43 @@
           </q-tooltip>
         </q-btn>
       </q-page-sticky>
+
+      <q-page-sticky position="bottom-right" :offset="[50, 50]">
+        <q-btn
+          fab
+          icon="local_atm"
+          color="green"
+          class="pulse-btn"
+          @click="openCreditoModal"
+        >
+          <q-tooltip
+            class="bg-primary text-white text-body2"
+            :offset="[10, 10]"
+            anchor="center right"
+            self="center left"
+          >
+            Solicitud de Crédito Interno
+          </q-tooltip>
+        </q-btn>
+      </q-page-sticky>
     </template>
   </q-splitter>
+
+  <BaseDialog
+    fullWidth
+    v-model="showCreditoModal"
+    mode="create"
+    title-create="Solicitud de Crédito Interno"
+    button-label-create="Enviar Solicitud"
+    @submit="postCredito"
+  >
+    <template #form>
+      <cliente-credito-form
+        ref="refCredito"
+        :cliente="currentCliente || cliente"
+      />
+    </template>
+  </BaseDialog>
 </template>
 
 <script setup>
@@ -101,7 +136,9 @@ import { useCrudStore } from "src/stores/crud";
 
 const crud = useCrudStore();
 
+import BaseDialog from "src/bases/BaseDialog.vue";
 import ClienteForm from "src/components/Cliente/ClienteForm.vue";
+import ClienteCreditoForm from "src/components/Cliente/ClienteCreditoForm.vue";
 import ReferenciaIndex from "src/components/Referencia/ReferenciaIndex.vue";
 import RepresentanteCard from "src/components/Representante/RepresentanteCard.vue";
 import MaquinaTable from "src/components/Maquina/MaquinaTable.vue";
@@ -126,6 +163,8 @@ const tab = ref("info");
 const splitterModel = ref(270);
 const currentCliente = ref(null);
 const edit = ref(null);
+const showCreditoModal = ref(false);
+const refCredito = ref(null);
 let animationFrame = null;
 
 // Definición de tabs dinámicos
@@ -278,6 +317,25 @@ const putItem = async () => {
 
 const sendEmail = async () => {
   await crud.getItems(baseURL.value + "/mail/" + cliente.id);
+};
+
+const openCreditoModal = () => {
+  showCreditoModal.value = true;
+};
+
+const postCredito = async () => {
+  if (!refCredito.value) return;
+
+  const data = { ...refCredito.value.formCredito };
+
+  await crud.postItem(
+    "/api/intranet/creditoInterno",
+    data,
+    refCredito.value.validate,
+    () => {
+      showCreditoModal.value = false;
+    }
+  );
 };
 
 onMounted(() => {

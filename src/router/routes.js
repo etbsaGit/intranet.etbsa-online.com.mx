@@ -1,4 +1,19 @@
-import { auth, guest, admin, clientes, sales, NT, invItem, products, productsTractores, productsRiego, crm, reporteCliente, powerbi } from "./middleware";
+import {
+  auth,
+  guest,
+  admin,
+  clientes,
+  sales,
+  NT,
+  invItem,
+  products,
+  productsTractores,
+  productsRiego,
+  crm,
+  reporteCliente,
+  powerbi,
+  creditoInterno,
+} from "./middleware";
 
 const routes = [
   {
@@ -65,6 +80,20 @@ const routes = [
     path: "",
     component: () => import("layouts/MainLayout.vue"),
     meta: {
+      middlewares: [creditoInterno],
+    },
+    children: [
+      {
+        path: "/creditoint/dashboard",
+        component: () => import("src/pages/Creditoint/AllCreditoIntIndex.vue"),
+      },
+    ],
+  },
+
+  {
+    path: "",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
       middlewares: [sales],
     },
     children: [
@@ -84,7 +113,8 @@ const routes = [
     children: [
       {
         path: "/productos-tractores",
-        component: () => import("src/pages/Productos/Tractores/ProductosTractoresPage.vue"),
+        component: () =>
+          import("src/pages/Productos/Tractores/ProductosTractoresPage.vue"),
       },
     ],
   },
@@ -98,7 +128,8 @@ const routes = [
     children: [
       {
         path: "/productos-riego",
-        component: () => import("src/pages/Productos/Riego/ProductosRiegoPage.vue"),
+        component: () =>
+          import("src/pages/Productos/Riego/ProductosRiegoPage.vue"),
       },
     ],
   },
@@ -112,20 +143,21 @@ const routes = [
     children: [
       {
         path: "/cotizaciones/pedidosFormalizados",
-        component: () => import("src/pages/Cotizaciones/PedidosFormalizadosPage.vue"),
+        component: () =>
+          import("src/pages/Cotizaciones/PedidosFormalizadosPage.vue"),
       },
       {
         path: "/cotizaciones/pedidosAutorizados",
-        component: () => import("src/pages/Cotizaciones/PedidosAutorizadosPage.vue"),
+        component: () =>
+          import("src/pages/Cotizaciones/PedidosAutorizadosPage.vue"),
       },
       {
         path: "/cotizaciones/asignacionSerie",
-        component: () => import("src/pages/Cotizaciones/AsignacionSeriePage.vue"),
+        component: () =>
+          import("src/pages/Cotizaciones/AsignacionSeriePage.vue"),
       },
     ],
   },
-
-
 
   {
     path: "",
@@ -168,9 +200,7 @@ const routes = [
       {
         path: "/reportes",
         component: () =>
-          import(
-            "src/pages/ReporteClientes/ReporteClientesPage.vue"
-          ),
+          import("src/pages/ReporteClientes/ReporteClientesPage.vue"),
       },
     ],
   },
@@ -184,9 +214,7 @@ const routes = [
       {
         path: "/powerbi/historico",
         component: () =>
-          import(
-            "src/pages/PowerBI/Direccion/DireccionPage.vue"
-          ),
+          import("src/pages/PowerBI/Direccion/DireccionPage.vue"),
       },
     ],
   },

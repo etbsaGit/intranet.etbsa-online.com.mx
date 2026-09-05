@@ -72,6 +72,23 @@
       <q-item-section>Clientes</q-item-section>
     </q-item>
 
+    <!-- credito Interno -->
+    <q-item
+      v-if="checkRole('Intranet.CreditoInterno')"
+      clickable
+      v-ripple
+      to="/creditoint"
+      :active="link === 'creditoint'"
+      @click="link = 'creditoint'"
+      active-class="my-menu-link"
+    >
+      <q-item-section avatar>
+        <q-icon name="fa-solid fa-credit-card" />
+      </q-item-section>
+
+      <q-item-section>Crédito Interno</q-item-section>
+    </q-item>
+
     <!-- Módulo Productos -->
 
     <q-expansion-item

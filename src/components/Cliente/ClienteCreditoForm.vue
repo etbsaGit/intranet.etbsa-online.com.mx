@@ -232,7 +232,7 @@
             class="text-primary text-weight-bold"
           >
             -Programación de Fechas de Pago ({{ formCredito.pagos.length }}
-            {{ formCredito.pagos.length === 1 ? "Pago" : "Pagos" }})-
+            {{ formCredito.pagos.length === 1 ? "Registro" : "Registros" }})-
           </q-item-label>
         </q-item-section>
       </q-item>
@@ -243,14 +243,21 @@
           :key="index"
           class="col-12 col-sm-6 col-md-4"
         >
-          <q-card flat bordered class="q-pa-xs bg-grey-1">
+          <q-card
+            flat
+            bordered
+            :class="
+              pago.es_anticipo ? 'q-pa-xs bg-amber-1' : 'q-pa-xs bg-grey-1'
+            "
+          >
             <q-item dense class="q-pa-xs items-center">
               <q-item-section avatar style="min-width: 90px">
                 <q-chip
-                  color="primary"
+                  :color="pago.es_anticipo ? 'amber-9' : 'primary'"
                   text-color="white"
                   dense
                   class="text-weight-bold q-ma-none"
+                  :icon="pago.es_anticipo ? 'savings' : undefined"
                 >
                   {{ pago.etiqueta }}
                 </q-chip>
@@ -261,11 +268,16 @@
                   v-model="pago.fecha"
                   filled
                   dense
-                  label="Fecha de pago"
+                  :label="
+                    pago.es_anticipo
+                      ? 'Fecha pago de anticipo'
+                      : 'Fecha de pago'
+                  "
                   mask="####-##-##"
                   :rules="[
                     (val) => !!val || 'Fecha obligatoria',
-                    (val) => (validateFechaPago ? validateFechaPago(val, index) : true),
+                    (val) =>
+                      validateFechaPago ? validateFechaPago(val, index) : true,
                   ]"
                   hide-bottom-space
                 >
@@ -280,7 +292,10 @@
                           minimal
                           v-model="pago.fecha"
                           mask="YYYY-MM-DD"
-                          :options="(d) => (isDateAllowed ? isDateAllowed(d, index) : true)"
+                          :options="
+                            (d) =>
+                              isDateAllowed ? isDateAllowed(d, index) : true
+                          "
                         >
                           <div class="row items-center justify-end">
                             <q-btn
@@ -301,6 +316,111 @@
         </div>
       </div>
     </template>
+
+    <q-separator class="q-my-md" />
+
+    <!-- 📎 Sección de Documentación Adjunta -->
+    <q-item>
+      <q-item-section>
+        <q-item-label
+          caption
+          align="center"
+          class="text-primary text-weight-bold"
+        >
+          -Documentación del Crédito (Opcional)-
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+
+    <div class="row q-col-gutter-sm q-px-md q-pb-sm items-center">
+      <!-- Droplist de Tipos de Documento -->
+      <div class="col-12 col-md-5">
+        <q-select
+          v-model="tempDoc.tipo"
+          :options="tiposDocumentos"
+          label="Tipo de documento"
+          filled
+          dense
+          options-dense
+          clearable
+        />
+      </div>
+
+      <!-- Selector de Archivo (Solo PDF) -->
+      <div class="col-12 col-md-5">
+        <q-file
+          v-model="tempDoc.file"
+          filled
+          dense
+          label="Seleccionar archivo (Solo PDF)"
+          accept=".pdf,application/pdf"
+          clearable
+          @update:model-value="onFileSelected"
+        >
+          <template v-slot:prepend>
+            <q-icon name="picture_as_pdf" color="red-7" />
+          </template>
+        </q-file>
+      </div>
+
+      <!-- Botón Agregar Documento -->
+      <div class="col-12 col-md-2 text-center">
+        <q-btn
+          label="Adjuntar"
+          icon="add"
+          color="primary"
+          dense
+          class="full-width q-py-xs"
+          :disable="!tempDoc.tipo || !tempDoc.base64"
+          @click="agregarArchivo"
+        />
+      </div>
+    </div>
+
+    <!-- Lista de Archivos Adjuntos -->
+    <div
+      v-if="formCredito.archivos && formCredito.archivos.length > 0"
+      class="q-px-md q-pb-sm"
+    >
+      <q-list bordered separator class="rounded-borders bg-white">
+        <q-item
+          v-for="(arch, idx) in formCredito.archivos"
+          :key="idx"
+          dense
+          class="q-py-xs"
+        >
+          <q-item-section avatar style="min-width: 36px">
+            <q-icon
+              name="picture_as_pdf"
+              color="red-7"
+            />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label class="text-weight-bold text-primary">
+              {{ arch.tipo }}
+            </q-item-label>
+            <q-item-label caption class="text-grey-8">
+              {{ arch.nombre }}
+              <span v-if="arch.size" class="text-grey-6">({{ arch.size }})</span>
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side>
+            <q-btn
+              flat
+              round
+              dense
+              color="negative"
+              icon="delete"
+              @click="eliminarArchivo(idx)"
+            >
+              <q-tooltip>Eliminar documento</q-tooltip>
+            </q-btn>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
 
     <q-separator class="q-my-sm" />
 
@@ -358,9 +478,90 @@ const formCredito = ref({
   notificado_id: null,
   numero_pagos: null,
   pagos: [],
+  archivos: [],
   motivo: null,
   notas: null,
 });
+
+const tiposDocumentos = [
+  "INE",
+  "Comprobante de Domicilio",
+  "Comprobante de Ingreso",
+  "CURP",
+  "RFC",
+  "Estado de Cuenta",
+  "Cotización",
+  "Otro",
+];
+
+const tempDoc = ref({
+  tipo: null,
+  file: null,
+  nombre: null,
+  extension: null,
+  size: null,
+  base64: null,
+});
+
+const onFileSelected = (file) => {
+  if (!file) {
+    tempDoc.value.nombre = null;
+    tempDoc.value.extension = null;
+    tempDoc.value.size = null;
+    tempDoc.value.base64 = null;
+    return;
+  }
+
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (ext !== "pdf") {
+    tempDoc.value.file = null;
+    tempDoc.value.nombre = null;
+    tempDoc.value.extension = null;
+    tempDoc.value.size = null;
+    tempDoc.value.base64 = null;
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    tempDoc.value.nombre = file.name;
+    tempDoc.value.extension = "pdf";
+    tempDoc.value.size = (file.size / 1024).toFixed(1) + " KB";
+    tempDoc.value.base64 = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+const agregarArchivo = () => {
+  if (!tempDoc.value.tipo || !tempDoc.value.base64) return;
+
+  if (!formCredito.value.archivos) {
+    formCredito.value.archivos = [];
+  }
+
+  formCredito.value.archivos.push({
+    tipo: tempDoc.value.tipo,
+    nombre: tempDoc.value.nombre,
+    extension: tempDoc.value.extension,
+    size: tempDoc.value.size,
+    base64: tempDoc.value.base64,
+  });
+
+  tempDoc.value = {
+    tipo: null,
+    file: null,
+    nombre: null,
+    extension: null,
+    size: null,
+    base64: null,
+  };
+};
+
+const eliminarArchivo = (index) => {
+  if (formCredito.value.archivos) {
+    formCredito.value.archivos.splice(index, 1);
+  }
+};
 
 const seleccionarGerenteAutomatico = () => {
   const gerentes =
@@ -418,7 +619,9 @@ const validateFechaPago = (val, index) => {
   if (index === 0 || !val) return true;
   const prevPago = formCredito.value.pagos?.[index - 1];
   if (prevPago?.fecha && val < prevPago.fecha) {
-    return `No puede ser anterior al ${prevPago.etiqueta || "pago anterior"}`;
+    return `No puede ser anterior a la fecha de ${
+      prevPago.etiqueta || "pago anterior"
+    }`;
   }
   return true;
 };
@@ -437,29 +640,51 @@ const getOrdinal = (n) => {
   return `${n}° Pago`;
 };
 
+const regenerarPagos = () => {
+  const tieneAnticipo = Number(formCredito.value.anticipo) > 0;
+  const numPagos = parseInt(formCredito.value.numero_pagos, 10);
+  const totalPagos = numPagos && numPagos >= 1 ? Math.min(numPagos, 120) : 0;
+
+  if (!tieneAnticipo && totalPagos === 0) {
+    formCredito.value.pagos = [];
+    return;
+  }
+
+  const currentPagos = formCredito.value.pagos || [];
+  const prevAnticipo = currentPagos.find((p) => p.es_anticipo);
+  const prevNormales = currentPagos.filter((p) => !p.es_anticipo);
+
+  const newPagos = [];
+  let contadorNumero = 1;
+
+  // 1. Si hay anticipo, se agrega como el primer pago en la lista
+  if (tieneAnticipo) {
+    newPagos.push({
+      numero: contadorNumero++,
+      etiqueta: "Anticipo",
+      es_anticipo: true,
+      fecha: prevAnticipo ? prevAnticipo.fecha : null,
+    });
+  }
+
+  // 2. Pagos restantes programados (1er Pago, 2do Pago, ...)
+  for (let i = 1; i <= totalPagos; i++) {
+    const existing = prevNormales[i - 1];
+    newPagos.push({
+      numero: contadorNumero++,
+      etiqueta: getOrdinal(i),
+      es_anticipo: false,
+      fecha: existing ? existing.fecha : null,
+    });
+  }
+
+  formCredito.value.pagos = newPagos;
+};
+
 watch(
-  () => formCredito.value.numero_pagos,
-  (val) => {
-    const num = parseInt(val, 10);
-    if (!num || num < 1) {
-      formCredito.value.pagos = [];
-      return;
-    }
-
-    const total = Math.min(num, 120);
-    const currentPagos = formCredito.value.pagos || [];
-    const newPagos = [];
-
-    for (let i = 1; i <= total; i++) {
-      const existing = currentPagos[i - 1];
-      newPagos.push({
-        numero: i,
-        etiqueta: getOrdinal(i),
-        fecha: existing ? existing.fecha : null,
-      });
-    }
-
-    formCredito.value.pagos = newPagos;
+  [() => formCredito.value.numero_pagos, () => formCredito.value.anticipo],
+  () => {
+    regenerarPagos();
   }
 );
 

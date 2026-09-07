@@ -84,8 +84,9 @@ const routes = [
     },
     children: [
       {
-        path: "/creditoint/dashboard",
-        component: () => import("src/pages/Creditoint/AllCreditoIntIndex.vue"),
+        path: "/creditoint",
+        component: () =>
+          import("src/pages/CreditoInterno/CreditoInternoIndex.vue"),
       },
     ],
   },

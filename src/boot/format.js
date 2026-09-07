@@ -41,3 +41,34 @@ export const years = () => {
   const current = new Date().getFullYear();
   return Array.from({ length: 4 }, (_, i) => current - 2 + i);
 };
+
+export function formatFechaLarga(dateStr) {
+  if (!dateStr) return "N/A";
+  const cleanDate = dateStr.toString().substring(0, 10);
+  const parts = cleanDate.split("-");
+  if (parts.length !== 3) return dateStr;
+
+  const year = parts[0];
+  const monthIdx = parseInt(parts[1], 10) - 1;
+  const day = parts[2].padStart(2, "0");
+
+  const meses = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  if (monthIdx < 0 || monthIdx > 11) return dateStr;
+
+  return `${day} de ${meses[monthIdx]} del ${year}`;
+}
+

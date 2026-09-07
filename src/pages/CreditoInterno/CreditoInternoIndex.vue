@@ -199,7 +199,7 @@
       </q-td>
     </template>
 
-    <!-- Columna: Acciones / Detalles e Historial -->
+    <!-- Columna: Acciones / Detalles, Historial y Pagos -->
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props" align="center">
         <div class="row items-center justify-center q-gutter-xs no-wrap">
@@ -212,6 +212,16 @@
             @click="verDetalles(props.row)"
           >
             <q-tooltip class="bg-primary">Ver detalles completos</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="payments"
+            color="teal-8"
+            @click="verPagos(props.row)"
+          >
+            <q-tooltip class="bg-teal-8">Control y gestión de pagos</q-tooltip>
           </q-btn>
           <q-btn
             flat
@@ -230,6 +240,13 @@
 
   <!-- Modal de Detalles modular -->
   <CreditoDetallesModal v-model="showDetallesModal" :credito="selectedItem" />
+
+  <!-- Modal de Pagos del Crédito -->
+  <CreditoPagosModal
+    v-model="showPagosModal"
+    :credito="selectedPagosItem"
+    @updated="onPagosUpdated"
+  />
 
   <!-- Modal de Historial de Cambios -->
   <CreditoHistorialModal
@@ -251,9 +268,13 @@ import BaseCatalogo from "src/bases/BaseCatalogo.vue";
 import CreditoFiltros from "src/components/CreditoInterno/CreditoFiltros.vue";
 import CreditoDetallesModal from "src/components/CreditoInterno/CreditoDetallesModal.vue";
 import CreditoHistorialModal from "src/components/CreditoInterno/CreditoHistorialModal.vue";
+import CreditoPagosModal from "src/components/CreditoInterno/CreditoPagosModal.vue";
 
 const showDetallesModal = ref(false);
 const selectedItem = ref(null);
+
+const showPagosModal = ref(false);
+const selectedPagosItem = ref(null);
 
 const showHistorialModal = ref(false);
 const selectedHistorialItem = ref(null);
@@ -332,9 +353,26 @@ const verDetalles = (row) => {
   showDetallesModal.value = true;
 };
 
+const verPagos = (row) => {
+  selectedPagosItem.value = row;
+  showPagosModal.value = true;
+};
+
 const verHistorial = (row) => {
   selectedHistorialItem.value = row;
   showHistorialModal.value = true;
+};
+
+const onPagosUpdated = async () => {
+  await crud.getPaginatedItems("/api/intranet/creditoInternos");
+  if (selectedPagosItem.value?.id) {
+    const updated = (crud.paginatedItems || []).find(
+      (c) => c.id === selectedPagosItem.value.id
+    );
+    if (updated) {
+      selectedPagosItem.value = updated;
+    }
+  }
 };
 
 const getOptions = async () => {

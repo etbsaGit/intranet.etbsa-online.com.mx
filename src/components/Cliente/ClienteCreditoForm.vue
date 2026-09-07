@@ -157,6 +157,52 @@
     <q-item>
       <q-item-section class="col-12 col-md-6">
         <q-select
+          v-model="formCredito.asesor_id"
+          :options="filterEmpleados"
+          label="Asesor"
+          option-value="id"
+          option-label="nombreCompleto"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          use-input
+          input-debounce="0"
+          @filter="filterEmpleadosFn"
+          :clearable="puedeSeleccionarAsesor"
+          :disable="!puedeSeleccionarAsesor"
+          :rules="[(val) => !!val || 'El asesor es obligatorio']"
+        />
+      </q-item-section>
+
+      <q-item-section class="col-12 col-md-6">
+        <q-select
+          disable
+          v-model="formCredito.sucursal_id"
+          :options="crud.items.sucursales || []"
+          label="Sucursal"
+          option-value="id"
+          option-label="nombre"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          :rules="[(val) => !!val || 'La sucursal es obligatoria']"
+        />
+      </q-item-section>
+    </q-item>
+
+    <q-item>
+      <q-item-section class="col-12 col-md-6">
+        <q-select
           v-model="formCredito.linea_id"
           :options="crud.items.creditoLineas || []"
           label="Línea de crédito"
@@ -390,10 +436,7 @@
           class="q-py-xs"
         >
           <q-item-section avatar style="min-width: 36px">
-            <q-icon
-              name="picture_as_pdf"
-              color="red-7"
-            />
+            <q-icon name="picture_as_pdf" color="red-7" />
           </q-item-section>
 
           <q-item-section>
@@ -402,7 +445,9 @@
             </q-item-label>
             <q-item-label caption class="text-grey-8">
               {{ arch.nombre }}
-              <span v-if="arch.size" class="text-grey-6">({{ arch.size }})</span>
+              <span v-if="arch.size" class="text-grey-6"
+                >({{ arch.size }})</span
+              >
             </q-item-label>
           </q-item-section>
 
@@ -459,10 +504,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from "vue";
+import { ref, watch, onMounted, computed } from "vue";
 import { formatPhoneNumber } from "src/boot/format";
 import { useCrudStore } from "src/stores/crud";
 import { useAuthStore } from "src/stores/auth";
+import { checkRole } from "src/boot/functions";
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -470,11 +516,52 @@ const crud = useCrudStore();
 const authStore = useAuthStore();
 const myForm = ref(null);
 
+const puedeSeleccionarAsesor = computed(() => {
+  const roles = authStore.authUser?.roles || [];
+  return (
+    roles.some(
+      (r) =>
+        r.name === "Admin" ||
+        r.name === "Credito" ||
+        r.name === "Crédito" ||
+        r.name === "Intranet.CreditoInterno"
+    ) ||
+    checkRole("Admin") ||
+    checkRole("Credito")
+  );
+});
+
+const filterEmpleados = ref([]);
+
+const filterEmpleadosFn = (val, update) => {
+  const lista = crud.items.empleados || [];
+  if (val === "") {
+    update(() => {
+      filterEmpleados.value = lista;
+    });
+    return;
+  }
+
+  update(() => {
+    const needle = val.toLowerCase();
+    filterEmpleados.value = lista.filter(
+      (empleado) =>
+        (empleado.nombreCompleto || "").toLowerCase().indexOf(needle) > -1
+    );
+  });
+};
+
 const formCredito = ref({
   cliente_id: cliente ? cliente.id : null,
   monto_solicitado: null,
   anticipo: null,
   linea_id: null,
+  sucursal_id:
+    authStore.authUser?.empleado?.sucursal_id ||
+    authStore.authUser?.empleado?.sucursal?.id ||
+    null,
+  asesor_id:
+    authStore.authUser?.empleado?.id || authStore.authUser?.empleado_id || null,
   notificado_id: null,
   numero_pagos: null,
   pagos: [],
@@ -568,13 +655,32 @@ const seleccionarGerenteAutomatico = () => {
     crud.items.creditoInternos?.gerentes || crud.items.gerentes || [];
   if (!gerentes || gerentes.length === 0) return;
 
-  const empleado = authStore.authUser?.empleado;
-  const sucursalId = empleado?.sucursal_id || empleado?.sucursal?.id;
-  const sucursalNombre = (empleado?.sucursal?.nombre || "")
-    .toLowerCase()
-    .trim();
+  // 1. Obtener el sucursal_id actual del formulario, del asesor seleccionado o del empleado
+  let sucursalId = formCredito.value.sucursal_id;
+  let sucursalNombre = "";
 
-  // 1. Buscar gerente de la misma sucursal del empleado
+  if (sucursalId && crud.items.sucursales) {
+    const suc = (crud.items.sucursales || []).find((s) => s.id === sucursalId);
+    if (suc) {
+      sucursalNombre = (suc.nombre || "").toLowerCase().trim();
+    }
+  }
+
+  if (!sucursalId) {
+    const asesor = (crud.items.empleados || []).find(
+      (e) => e.id === formCredito.value.asesor_id
+    );
+    sucursalId = asesor?.sucursal_id || asesor?.sucursal?.id;
+    sucursalNombre = (asesor?.sucursal?.nombre || "").toLowerCase().trim();
+  }
+
+  if (!sucursalId) {
+    const empleado = authStore.authUser?.empleado;
+    sucursalId = empleado?.sucursal_id || empleado?.sucursal?.id;
+    sucursalNombre = (empleado?.sucursal?.nombre || "").toLowerCase().trim();
+  }
+
+  // 2. Buscar gerente de la misma sucursal
   let gerenteSeleccionado = null;
 
   if (sucursalId) {
@@ -589,23 +695,85 @@ const seleccionarGerenteAutomatico = () => {
     );
   }
 
-  // 2. Si no hay gerente de la sucursal del empleado, buscar gerente de la sucursal CELAYA
+  // 3. Si no hay gerente de la sucursal, buscar gerente de la sucursal CELAYA
   if (!gerenteSeleccionado) {
     gerenteSeleccionado = gerentes.find((g) =>
       (g.sucursal?.nombre || "").toLowerCase().includes("celaya")
     );
   }
 
-  // 3. Asignar automáticamente a formCredito.notificado_id
+  // 4. Asignar automáticamente a formCredito.notificado_id
   if (gerenteSeleccionado) {
     formCredito.value.notificado_id = gerenteSeleccionado.id;
   }
 };
 
-const getOptions = async () => {
-  await crud.getItems("/api/intranet/creditoInternos/options");
+const actualizarSucursalPorAsesor = () => {
+  const asesorId = formCredito.value.asesor_id;
+  if (!asesorId) {
+    formCredito.value.sucursal_id = null;
+    seleccionarGerenteAutomatico();
+    return;
+  }
+
+  const empleados = crud.items.empleados || [];
+  const asesor = empleados.find((e) => e.id === asesorId);
+
+  if (asesor) {
+    const sucursalId = asesor.sucursal_id || asesor.sucursal?.id;
+    if (sucursalId) {
+      formCredito.value.sucursal_id = sucursalId;
+    }
+  } else if (authStore.authUser?.empleado?.id === asesorId) {
+    const sucursalId =
+      authStore.authUser.empleado.sucursal_id ||
+      authStore.authUser.empleado.sucursal?.id;
+    if (sucursalId) {
+      formCredito.value.sucursal_id = sucursalId;
+    }
+  }
+
   seleccionarGerenteAutomatico();
 };
+
+const asignarEmpleadoPorDefecto = () => {
+  const empleadoActual = authStore.authUser?.empleado;
+  const empleadoId = empleadoActual?.id || authStore.authUser?.empleado_id;
+
+  if (!puedeSeleccionarAsesor.value) {
+    // Si NO es Admin ni Credito, forzar su empleado
+    if (empleadoId) {
+      formCredito.value.asesor_id = empleadoId;
+    }
+  } else {
+    // Si es Admin o Credito, si aún no hay asesor seleccionado, poner el del usuario logueado si existe
+    if (!formCredito.value.asesor_id && empleadoId) {
+      formCredito.value.asesor_id = empleadoId;
+    }
+  }
+
+  actualizarSucursalPorAsesor();
+};
+
+const getOptions = async () => {
+  await crud.getItems("/api/intranet/creditoInternos/options");
+  filterEmpleados.value = crud.items.empleados || [];
+  asignarEmpleadoPorDefecto();
+};
+
+watch(
+  () => formCredito.value.asesor_id,
+  () => {
+    actualizarSucursalPorAsesor();
+  }
+);
+
+watch(
+  () => formCredito.value.sucursal_id,
+  () => {
+    seleccionarGerenteAutomatico();
+  }
+);
 
 const isDateAllowed = (dateString, index) => {
   if (!dateString || index === 0) return true;

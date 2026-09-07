@@ -72,3 +72,21 @@ export function formatFechaLarga(dateStr) {
   return `${day} de ${meses[monthIdx]} del ${year}`;
 }
 
+export function formatFechaHora(dateStr) {
+  if (!dateStr) return "N/A";
+  const fecha = formatFechaLarga(dateStr);
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return fecha;
+    const hora = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return `${fecha} a las ${hora}`;
+  } catch (e) {
+    return fecha;
+  }
+}
+
+

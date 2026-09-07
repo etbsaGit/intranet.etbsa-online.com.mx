@@ -1,10 +1,25 @@
 <template>
   <BaseCatalogo
-    title="Crédito Interno"
+    title="Solicitudes Crédito Interno"
     :columns="columns"
     url="/api/intranet/creditoInternos"
     :on-delete="false"
+    :initial-filters="{
+      sucursal_id: null,
+      asesor_id: null,
+      estatus_id: null,
+      linea_id: null,
+    }"
   >
+    <!-- Filtros extra -->
+    <template #filters-extra="{ filters, onSearchChange }">
+      <CreditoFiltros
+        :filters="filters"
+        :options="options"
+        @update="onSearchChange"
+      />
+    </template>
+
     <!-- Columna: Folio -->
     <template v-slot:body-cell-folio="props">
       <q-td :props="props">
@@ -39,7 +54,9 @@
               <span v-if="props.row.cliente?.rfc">
                 RFC: {{ props.row.cliente.rfc }}
               </span>
-              <span v-if="props.row.cliente?.rfc && props.row.cliente?.telefono">
+              <span
+                v-if="props.row.cliente?.rfc && props.row.cliente?.telefono"
+              >
                 •
               </span>
               <span v-if="props.row.cliente?.telefono">
@@ -48,6 +65,27 @@
             </div>
           </div>
         </div>
+      </q-td>
+    </template>
+
+    <!-- Columna: Línea de Crédito -->
+    <template v-slot:body-cell-linea="props">
+      <q-td :props="props">
+        <q-badge
+          v-if="props.row.linea?.name || props.row.credito_linea?.name"
+          color="blue-grey-1"
+          text-color="blue-grey-9"
+          class="text-weight-bold q-pa-xs"
+        >
+          <q-icon
+            name="category"
+            size="xs"
+            class="q-mr-xs"
+            color="blue-grey-8"
+          />
+          {{ props.row.linea?.name || props.row.credito_linea?.name }}
+        </q-badge>
+        <div v-else class="text-caption text-grey-5">Sin línea</div>
       </q-td>
     </template>
 
@@ -67,7 +105,11 @@
               {{ props.row.asesor?.nombreCompleto || "Sin asesor" }}
             </div>
             <div v-if="props.row.sucursal?.nombre" class="text-caption">
-              <q-badge color="grey-3" text-color="grey-9" class="text-weight-bold">
+              <q-badge
+                color="grey-3"
+                text-color="grey-9"
+                class="text-weight-bold"
+              >
                 <q-icon name="store" size="xs" class="q-mr-xs" />
                 {{ props.row.sucursal.nombre }}
               </q-badge>
@@ -113,8 +155,15 @@
     <template v-slot:body-cell-pagos="props">
       <q-td :props="props">
         <div class="column items-start q-gutter-xs">
-          <div v-if="props.row.resumen_pagos" class="flex items-center q-gutter-xs">
-            <q-badge color="blue-1" text-color="blue-9" class="text-weight-bold q-pa-xs">
+          <div
+            v-if="props.row.resumen_pagos"
+            class="flex items-center q-gutter-xs"
+          >
+            <q-badge
+              color="blue-1"
+              text-color="blue-9"
+              class="text-weight-bold q-pa-xs"
+            >
               <q-icon name="payments" size="xs" class="q-mr-xs" />
               {{ props.row.resumen_pagos }}
             </q-badge>
@@ -150,42 +199,67 @@
       </q-td>
     </template>
 
-    <!-- Columna: Acciones / Detalles -->
+    <!-- Columna: Acciones / Detalles e Historial -->
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props" align="center">
-        <q-btn
-          flat
-          round
-          dense
-          icon="visibility"
-          color="primary"
-          @click="verDetalles(props.row)"
-        >
-          <q-tooltip class="bg-primary">Ver detalles completos</q-tooltip>
-        </q-btn>
+        <div class="row items-center justify-center q-gutter-xs no-wrap">
+          <q-btn
+            flat
+            round
+            dense
+            icon="visibility"
+            color="primary"
+            @click="verDetalles(props.row)"
+          >
+            <q-tooltip class="bg-primary">Ver detalles completos</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="history"
+            color="indigo"
+            @click="verHistorial(props.row)"
+          >
+            <q-tooltip class="bg-indigo">Ver historial de cambios</q-tooltip>
+          </q-btn>
+        </div>
       </q-td>
     </template>
   </BaseCatalogo>
 
   <!-- Modal de Detalles modular -->
-  <CreditoDetallesModal
-    v-model="showDetallesModal"
-    :credito="selectedItem"
+  <CreditoDetallesModal v-model="showDetallesModal" :credito="selectedItem" />
+
+  <!-- Modal de Historial de Cambios -->
+  <CreditoHistorialModal
+    v-model="showHistorialModal"
+    :credito="selectedHistorialItem"
+    :historial="selectedHistorialItem?.historial"
   />
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { useCrudStore } from "src/stores/crud";
 import {
   formatPhoneNumber,
   formatCurrency,
   formatFechaLarga,
 } from "src/boot/format";
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
+import CreditoFiltros from "src/components/CreditoInterno/CreditoFiltros.vue";
 import CreditoDetallesModal from "src/components/CreditoInterno/CreditoDetallesModal.vue";
+import CreditoHistorialModal from "src/components/CreditoInterno/CreditoHistorialModal.vue";
 
 const showDetallesModal = ref(false);
 const selectedItem = ref(null);
+
+const showHistorialModal = ref(false);
+const selectedHistorialItem = ref(null);
+const options = ref([]);
+
+const crud = useCrudStore();
 
 const columns = [
   {
@@ -199,6 +273,14 @@ const columns = [
     name: "cliente",
     label: "Cliente",
     field: (row) => row.cliente?.nombre || "Sin cliente",
+    sortable: true,
+    align: "left",
+  },
+  {
+    name: "linea",
+    label: "Línea de Crédito",
+    field: (row) =>
+      row.linea?.name || row.credito_linea?.name || row.linea || "Sin línea",
     sortable: true,
     align: "left",
   },
@@ -249,4 +331,18 @@ const verDetalles = (row) => {
   selectedItem.value = row;
   showDetallesModal.value = true;
 };
+
+const verHistorial = (row) => {
+  selectedHistorialItem.value = row;
+  showHistorialModal.value = true;
+};
+
+const getOptions = async () => {
+  await crud.getItems("/api/intranet/creditoInternos/options");
+  options.value = crud.items || [];
+};
+
+onMounted(() => {
+  getOptions();
+});
 </script>

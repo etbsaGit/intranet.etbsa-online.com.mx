@@ -116,6 +116,112 @@
       </q-item-section>
     </q-item>
 
+    <!-- Fila 1: Asesor, Sucursal, Notificar a -->
+    <q-item>
+      <q-item-section class="col-12 col-md-4">
+        <q-select
+          v-model="formCredito.asesor_id"
+          :options="filterEmpleados"
+          label="Asesor"
+          option-value="id"
+          option-label="nombreCompleto"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          use-input
+          input-debounce="0"
+          @filter="filterEmpleadosFn"
+          :clearable="puedeSeleccionarAsesor"
+          :disable="!puedeSeleccionarAsesor"
+          :rules="[(val) => !!val || 'El asesor es obligatorio']"
+        />
+      </q-item-section>
+
+      <q-item-section class="col-12 col-md-4">
+        <q-select
+          disable
+          v-model="formCredito.sucursal_id"
+          :options="crud.items.sucursales || []"
+          label="Sucursal"
+          option-value="id"
+          option-label="nombre"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          :rules="[(val) => !!val || 'La sucursal es obligatoria']"
+        />
+      </q-item-section>
+
+      <q-item-section class="col-12 col-md-4">
+        <q-select
+          disable
+          v-model="formCredito.notificado_id"
+          :options="crud.items.gerentes || []"
+          label="Notificar a (Gerente Territorial)"
+          option-value="id"
+          option-label="nombreCompleto"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          clearable
+          :rules="[(val) => !!val || 'El empleado a notificar es obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+
+    <!-- Fila 2: Línea de crédito, Tipo de anticipo -->
+    <q-item>
+      <q-item-section class="col-12 col-md-6">
+        <q-select
+          v-model="formCredito.linea_id"
+          :options="crud.items.creditoLineas || []"
+          label="Línea de crédito"
+          option-value="id"
+          option-label="name"
+          option-disable="inactive"
+          emit-value
+          map-options
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          filled
+          dense
+          options-dense
+          clearable
+          :rules="[(val) => !!val || 'La línea de crédito es obligatoria']"
+        />
+      </q-item-section>
+
+      <q-item-section class="col-12 col-md-6">
+        <q-select
+          v-model="formCredito.tipo_anticipo"
+          :options="tipoAnticipoOptions"
+          label="Tipo de anticipo"
+          filled
+          dense
+          options-dense
+          transition-show="jump-up"
+          transition-hide="jump-up"
+          :rules="[(val) => !!val || 'El tipo de anticipo es obligatorio']"
+        />
+      </q-item-section>
+    </q-item>
+
+    <!-- Fila 3: Monto solicitado, Anticipo -->
     <q-item>
       <q-item-section class="col-12 col-md-6">
         <q-input
@@ -140,106 +246,37 @@
           v-model="formCredito.anticipo"
           filled
           dense
-          label="Anticipo"
+          :label="anticipoLabel"
+          :disable="formCredito.tipo_anticipo === 'Sin Anticipo'"
           prefix="$"
           mask="###,###,###"
           reverse-fill-mask
           unmasked-value
           lazy-rules
-          :rules="[
-            (val) => !!val || 'El anticipo es obligatorio',
-            (val) => Number(val) > 0 || 'El anticipo debe ser mayor a 0',
-          ]"
         />
-      </q-item-section>
-    </q-item>
-
-    <q-item>
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          v-model="formCredito.asesor_id"
-          :options="filterEmpleados"
-          label="Asesor"
-          option-value="id"
-          option-label="nombreCompleto"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          use-input
-          input-debounce="0"
-          @filter="filterEmpleadosFn"
-          :clearable="puedeSeleccionarAsesor"
-          :disable="!puedeSeleccionarAsesor"
-          :rules="[(val) => !!val || 'El asesor es obligatorio']"
-        />
-      </q-item-section>
-
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          disable
-          v-model="formCredito.sucursal_id"
-          :options="crud.items.sucursales || []"
-          label="Sucursal"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          :rules="[(val) => !!val || 'La sucursal es obligatoria']"
-        />
-      </q-item-section>
-    </q-item>
-
-    <q-item>
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          v-model="formCredito.linea_id"
-          :options="crud.items.creditoLineas || []"
-          label="Línea de crédito"
-          option-value="id"
-          option-label="name"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          clearable
-          :rules="[(val) => !!val || 'La línea de crédito es obligatoria']"
-        />
-      </q-item-section>
-
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          disable
-          v-model="formCredito.notificado_id"
-          :options="crud.items.gerentes || []"
-          label="Notificar a (Gerente Territorial)"
-          option-value="id"
-          option-label="nombreCompleto"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          clearable
-          :rules="[(val) => !!val || 'El empleado a notificar es obligatorio']"
-        />
+        <!-- Nota informativa para Servicio si el anticipo es menor al 50% -->
+        <div
+          v-if="mostrarAlertaAnticipoServicio"
+          class="q-mt-xs q-pa-xs rounded-borders bg-orange-1 text-orange-9 text-caption row items-center no-wrap"
+          style="border: 1px solid #ffb74d"
+        >
+          <q-icon
+            name="warning_amber"
+            color="orange-9"
+            size="18px"
+            class="q-mr-xs flex-shrink-0"
+          />
+          <div>
+            <span>
+              Nota: Para la línea de <strong>Servicio</strong> lo recomendable
+              sería dar un <strong>50%</strong> de anticipo<span
+                v-if="montoSolicitadoNum > 0"
+              >
+                ({{ formatCurrency(anticipoMinimoRecomendado) }})</span
+              >.
+            </span>
+          </div>
+        </div>
       </q-item-section>
     </q-item>
 
@@ -505,7 +542,7 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from "vue";
-import { formatPhoneNumber } from "src/boot/format";
+import { formatPhoneNumber, formatCurrency } from "src/boot/format";
 import { useCrudStore } from "src/stores/crud";
 import { useAuthStore } from "src/stores/auth";
 import { checkRole } from "src/boot/functions";
@@ -554,6 +591,7 @@ const filterEmpleadosFn = (val, update) => {
 const formCredito = ref({
   cliente_id: cliente ? cliente.id : null,
   monto_solicitado: null,
+  tipo_anticipo: "Anticipo",
   anticipo: null,
   linea_id: null,
   sucursal_id:
@@ -568,6 +606,143 @@ const formCredito = ref({
   archivos: [],
   motivo: null,
   notas: null,
+});
+
+const esLineaServicio = computed(() => {
+  const lineaId = formCredito.value.linea_id;
+  if (!lineaId && lineaId !== 0) return false;
+
+  // Si lineaId es un objeto
+  if (typeof lineaId === "object" && lineaId !== null) {
+    const txt = (
+      lineaId.name ||
+      lineaId.nombre ||
+      lineaId.label ||
+      lineaId.descripcion ||
+      ""
+    ).toLowerCase();
+    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return clean.includes("servicio");
+  }
+
+  // Si lineaId es un string con el nombre directo
+  if (typeof lineaId === "string" && isNaN(Number(lineaId))) {
+    const clean = lineaId
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    if (clean.includes("servicio")) return true;
+  }
+
+  // Buscar en la lista de opciones de líneas de crédito
+  const lineas = crud.items.creditoLineas || crud.items.credito_lineas || [];
+  const linea = lineas.find(
+    (l) =>
+      l.id == lineaId || l.value == lineaId || String(l.id) === String(lineaId)
+  );
+
+  if (linea) {
+    const txt = (
+      linea.name ||
+      linea.nombre ||
+      linea.label ||
+      linea.descripcion ||
+      ""
+    ).toLowerCase();
+    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return clean.includes("servicio");
+  }
+
+  return false;
+});
+
+const esLineaMaquinaria = computed(() => {
+  const lineaId = formCredito.value.linea_id;
+  if (!lineaId && lineaId !== 0) return false;
+
+  // Si lineaId es un objeto
+  if (typeof lineaId === "object" && lineaId !== null) {
+    const txt = (
+      lineaId.name ||
+      lineaId.nombre ||
+      lineaId.label ||
+      lineaId.descripcion ||
+      ""
+    ).toLowerCase();
+    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return clean.includes("maquinaria") || clean.includes("tractor");
+  }
+
+  // Si lineaId es un string con el nombre directo
+  if (typeof lineaId === "string" && isNaN(Number(lineaId))) {
+    const clean = lineaId
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    return clean.includes("maquinaria") || clean.includes("tractor");
+  }
+
+  // Buscar en la lista de opciones de líneas de crédito
+  const lineas = crud.items.creditoLineas || crud.items.credito_lineas || [];
+  const linea = lineas.find(
+    (l) =>
+      l.id == lineaId || l.value == lineaId || String(l.id) === String(lineaId)
+  );
+
+  if (linea) {
+    const txt = (
+      linea.name ||
+      linea.nombre ||
+      linea.label ||
+      linea.descripcion ||
+      ""
+    ).toLowerCase();
+    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return clean.includes("maquinaria") || clean.includes("tractor");
+  }
+
+  return false;
+});
+
+const tipoAnticipoOptions = computed(() => {
+  if (esLineaServicio.value) {
+    return ["Anticipo"];
+  }
+  if (esLineaMaquinaria.value) {
+    return ["Sin Anticipo", "Anticipo", "Maquinaria a Cuenta"];
+  }
+  return ["Sin Anticipo", "Anticipo"];
+});
+
+const anticipoLabel = computed(() => {
+  if (formCredito.value.tipo_anticipo === "Maquinaria a Cuenta") {
+    return "Valor de la Maquinaria";
+  }
+  if (formCredito.value.tipo_anticipo === "Sin Anticipo") {
+    return "Anticipo (Sin anticipo)";
+  }
+  return "Anticipo (Opcional)";
+});
+
+const montoSolicitadoNum = computed(() => {
+  return Number(formCredito.value.monto_solicitado) || 0;
+});
+
+const anticipoNum = computed(() => {
+  return Number(formCredito.value.anticipo) || 0;
+});
+
+const anticipoMinimoRecomendado = computed(() => {
+  return montoSolicitadoNum.value * 0.5;
+});
+
+const mostrarAlertaAnticipoServicio = computed(() => {
+  if (!esLineaServicio.value) return false;
+  if (formCredito.value.tipo_anticipo === "Sin Anticipo") return false;
+  if (montoSolicitadoNum.value > 0) {
+    return anticipoNum.value < anticipoMinimoRecomendado.value;
+  }
+  return anticipoNum.value <= 0;
 });
 
 const tiposDocumentos = [
@@ -772,6 +947,29 @@ watch(
   () => formCredito.value.sucursal_id,
   () => {
     seleccionarGerenteAutomatico();
+  }
+);
+
+watch(
+  () => formCredito.value.linea_id,
+  () => {
+    if (esLineaServicio.value) {
+      formCredito.value.tipo_anticipo = "Anticipo";
+    } else if (
+      !esLineaMaquinaria.value &&
+      formCredito.value.tipo_anticipo === "Maquinaria a Cuenta"
+    ) {
+      formCredito.value.tipo_anticipo = "Anticipo";
+    }
+  }
+);
+
+watch(
+  () => formCredito.value.tipo_anticipo,
+  (newVal) => {
+    if (newVal === "Sin Anticipo") {
+      formCredito.value.anticipo = null;
+    }
   }
 );
 

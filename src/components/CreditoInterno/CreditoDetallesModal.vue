@@ -157,19 +157,31 @@
 
             <q-card-section class="q-pt-xs">
               <div class="row q-col-gutter-md">
-                <div class="col-4 col-md-3">
+                <div class="col-6 col-sm-3">
                   <div class="text-caption text-grey-8">Monto Solicitado</div>
                   <div class="text-h6 text-weight-bolder text-primary">
                     {{ formatCurrency(credito.monto_solicitado || 0) }}
                   </div>
                 </div>
-                <div class="col-4 col-md-3">
-                  <div class="text-caption text-grey-8">Anticipo</div>
+                <div class="col-6 col-sm-3" v-if="credito.tipo_anticipo">
+                  <div class="text-caption text-grey-8">Tipo de Anticipo</div>
+                  <div class="text-h6 text-weight-bolder text-dark">
+                    {{ credito.tipo_anticipo }}
+                  </div>
+                </div>
+                <div class="col-6 col-sm-3">
+                  <div class="text-caption text-grey-8">
+                    {{
+                      credito.tipo_anticipo === "Maquinaria a Cuenta"
+                        ? "Valor Maquinaria"
+                        : "Anticipo"
+                    }}
+                  </div>
                   <div class="text-h6 text-weight-bolder text-amber-9">
                     {{ formatCurrency(credito.anticipo || 0) }}
                   </div>
                 </div>
-                <div class="col-4 col-md-3">
+                <div class="col-6 col-sm-3">
                   <div class="text-caption text-grey-8">Número de Pagos</div>
                   <div class="text-h6 text-weight-bolder text-indigo">
                     {{ credito.numero_pagos || credito.pagos?.length || 0 }}

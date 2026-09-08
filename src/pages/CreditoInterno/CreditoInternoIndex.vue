@@ -1,5 +1,6 @@
 <template>
   <BaseCatalogo
+    :onCreate="false"
     title="Solicitudes Crédito Interno"
     :columns="columns"
     url="/api/intranet/creditoInternos"
@@ -16,6 +17,15 @@
       <CreditoFiltros
         :filters="filters"
         :options="options"
+        @update:filter="(key, val) => (filters[key] = val)"
+        @clear="
+          Object.assign(filters, {
+            sucursal_id: null,
+            asesor_id: null,
+            estatus_id: null,
+            linea_id: null,
+          })
+        "
         @update="onSearchChange"
       />
     </template>

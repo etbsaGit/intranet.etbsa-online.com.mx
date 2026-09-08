@@ -14,10 +14,10 @@
       option-label="nombre"
       style="min-width: 155px; max-width: 190px"
       label="Sucursal"
-      v-model="filters.sucursal_id"
+      :model-value="filters.sucursal_id"
       :options="filteredSucursales"
       @filter="filterSucursales"
-      @update:model-value="onFilterChange"
+      @update:model-value="(val) => updateFilter('sucursal_id', val)"
     >
       <template v-slot:no-option>
         <q-item>
@@ -42,10 +42,10 @@
       option-label="nombreCompleto"
       style="min-width: 175px; max-width: 220px"
       label="Asesor / Empleado"
-      v-model="filters.asesor_id"
+      :model-value="filters.asesor_id"
       :options="filteredEmpleados"
       @filter="filterEmpleados"
-      @update:model-value="onFilterChange"
+      @update:model-value="(val) => updateFilter('asesor_id', val)"
     >
       <template v-slot:no-option>
         <q-item>
@@ -68,9 +68,9 @@
       option-label="nombre"
       style="min-width: 165px; max-width: 200px"
       label="Estatus"
-      v-model="filters.estatus_id"
+      :model-value="filters.estatus_id"
       :options="estatusesList"
-      @update:model-value="onFilterChange"
+      @update:model-value="(val) => updateFilter('estatus_id', val)"
     >
       <template v-slot:option="scope">
         <q-item v-bind="scope.itemProps">
@@ -99,9 +99,9 @@
       option-label="name"
       style="min-width: 155px; max-width: 185px"
       label="Línea de Crédito"
-      v-model="filters.linea_id"
+      :model-value="filters.linea_id"
       :options="lineasList"
-      @update:model-value="onFilterChange"
+      @update:model-value="(val) => updateFilter('linea_id', val)"
     />
 
     <!-- Botón Limpiar Filtros -->
@@ -134,7 +134,17 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update"]);
+const emit = defineEmits(["update", "update:filter", "clear"]);
+
+const updateFilter = (key, value) => {
+  emit("update:filter", key, value);
+  emit("update");
+};
+
+const limpiarFiltros = () => {
+  emit("clear");
+  emit("update");
+};
 
 const localOptions = ref({
   sucursales: [],
@@ -238,17 +248,7 @@ const hasActiveFilters = computed(() => {
   );
 });
 
-const onFilterChange = () => {
-  emit("update");
-};
 
-const limpiarFiltros = () => {
-  props.filters.sucursal_id = null;
-  props.filters.asesor_id = null;
-  props.filters.estatus_id = null;
-  props.filters.linea_id = null;
-  emit("update");
-};
 
 const getOptionsFallback = async () => {
   if (props.options && Object.keys(props.options).length > 0) return;

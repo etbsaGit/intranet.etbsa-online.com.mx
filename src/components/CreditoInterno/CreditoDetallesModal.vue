@@ -45,7 +45,7 @@
             </q-card-section>
             <q-card-section class="q-pt-xs">
               <div class="row q-col-gutter-sm">
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-5">
                   <div class="text-caption text-grey-7">
                     Nombre / Razón Social
                   </div>
@@ -54,22 +54,41 @@
                   </div>
                 </div>
                 <div class="col-12 col-md-3">
+                  <div class="text-caption text-grey-7">Tipo de Persona</div>
+                  <q-badge
+                    dense
+                    :color="
+                      (credito.cliente?.tipo || '')
+                        .toLowerCase()
+                        .includes('moral')
+                        ? 'indigo-8'
+                        : 'teal-8'
+                    "
+                    text-color="white"
+                    class="text-weight-bold q-px-xs"
+                  >
+                    {{
+                      (credito.cliente?.tipo || "")
+                        .toLowerCase()
+                        .includes("moral")
+                        ? "Persona Moral"
+                        : "Persona Física"
+                    }}
+                  </q-badge>
+                </div>
+                <div class="col-12 col-md-4">
                   <div class="text-caption text-grey-7">RFC</div>
                   <div class="text-weight-medium">
                     {{ credito.cliente?.rfc || "N/A" }}
                   </div>
                 </div>
-                <div class="col-12 col-md-3">
+                <div class="col-12 col-md-4" v-if="credito.cliente?.telefono">
                   <div class="text-caption text-grey-7">Teléfono</div>
                   <div class="text-weight-medium">
-                    {{
-                      credito.cliente?.telefono
-                        ? formatPhoneNumber(credito.cliente.telefono)
-                        : "N/A"
-                    }}
+                    {{ formatPhoneNumber(credito.cliente.telefono) }}
                   </div>
                 </div>
-                <div class="col-12" v-if="credito.cliente?.email">
+                <div class="col-12 col-md-8" v-if="credito.cliente?.email">
                   <div class="text-caption text-grey-7">Email</div>
                   <div class="text-weight-medium">
                     {{ credito.cliente.email }}
@@ -163,22 +182,39 @@
                     {{ formatCurrency(credito.monto_solicitado || 0) }}
                   </div>
                 </div>
-                <div class="col-6 col-sm-3" v-if="credito.tipo_anticipo">
-                  <div class="text-caption text-grey-8">Tipo de Anticipo</div>
+                <div
+                  class="col-6 col-sm-3"
+                  v-if="credito.tipo_enganche?.nombre || credito.tipo_anticipo"
+                >
+                  <div class="text-caption text-grey-8">Tipo de Enganche</div>
                   <div class="text-h6 text-weight-bolder text-dark">
-                    {{ credito.tipo_anticipo }}
+                    {{ credito.tipo_enganche?.nombre || credito.tipo_anticipo }}
                   </div>
                 </div>
                 <div class="col-6 col-sm-3">
                   <div class="text-caption text-grey-8">
                     {{
-                      credito.tipo_anticipo === "Maquinaria a Cuenta"
+                      (
+                        credito.tipo_enganche?.nombre ||
+                        credito.tipo_anticipo ||
+                        ""
+                      )
+                        .toLowerCase()
+                        .includes("a cuenta")
                         ? "Valor Maquinaria"
-                        : "Anticipo"
+                        : (credito.tipo_enganche?.nombre || "")
+                            .toLowerCase()
+                            .includes("sin")
+                        ? "Enganche"
+                        : "Enganche / Anticipo"
                     }}
                   </div>
                   <div class="text-h6 text-weight-bolder text-amber-9">
-                    {{ formatCurrency(credito.anticipo || 0) }}
+                    {{
+                      formatCurrency(
+                        credito.valor_enganche || credito.anticipo || 0
+                      )
+                    }}
                   </div>
                 </div>
                 <div class="col-6 col-sm-3">
@@ -223,13 +259,25 @@
                   <q-td :props="props" align="center">
                     <q-chip
                       dense
-                      :color="props.row.n_pago === 1 ? 'orange-9' : 'dark'"
+                      :color="
+                        props.row.es_anticipo ||
+                        props.row.etiqueta === 'Enganche' ||
+                        (props.row.n_pago === 1 &&
+                          Number(credito.valor_enganche || credito.anticipo) >
+                            0)
+                          ? 'orange-9'
+                          : 'dark'
+                      "
                       text-color="white"
                       class="text-weight-bold"
                     >
                       {{
-                        props.row.n_pago === 1
-                          ? "Pago 1 (Anticipo)"
+                        props.row.es_anticipo ||
+                        props.row.etiqueta === "Enganche" ||
+                        (props.row.n_pago === 1 &&
+                          Number(credito.valor_enganche || credito.anticipo) >
+                            0)
+                          ? "Pago 1 (Enganche)"
                           : props.row.etiqueta || `Pago #${props.row.n_pago}`
                       }}
                     </q-chip>

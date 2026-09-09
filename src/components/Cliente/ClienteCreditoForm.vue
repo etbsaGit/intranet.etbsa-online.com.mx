@@ -208,15 +208,19 @@
 
       <q-item-section class="col-12 col-md-6">
         <q-select
-          v-model="formCredito.tipo_anticipo"
-          :options="tipoAnticipoOptions"
-          label="Tipo de anticipo"
+          v-model="formCredito.tipo_enganche_id"
+          :options="tipoEngancheOptions"
+          label="Tipo de Enganche"
+          option-value="id"
+          option-label="nombre"
+          emit-value
+          map-options
           filled
           dense
           options-dense
           transition-show="jump-up"
           transition-hide="jump-up"
-          :rules="[(val) => !!val || 'El tipo de anticipo es obligatorio']"
+          :rules="[(val) => !!val || 'El tipo de enganche es obligatorio']"
         />
       </q-item-section>
     </q-item>
@@ -243,11 +247,11 @@
 
       <q-item-section class="col-12 col-md-6">
         <q-input
-          v-model="formCredito.anticipo"
+          v-model="formCredito.valor_enganche"
           filled
           dense
           :label="anticipoLabel"
-          :disable="formCredito.tipo_anticipo === 'Sin Anticipo'"
+          :disable="esSinAnticipo"
           prefix="$"
           mask="###,###,###"
           reverse-fill-mask
@@ -353,7 +357,7 @@
                   dense
                   :label="
                     pago.es_anticipo
-                      ? 'Fecha pago de anticipo'
+                      ? 'Fecha pago de enganche'
                       : 'Fecha de pago'
                   "
                   mask="####-##-##"
@@ -402,7 +406,7 @@
 
     <q-separator class="q-my-md" />
 
-    <!-- 📎 Sección de Documentación Adjunta -->
+    <!-- 📎 Sección de Documentación Obligatoria -->
     <q-item>
       <q-item-section>
         <q-item-label
@@ -410,7 +414,272 @@
           align="center"
           class="text-primary text-weight-bold"
         >
-          -Documentación del Crédito (Opcional)-
+          -Documentación Obligatoria del Crédito (Persona
+          {{ clienteEsMoral ? "Moral" : "Física"
+          }}{{ esEngancheACuenta ? " - A Cuenta" : "" }})-
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+
+    <div
+      v-if="listaDocsObligatorios && listaDocsObligatorios.length > 0"
+      class="row q-col-gutter-sm q-px-md q-pb-sm"
+    >
+      <div
+        v-for="item in listaDocsObligatorios"
+        :key="item.doc_id"
+        class="col-12 col-md-6"
+      >
+        <q-card flat bordered class="rounded-borders bg-white shadow-1">
+          <q-card-section class="q-pa-sm">
+            <!-- Título del documento y Badge de estado -->
+            <div class="row items-center justify-between no-wrap q-mb-xs">
+              <div
+                class="text-subtitle2 text-weight-bold text-primary flex items-center q-gutter-xs ellipsis"
+              >
+                <q-icon name="description" size="18px" color="primary" />
+                <span class="ellipsis">{{ item.nombre }}</span>
+                <span class="text-negative text-weight-bolder">*</span>
+              </div>
+
+              <q-badge
+                :color="getDocExpedienteInfo(item).color"
+                text-color="white"
+                class="text-weight-bold q-px-xs"
+              >
+                <q-icon
+                  :name="getDocExpedienteInfo(item).icono"
+                  size="xs"
+                  class="q-mr-xs"
+                />
+                {{ getDocExpedienteInfo(item).badgeText }}
+              </q-badge>
+            </div>
+
+            <!-- Caso 1: Documento vigente en expediente y no se ha seleccionado reemplazar -->
+            <template
+              v-if="
+                getDocExpedienteInfo(item).estado === 'vigente' &&
+                !reemplazarDoc[item.doc_id] &&
+                !archivosObligatorios[item.doc_id]
+              "
+            >
+              <div
+                class="q-pa-xs rounded-borders bg-green-1 text-green-9 text-caption row items-center justify-between no-wrap"
+                style="border: 1px solid #a5d6a7"
+              >
+                <div class="row items-center q-gutter-xs col ellipsis">
+                  <q-icon
+                    name="check_circle"
+                    color="positive"
+                    size="18px"
+                    class="flex-shrink-0"
+                  />
+                  <span class="ellipsis">
+                    Guardado en expediente
+                    <strong
+                      v-if="getDocExpedienteInfo(item).doc?.expiration_date"
+                    >
+                      (Vence:
+                      {{ getDocExpedienteInfo(item).doc.expiration_date }})
+                    </strong>
+                  </span>
+                </div>
+                <div class="row items-center q-gutter-xs no-wrap flex-shrink-0">
+                  <q-btn
+                    v-if="getDocExpedienteInfo(item).doc?.realpath"
+                    flat
+                    dense
+                    size="sm"
+                    color="primary"
+                    icon="visibility"
+                    label="Ver"
+                    @click="
+                      openDocWindow(getDocExpedienteInfo(item).doc.realpath)
+                    "
+                  >
+                    <q-tooltip>Ver documento del expediente</q-tooltip>
+                  </q-btn>
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    color="grey-8"
+                    icon="swap_horiz"
+                    label="Reemplazar"
+                    @click="activarReemplazo(item.doc_id)"
+                  >
+                    <q-tooltip>Subir una versión nueva</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+            </template>
+
+            <!-- Caso 2: Próximo a caducar, Caducado, No subido o el usuario eligió reemplazar -->
+            <template v-else>
+              <!-- Mensaje de estado -->
+              <div
+                v-if="
+                  getDocExpedienteInfo(item).estado === 'proximo_a_caducar' ||
+                  getDocExpedienteInfo(item).estado === 'caducado'
+                "
+                class="q-mb-xs q-pa-xs rounded-borders text-caption row items-center justify-between no-wrap"
+                :class="
+                  getDocExpedienteInfo(item).estado === 'caducado'
+                    ? 'bg-red-1 text-negative'
+                    : 'bg-orange-1 text-orange-9'
+                "
+                :style="
+                  getDocExpedienteInfo(item).estado === 'caducado'
+                    ? 'border: 1px solid #ef9a9a'
+                    : 'border: 1px solid #ffcc80'
+                "
+              >
+                <div class="row items-center q-gutter-xs col ellipsis">
+                  <q-icon
+                    :name="getDocExpedienteInfo(item).icono"
+                    size="16px"
+                    class="flex-shrink-0"
+                  />
+                  <span class="ellipsis">{{
+                    getDocExpedienteInfo(item).mensaje
+                  }}</span>
+                </div>
+                <q-btn
+                  v-if="getDocExpedienteInfo(item).doc?.realpath"
+                  flat
+                  dense
+                  size="xs"
+                  color="primary"
+                  icon="visibility"
+                  label="Ver actual"
+                  class="flex-shrink-0"
+                  @click="
+                    openDocWindow(getDocExpedienteInfo(item).doc.realpath)
+                  "
+                />
+              </div>
+
+              <!-- Selector de Archivo -->
+              <div class="row q-col-gutter-xs items-center">
+                <div class="col">
+                  <q-file
+                    v-model="archivosObligatoriosFiles[item.doc_id]"
+                    filled
+                    dense
+                    :label="
+                      archivosObligatorios[item.doc_id]
+                        ? archivosObligatorios[item.doc_id].nombre
+                        : `Seleccionar PDF (${item.nombre})`
+                    "
+                    accept=".pdf,application/pdf"
+                    clearable
+                    :rules="[
+                      () =>
+                        validarDocObligatorio(item) ||
+                        `El documento ${item.nombre} es obligatorio`,
+                    ]"
+                    hide-bottom-space
+                    @update:model-value="
+                      (file) => onObligatorioFileSelected(file, item)
+                    "
+                  >
+                    <template v-slot:prepend>
+                      <q-icon
+                        name="picture_as_pdf"
+                        :color="
+                          archivosObligatorios[item.doc_id]
+                            ? 'positive'
+                            : 'negative'
+                        "
+                      />
+                    </template>
+                  </q-file>
+                </div>
+
+                <!-- Botón Cancelar Reemplazo si era vigente -->
+                <div
+                  v-if="
+                    getDocExpedienteInfo(item).estado === 'vigente' &&
+                    reemplazarDoc[item.doc_id]
+                  "
+                  class="col-auto"
+                >
+                  <q-btn
+                    flat
+                    dense
+                    round
+                    color="grey-7"
+                    icon="close"
+                    @click="cancelarReemplazo(item.doc_id)"
+                  >
+                    <q-tooltip>Conservar archivo del expediente</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+
+              <!-- Campo de fecha de vencimiento si subió archivo nuevo -->
+              <div
+                v-if="archivosObligatorios[item.doc_id]"
+                class="row items-center q-mt-xs"
+              >
+                <q-input
+                  v-model="archivosObligatorios[item.doc_id].expiration_date"
+                  filled
+                  dense
+                  label="Fecha de vencimiento (para expediente)"
+                  mask="####-##-##"
+                  class="full-width"
+                  hide-bottom-space
+                >
+                  <template v-slot:append>
+                    <q-icon name="event" class="cursor-pointer">
+                      <q-popup-proxy
+                        cover
+                        transition-show="scale"
+                        transition-hide="scale"
+                      >
+                        <q-date
+                          minimal
+                          v-model="
+                            archivosObligatorios[item.doc_id].expiration_date
+                          "
+                          mask="YYYY-MM-DD"
+                        >
+                          <div class="row items-center justify-end">
+                            <q-btn
+                              v-close-popup
+                              label="Cerrar"
+                              color="primary"
+                              flat
+                            />
+                          </div>
+                        </q-date>
+                      </q-popup-proxy>
+                    </q-icon>
+                  </template>
+                </q-input>
+              </div>
+            </template>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+    <div v-else class="q-px-md q-pb-sm text-caption text-grey-6 text-center">
+      No hay documentos obligatorios configurados para esta categoría.
+    </div>
+
+    <q-separator class="q-my-sm" />
+
+    <!-- 📎 Sección de Documentación Adicional (Opcional) -->
+    <q-item>
+      <q-item-section>
+        <q-item-label
+          caption
+          align="center"
+          class="text-grey-8 text-weight-bold"
+        >
+          -Documentación Adicional (Opcional)-
         </q-item-label>
       </q-item-section>
     </q-item>
@@ -420,8 +689,8 @@
       <div class="col-12 col-md-5">
         <q-select
           v-model="tempDoc.tipo"
-          :options="tiposDocumentos"
-          label="Tipo de documento"
+          :options="tiposDocumentosOpcionales"
+          label="Tipo de documento adicional"
           filled
           dense
           options-dense
@@ -455,19 +724,19 @@
           dense
           class="full-width q-py-xs"
           :disable="!tempDoc.tipo || !tempDoc.base64"
-          @click="agregarArchivo"
+          @click="agregarArchivoOpcional"
         />
       </div>
     </div>
 
-    <!-- Lista de Archivos Adjuntos -->
+    <!-- Lista de Archivos Opcionales Adjuntos -->
     <div
-      v-if="formCredito.archivos && formCredito.archivos.length > 0"
+      v-if="archivosOpcionales && archivosOpcionales.length > 0"
       class="q-px-md q-pb-sm"
     >
       <q-list bordered separator class="rounded-borders bg-white">
         <q-item
-          v-for="(arch, idx) in formCredito.archivos"
+          v-for="(arch, idx) in archivosOpcionales"
           :key="idx"
           dense
           class="q-py-xs"
@@ -479,6 +748,7 @@
           <q-item-section>
             <q-item-label class="text-weight-bold text-primary">
               {{ arch.tipo }}
+              <q-badge color="grey-6" class="q-ml-xs">Opcional</q-badge>
             </q-item-label>
             <q-item-label caption class="text-grey-8">
               {{ arch.nombre }}
@@ -495,7 +765,7 @@
               dense
               color="negative"
               icon="delete"
-              @click="eliminarArchivo(idx)"
+              @click="eliminarArchivoOpcional(idx)"
             >
               <q-tooltip>Eliminar documento</q-tooltip>
             </q-btn>
@@ -545,7 +815,7 @@ import { ref, watch, onMounted, computed } from "vue";
 import { formatPhoneNumber, formatCurrency } from "src/boot/format";
 import { useCrudStore } from "src/stores/crud";
 import { useAuthStore } from "src/stores/auth";
-import { checkRole } from "src/boot/functions";
+import { checkRole, sendRequest } from "src/boot/functions";
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -591,8 +861,8 @@ const filterEmpleadosFn = (val, update) => {
 const formCredito = ref({
   cliente_id: cliente ? cliente.id : null,
   monto_solicitado: null,
-  tipo_anticipo: "Anticipo",
-  anticipo: null,
+  tipo_enganche_id: null,
+  valor_enganche: null,
   linea_id: null,
   sucursal_id:
     authStore.authUser?.empleado?.sucursal_id ||
@@ -608,120 +878,80 @@ const formCredito = ref({
   notas: null,
 });
 
+const lineaSeleccionada = computed(() => {
+  const lineas = crud.items.creditoLineas || crud.items.credito_lineas || [];
+  const lineaId = formCredito.value.linea_id;
+  if (!lineaId && lineaId !== 0) return null;
+
+  if (typeof lineaId === "object" && lineaId !== null) {
+    return lineaId;
+  }
+
+  return (
+    lineas.find(
+      (l) =>
+        l.id == lineaId ||
+        l.value == lineaId ||
+        String(l.id) === String(lineaId) ||
+        (l.name && l.name.toLowerCase() === String(lineaId).toLowerCase())
+    ) || null
+  );
+});
+
 const esLineaServicio = computed(() => {
-  const lineaId = formCredito.value.linea_id;
-  if (!lineaId && lineaId !== 0) return false;
-
-  // Si lineaId es un objeto
-  if (typeof lineaId === "object" && lineaId !== null) {
-    const txt = (
-      lineaId.name ||
-      lineaId.nombre ||
-      lineaId.label ||
-      lineaId.descripcion ||
-      ""
-    ).toLowerCase();
-    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return clean.includes("servicio");
-  }
-
-  // Si lineaId es un string con el nombre directo
-  if (typeof lineaId === "string" && isNaN(Number(lineaId))) {
-    const clean = lineaId
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    if (clean.includes("servicio")) return true;
-  }
-
-  // Buscar en la lista de opciones de líneas de crédito
-  const lineas = crud.items.creditoLineas || crud.items.credito_lineas || [];
-  const linea = lineas.find(
-    (l) =>
-      l.id == lineaId || l.value == lineaId || String(l.id) === String(lineaId)
-  );
-
-  if (linea) {
-    const txt = (
-      linea.name ||
-      linea.nombre ||
-      linea.label ||
-      linea.descripcion ||
-      ""
-    ).toLowerCase();
-    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return clean.includes("servicio");
-  }
-
-  return false;
+  if (!lineaSeleccionada.value) return false;
+  const txt = (
+    lineaSeleccionada.value.name ||
+    lineaSeleccionada.value.nombre ||
+    ""
+  ).toLowerCase();
+  const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return clean.includes("servicio");
 });
 
-const esLineaMaquinaria = computed(() => {
-  const lineaId = formCredito.value.linea_id;
-  if (!lineaId && lineaId !== 0) return false;
-
-  // Si lineaId es un objeto
-  if (typeof lineaId === "object" && lineaId !== null) {
-    const txt = (
-      lineaId.name ||
-      lineaId.nombre ||
-      lineaId.label ||
-      lineaId.descripcion ||
-      ""
-    ).toLowerCase();
-    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return clean.includes("maquinaria") || clean.includes("tractor");
+const tipoEngancheOptions = computed(() => {
+  if (!lineaSeleccionada.value || !lineaSeleccionada.value.tipos_enganche) {
+    return [];
   }
-
-  // Si lineaId es un string con el nombre directo
-  if (typeof lineaId === "string" && isNaN(Number(lineaId))) {
-    const clean = lineaId
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-    return clean.includes("maquinaria") || clean.includes("tractor");
-  }
-
-  // Buscar en la lista de opciones de líneas de crédito
-  const lineas = crud.items.creditoLineas || crud.items.credito_lineas || [];
-  const linea = lineas.find(
-    (l) =>
-      l.id == lineaId || l.value == lineaId || String(l.id) === String(lineaId)
-  );
-
-  if (linea) {
-    const txt = (
-      linea.name ||
-      linea.nombre ||
-      linea.label ||
-      linea.descripcion ||
-      ""
-    ).toLowerCase();
-    const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return clean.includes("maquinaria") || clean.includes("tractor");
-  }
-
-  return false;
+  return lineaSeleccionada.value.tipos_enganche;
 });
 
-const tipoAnticipoOptions = computed(() => {
-  if (esLineaServicio.value) {
-    return ["Anticipo"];
-  }
-  if (esLineaMaquinaria.value) {
-    return ["Sin Anticipo", "Anticipo", "Maquinaria a Cuenta"];
-  }
-  return ["Sin Anticipo", "Anticipo"];
+const tipoEngancheSeleccionado = computed(() => {
+  const id = formCredito.value.tipo_enganche_id;
+  if (!id && id !== 0) return null;
+  return (
+    tipoEngancheOptions.value.find(
+      (t) => t.id === id || t.id == id || t.nombre === id
+    ) || null
+  );
+});
+
+const esEngancheACuenta = computed(() => {
+  const nombre = (
+    tipoEngancheSeleccionado.value?.nombre ||
+    tipoEngancheSeleccionado.value?.name ||
+    ""
+  ).toLowerCase();
+  return nombre.includes("a cuenta");
+});
+
+const esSinAnticipo = computed(() => {
+  const nombre = (
+    tipoEngancheSeleccionado.value?.nombre ||
+    tipoEngancheSeleccionado.value?.name ||
+    ""
+  ).toLowerCase();
+  return nombre.includes("sin anticipo") || nombre.includes("sin enganche");
 });
 
 const anticipoLabel = computed(() => {
-  if (formCredito.value.tipo_anticipo === "Maquinaria a Cuenta") {
+  if (esEngancheACuenta.value) {
     return "Valor de la Maquinaria";
   }
-  if (formCredito.value.tipo_anticipo === "Sin Anticipo") {
-    return "Anticipo (Sin anticipo)";
+  if (esSinAnticipo.value) {
+    return "Enganche (Sin anticipo)";
   }
-  return "Anticipo (Opcional)";
+  return "Enganche / Anticipo";
 });
 
 const montoSolicitadoNum = computed(() => {
@@ -729,7 +959,7 @@ const montoSolicitadoNum = computed(() => {
 });
 
 const anticipoNum = computed(() => {
-  return Number(formCredito.value.anticipo) || 0;
+  return Number(formCredito.value.valor_enganche) || 0;
 });
 
 const anticipoMinimoRecomendado = computed(() => {
@@ -738,23 +968,301 @@ const anticipoMinimoRecomendado = computed(() => {
 
 const mostrarAlertaAnticipoServicio = computed(() => {
   if (!esLineaServicio.value) return false;
-  if (formCredito.value.tipo_anticipo === "Sin Anticipo") return false;
+  if (esSinAnticipo.value) return false;
   if (montoSolicitadoNum.value > 0) {
     return anticipoNum.value < anticipoMinimoRecomendado.value;
   }
   return anticipoNum.value <= 0;
 });
 
-const tiposDocumentos = [
-  "INE",
-  "Comprobante de Domicilio",
-  "Comprobante de Ingreso",
-  "CURP",
-  "RFC",
-  "Estado de Cuenta",
-  "Cotización",
-  "Otro",
-];
+const clienteEsMoral = computed(() => {
+  const tipoCliente = (cliente?.tipo || "").toLowerCase().trim();
+  return tipoCliente === "moral" || tipoCliente.includes("moral");
+});
+
+const categoriaClienteEnganche = computed(() => {
+  const esMoral = clienteEsMoral.value;
+  const esACuenta = esEngancheACuenta.value;
+
+  if (esMoral) {
+    return esACuenta ? "m/a cuenta" : "moral";
+  } else {
+    return esACuenta ? "f/a cuenta" : "fisica";
+  }
+});
+
+const listaDocsObligatorios = computed(() => {
+  const docsOblig = crud.items.docsObligatorios || [];
+  const catalogoDocs = crud.items.documentos || [];
+  const categoria = categoriaClienteEnganche.value;
+
+  const filtrados = docsOblig.filter(
+    (item) => (item.nombre || "").toLowerCase().trim() === categoria
+  );
+
+  return filtrados.map((item) => {
+    const docInfo = catalogoDocs.find(
+      (d) => d.id === item.doc_id || d.id == item.doc_id
+    );
+    const nombreDoc =
+      docInfo?.nombre || docInfo?.name || `Documento #${item.doc_id}`;
+    return {
+      id: item.id,
+      doc_id: item.doc_id,
+      categoria: item.nombre,
+      nombre: nombreDoc,
+    };
+  });
+});
+
+const tiposDocumentosOpcionales = computed(() => {
+  const docs = crud.items.documentos || [];
+  const obligatoriosIds = listaDocsObligatorios.value.map((d) => d.doc_id);
+  return docs
+    .filter((d) => !obligatoriosIds.includes(d.id))
+    .map((d) =>
+      typeof d === "object" && d !== null
+        ? d.nombre || d.name || d.label || d.tipo || d
+        : d
+    );
+});
+
+const clienteDocs = ref([]);
+const reemplazarDoc = ref({});
+
+const getClienteDocs = async () => {
+  const clienteId = cliente?.id || formCredito.value.cliente_id;
+  if (!clienteId) return;
+  try {
+    const res = await sendRequest(
+      "GET",
+      null,
+      `/api/intranet/clientesDoc/cliente/${clienteId}`
+    );
+    if (res && Array.isArray(res)) {
+      clienteDocs.value = res;
+    } else {
+      clienteDocs.value = [];
+    }
+  } catch (e) {
+    console.error("Error al obtener documentos del cliente:", e);
+    clienteDocs.value = [];
+  }
+  actualizarArchivosEnForm();
+};
+
+const normalizeStr = (str) => {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+const getDocExpedienteInfo = (item) => {
+  if (!clienteDocs.value || clienteDocs.value.length === 0) {
+    return {
+      estado: "no_subido",
+      badgeText: "No subido",
+      color: "grey-7",
+      icono: "warning",
+      mensaje: "No se encuentra en el expediente del cliente",
+      doc: null,
+    };
+  }
+
+  const itemNom = normalizeStr(item.nombre);
+
+  const doc = clienteDocs.value.find((d) => {
+    if (
+      d.status_id &&
+      (d.status_id == item.doc_id || d.status_id === item.doc_id)
+    ) {
+      return true;
+    }
+    const stNom = normalizeStr(d.status?.nombre);
+    if (
+      stNom &&
+      (stNom === itemNom || stNom.includes(itemNom) || itemNom.includes(stNom))
+    ) {
+      return true;
+    }
+    return false;
+  });
+
+  if (!doc || (!doc.path && !doc.realpath)) {
+    return {
+      estado: "no_subido",
+      badgeText: "No subido",
+      color: "grey-7",
+      icono: "warning",
+      mensaje: "No se encuentra en el expediente del cliente",
+      doc: null,
+    };
+  }
+
+  if (doc.expiration_date) {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    const parts = doc.expiration_date.split("-");
+    if (parts.length === 3) {
+      const expDate = new Date(
+        Number(parts[0]),
+        Number(parts[1]) - 1,
+        Number(parts[2])
+      );
+      const diffDays = Math.ceil((expDate - hoy) / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return {
+          estado: "caducado",
+          badgeText: "Vencido",
+          color: "negative",
+          icono: "error",
+          mensaje: `Documento vencido el ${doc.expiration_date}. Se requiere actualizar.`,
+          doc,
+        };
+      }
+
+      if (diffDays <= 21) {
+        const diasTxt =
+          diffDays === 0
+            ? "hoy"
+            : diffDays === 1
+            ? "mañana"
+            : `en ${diffDays} días`;
+        return {
+          estado: "proximo_a_caducar",
+          badgeText: "Próximo a caducar",
+          color: "orange-8",
+          icono: "warning",
+          mensaje: `Documento vence ${diasTxt} (${doc.expiration_date}). Se requiere actualizar.`,
+          doc,
+        };
+      }
+    }
+  }
+
+  return {
+    estado: "vigente",
+    badgeText: "Vigente",
+    color: "positive",
+    icono: "check_circle",
+    mensaje: doc.expiration_date
+      ? `Documento vigente en expediente (Vence: ${doc.expiration_date})`
+      : "Documento guardado en expediente",
+    doc,
+  };
+};
+
+const activarReemplazo = (docId) => {
+  reemplazarDoc.value[docId] = true;
+  actualizarArchivosEnForm();
+};
+
+const cancelarReemplazo = (docId) => {
+  reemplazarDoc.value[docId] = false;
+  archivosObligatoriosFiles.value[docId] = null;
+  delete archivosObligatorios.value[docId];
+  actualizarArchivosEnForm();
+};
+
+const openDocWindow = (url) => {
+  if (url) window.open(url, "_blank");
+};
+
+const validarDocObligatorio = (item) => {
+  const info = getDocExpedienteInfo(item);
+  if (info.estado === "vigente" && !reemplazarDoc.value[item.doc_id]) {
+    return true;
+  }
+  return !!archivosObligatorios.value[item.doc_id]?.base64;
+};
+
+const archivosObligatoriosFiles = ref({});
+const archivosObligatorios = ref({});
+const archivosOpcionales = ref([]);
+
+const actualizarArchivosEnForm = () => {
+  const docsActuales = listaDocsObligatorios.value;
+  const obligatorios = [];
+
+  docsActuales.forEach((item) => {
+    const info = getDocExpedienteInfo(item);
+    const nuevoSubido = archivosObligatorios.value[item.doc_id];
+
+    if (nuevoSubido && nuevoSubido.base64) {
+      obligatorios.push({
+        ...nuevoSubido,
+        doc_id: item.doc_id,
+        tipo: item.nombre,
+      });
+    } else if (
+      info.estado === "vigente" &&
+      !reemplazarDoc.value[item.doc_id] &&
+      info.doc
+    ) {
+      obligatorios.push({
+        doc_id: item.doc_id,
+        tipo: item.nombre,
+        nombre: info.doc.name || `${item.nombre}.pdf`,
+        path: info.doc.path,
+        realpath: info.doc.realpath,
+        expiration_date: info.doc.expiration_date,
+        existente: true,
+        es_obligatorio: true,
+      });
+    }
+  });
+
+  formCredito.value.archivos = [...obligatorios, ...archivosOpcionales.value];
+};
+
+const getFechaVencimientoDefault = () => {
+  const d = new Date();
+  d.setMonth(d.getMonth() + 3);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const onObligatorioFileSelected = (file, itemOblig) => {
+  if (!file) {
+    delete archivosObligatorios.value[itemOblig.doc_id];
+    actualizarArchivosEnForm();
+    return;
+  }
+
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (ext !== "pdf") {
+    archivosObligatoriosFiles.value[itemOblig.doc_id] = null;
+    delete archivosObligatorios.value[itemOblig.doc_id];
+    actualizarArchivosEnForm();
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const prevExp =
+      archivosObligatorios.value[itemOblig.doc_id]?.expiration_date ||
+      getFechaVencimientoDefault();
+    archivosObligatorios.value[itemOblig.doc_id] = {
+      doc_id: itemOblig.doc_id,
+      tipo: itemOblig.nombre,
+      nombre: file.name,
+      extension: "pdf",
+      size: (file.size / 1024).toFixed(1) + " KB",
+      base64: e.target.result,
+      expiration_date: prevExp,
+      es_obligatorio: true,
+    };
+    actualizarArchivosEnForm();
+  };
+  reader.readAsDataURL(file);
+};
 
 const tempDoc = ref({
   tipo: null,
@@ -794,19 +1302,21 @@ const onFileSelected = (file) => {
   reader.readAsDataURL(file);
 };
 
-const agregarArchivo = () => {
+const agregarArchivoOpcional = () => {
   if (!tempDoc.value.tipo || !tempDoc.value.base64) return;
 
-  if (!formCredito.value.archivos) {
-    formCredito.value.archivos = [];
-  }
+  const docCatalogo = (crud.items.documentos || []).find(
+    (d) => (d.nombre || d.name) === tempDoc.value.tipo
+  );
 
-  formCredito.value.archivos.push({
+  archivosOpcionales.value.push({
+    doc_id: docCatalogo?.id || null,
     tipo: tempDoc.value.tipo,
     nombre: tempDoc.value.nombre,
     extension: tempDoc.value.extension,
     size: tempDoc.value.size,
     base64: tempDoc.value.base64,
+    es_obligatorio: false,
   });
 
   tempDoc.value = {
@@ -817,13 +1327,28 @@ const agregarArchivo = () => {
     size: null,
     base64: null,
   };
+
+  actualizarArchivosEnForm();
 };
 
-const eliminarArchivo = (index) => {
-  if (formCredito.value.archivos) {
-    formCredito.value.archivos.splice(index, 1);
-  }
+const eliminarArchivoOpcional = (index) => {
+  archivosOpcionales.value.splice(index, 1);
+  actualizarArchivosEnForm();
 };
+
+watch(
+  () => listaDocsObligatorios.value,
+  () => {
+    actualizarArchivosEnForm();
+  }
+);
+
+watch(
+  () => clienteDocs.value,
+  () => {
+    actualizarArchivosEnForm();
+  }
+);
 
 const seleccionarGerenteAutomatico = () => {
   const gerentes =
@@ -953,23 +1478,27 @@ watch(
 watch(
   () => formCredito.value.linea_id,
   () => {
-    if (esLineaServicio.value) {
-      formCredito.value.tipo_anticipo = "Anticipo";
-    } else if (
-      !esLineaMaquinaria.value &&
-      formCredito.value.tipo_anticipo === "Maquinaria a Cuenta"
-    ) {
-      formCredito.value.tipo_anticipo = "Anticipo";
+    const opciones = tipoEngancheOptions.value;
+    if (opciones && opciones.length > 0) {
+      const existe = opciones.some(
+        (o) => o.id === formCredito.value.tipo_enganche_id
+      );
+      if (!existe) {
+        formCredito.value.tipo_enganche_id = opciones[0].id;
+      }
+    } else {
+      formCredito.value.tipo_enganche_id = null;
     }
   }
 );
 
 watch(
-  () => formCredito.value.tipo_anticipo,
-  (newVal) => {
-    if (newVal === "Sin Anticipo") {
-      formCredito.value.anticipo = null;
+  () => formCredito.value.tipo_enganche_id,
+  () => {
+    if (esSinAnticipo.value) {
+      formCredito.value.valor_enganche = null;
     }
+    actualizarArchivosEnForm();
   }
 );
 
@@ -1007,7 +1536,7 @@ const getOrdinal = (n) => {
 };
 
 const regenerarPagos = () => {
-  const tieneAnticipo = Number(formCredito.value.anticipo) > 0;
+  const tieneAnticipo = Number(formCredito.value.valor_enganche) > 0;
   const numPagos = parseInt(formCredito.value.numero_pagos, 10);
   const totalPagos = numPagos && numPagos >= 1 ? Math.min(numPagos, 120) : 0;
 
@@ -1027,7 +1556,7 @@ const regenerarPagos = () => {
   if (tieneAnticipo) {
     newPagos.push({
       numero: contadorNumero++,
-      etiqueta: "Anticipo",
+      etiqueta: "Enganche",
       es_anticipo: true,
       fecha: prevAnticipo ? prevAnticipo.fecha : null,
     });
@@ -1048,7 +1577,10 @@ const regenerarPagos = () => {
 };
 
 watch(
-  [() => formCredito.value.numero_pagos, () => formCredito.value.anticipo],
+  [
+    () => formCredito.value.numero_pagos,
+    () => formCredito.value.valor_enganche,
+  ],
   () => {
     regenerarPagos();
   }
@@ -1069,8 +1601,19 @@ const validate = async () => {
   return await myForm.value.validate();
 };
 
-onMounted(() => {
-  getOptions();
+watch(
+  () => cliente?.id,
+  (newId) => {
+    if (newId) {
+      formCredito.value.cliente_id = newId;
+      getClienteDocs();
+    }
+  }
+);
+
+onMounted(async () => {
+  await getOptions();
+  await getClienteDocs();
 });
 
 defineExpose({

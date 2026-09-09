@@ -51,9 +51,29 @@
 
           <div class="col-12 col-sm-6 col-md-3">
             <q-card flat bordered class="bg-amber-1 q-pa-sm rounded-borders">
-              <div class="text-caption text-grey-8">Anticipo</div>
+              <div class="text-caption text-grey-8">
+                {{
+                  (
+                    credito?.tipo_enganche?.nombre ||
+                    credito?.tipo_anticipo ||
+                    ""
+                  )
+                    .toLowerCase()
+                    .includes("a cuenta")
+                    ? "Valor Maquinaria"
+                    : (credito?.tipo_enganche?.nombre || "")
+                        .toLowerCase()
+                        .includes("sin")
+                    ? "Enganche"
+                    : "Enganche / Anticipo"
+                }}
+              </div>
               <div class="text-h6 text-weight-bolder text-amber-9">
-                {{ formatCurrency(credito?.anticipo || 0) }}
+                {{
+                  formatCurrency(
+                    credito?.valor_enganche || credito?.anticipo || 0
+                  )
+                }}
               </div>
             </q-card>
           </div>
@@ -120,13 +140,27 @@
             <q-td :props="props" align="center">
               <q-chip
                 dense
-                :color="props.row.n_pago === 1 ? 'orange-9' : 'dark'"
+                :color="
+                  props.row.es_anticipo ||
+                  props.row.etiqueta === 'Enganche' ||
+                  (props.row.n_pago === 1 &&
+                    Number(
+                      credito?.valor_enganche || credito?.anticipo
+                    ) > 0)
+                    ? 'orange-9'
+                    : 'dark'
+                "
                 text-color="white"
                 class="text-weight-bold q-px-sm"
               >
                 {{
-                  props.row.n_pago === 1
-                    ? "Pago 1 (Anticipo)"
+                  props.row.es_anticipo ||
+                  props.row.etiqueta === 'Enganche' ||
+                  (props.row.n_pago === 1 &&
+                    Number(
+                      credito?.valor_enganche || credito?.anticipo
+                    ) > 0)
+                    ? 'Pago 1 (Enganche)'
                     : props.row.etiqueta || `Pago #${props.row.n_pago}`
                 }}
               </q-chip>

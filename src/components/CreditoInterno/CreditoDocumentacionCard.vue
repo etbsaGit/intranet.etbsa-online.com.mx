@@ -46,7 +46,13 @@
 
               <q-item-section>
                 <q-item-label class="text-weight-bold text-primary text-body2">
-                  {{ doc.archivo || doc.tipo || "Documento" }}
+                  {{
+                    doc.documento?.nombre ||
+                    doc.archivo ||
+                    doc.tipo ||
+                    doc.nombre ||
+                    "Documento"
+                  }}
                 </q-item-label>
                 <q-item-label
                   caption
@@ -120,7 +126,13 @@
             class="text-subtitle1 text-weight-bold flex items-center q-gutter-sm"
           >
             <q-icon name="picture_as_pdf" />
-            <span>{{ selectedDoc?.archivo || "Documento" }}</span>
+            <span>{{
+              selectedDoc?.documento?.nombre ||
+              selectedDoc?.archivo ||
+              selectedDoc?.tipo ||
+              selectedDoc?.nombre ||
+              "Documento"
+            }}</span>
           </div>
           <div class="row items-center q-gutter-xs">
             <q-btn

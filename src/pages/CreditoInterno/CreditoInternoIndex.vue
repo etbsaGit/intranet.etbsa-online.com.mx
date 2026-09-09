@@ -137,10 +137,16 @@
             {{ formatCurrency(props.row.monto_solicitado || 0) }}
           </div>
           <div
-            v-if="props.row.anticipo && Number(props.row.anticipo) > 0"
+            v-if="
+              (props.row.valor_enganche || props.row.anticipo) &&
+              Number(props.row.valor_enganche || props.row.anticipo) > 0
+            "
             class="text-caption text-amber-9 text-weight-medium"
           >
-            Anticipo: {{ formatCurrency(props.row.anticipo) }}
+            Enganche:
+            {{
+              formatCurrency(props.row.valor_enganche || props.row.anticipo)
+            }}
           </div>
         </div>
       </q-td>

@@ -180,12 +180,21 @@ const props = defineProps({
 defineEmits(["update:modelValue"]);
 
 const itemsHistorial = computed(() => {
+  let list = [];
   if (props.historial && Array.isArray(props.historial)) {
-    return props.historial;
+    list = [...props.historial];
+  } else if (props.credito?.historial && Array.isArray(props.credito.historial)) {
+    list = [...props.credito.historial];
   }
-  if (props.credito?.historial && Array.isArray(props.credito.historial)) {
-    return props.credito.historial;
-  }
-  return [];
+
+  // Ordenar descendente: la última actualización hasta arriba
+  return list.sort((a, b) => {
+    const timeA = new Date(a.created_at || a.fecha || 0).getTime();
+    const timeB = new Date(b.created_at || b.fecha || 0).getTime();
+    if (timeB !== timeA) {
+      return timeB - timeA;
+    }
+    return (b.id || 0) - (a.id || 0);
+  });
 });
 </script>

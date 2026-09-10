@@ -260,7 +260,6 @@
                     <q-chip
                       dense
                       :color="
-                        props.row.es_anticipo ||
                         props.row.etiqueta === 'Enganche' ||
                         (props.row.n_pago === 1 &&
                           Number(credito.valor_enganche || credito.anticipo) >
@@ -271,15 +270,7 @@
                       text-color="white"
                       class="text-weight-bold"
                     >
-                      {{
-                        props.row.es_anticipo ||
-                        props.row.etiqueta === "Enganche" ||
-                        (props.row.n_pago === 1 &&
-                          Number(credito.valor_enganche || credito.anticipo) >
-                            0)
-                          ? "Pago 1 (Enganche)"
-                          : props.row.etiqueta || `Pago #${props.row.n_pago}`
-                      }}
+                      {{ props.row.etiqueta }}
                     </q-chip>
                   </q-td>
                 </template>
@@ -313,6 +304,94 @@
                       class="text-weight-bold text-positive"
                     >
                       {{ formatCurrency(props.row.monto_pagado) }}
+                    </div>
+                    <div
+                      v-else-if="
+                        Number(props.row.saldo_pendiente) === 0 &&
+                        props.row.fecha_liquidado &&
+                        props.row.n_pago > 1
+                      "
+                    >
+                      <q-badge
+                        color="green-1"
+                        text-color="green-9"
+                        class="text-weight-bold q-pa-xs"
+                      >
+                        Liquidado anticipadamente
+                      </q-badge>
+                    </div>
+                    <div v-else class="text-grey-5">—</div>
+                  </q-td>
+                </template>
+
+                <!-- Comprobante / Evidencia PDF -->
+                <template v-slot:body-cell-comprobante="props">
+                  <q-td :props="props" align="center">
+                    <div
+                      v-if="
+                        props.row.documento?.realpath ||
+                        props.row.documento?.path ||
+                        props.row.documento_id ||
+                        props.row.document_id
+                      "
+                      class="row items-center justify-center q-gutter-xs"
+                    >
+                      <q-btn
+                        dense
+                        flat
+                        color="red-8"
+                        icon="picture_as_pdf"
+                        label="Ver Recibo"
+                        class="text-weight-bold"
+                        @click="previsualizarPdf(props.row.documento)"
+                      >
+                        <q-tooltip>Ver comprobante PDF</q-tooltip>
+                      </q-btn>
+                    </div>
+                    <div
+                      v-else-if="
+                        Number(props.row.saldo_pendiente) === 0 &&
+                        props.row.fecha_liquidado &&
+                        props.row.n_pago > 1
+                      "
+                    >
+                      <q-badge
+                        color="grey-3"
+                        text-color="grey-8"
+                        class="q-pa-xs"
+                      >
+                        Auto-liquidado
+                      </q-badge>
+                    </div>
+                    <div
+                      v-else-if="
+                        props.row.monto_pagado !== null &&
+                        Number(props.row.monto_pagado) > 0
+                      "
+                    >
+                      <q-badge
+                        color="orange-1"
+                        text-color="orange-9"
+                        class="q-pa-xs"
+                      >
+                        Sin comprobante
+                      </q-badge>
+                    </div>
+                    <div v-else class="text-grey-5">—</div>
+                  </q-td>
+                </template>
+
+                <!-- Saldo Pendiente -->
+                <template v-slot:body-cell-saldo_pendiente="props">
+                  <q-td :props="props" align="right">
+                    <div
+                      v-if="
+                        props.row.saldo_pendiente !== null &&
+                        props.row.saldo_pendiente !== undefined
+                      "
+                      class="text-weight-bold text-dark"
+                    >
+                      {{ formatCurrency(props.row.saldo_pendiente) }}
                     </div>
                     <div v-else class="text-grey-5">—</div>
                   </q-td>
@@ -350,6 +429,52 @@
                       <span>{{
                         formatFechaLarga(props.row.fecha_liquidado)
                       }}</span>
+                    </div>
+                    <div v-else class="text-grey-5">—</div>
+                  </q-td>
+                </template>
+
+                <!-- Registrado Por -->
+                <template v-slot:body-cell-actualizado_por="props">
+                  <q-td :props="props">
+                    <div
+                      v-if="props.row.actualizado_por?.nombreCompleto"
+                      class="text-weight-medium text-grey-9 flex items-center q-gutter-xs"
+                    >
+                      <q-icon name="person" size="xs" color="grey-7" />
+                      <span>{{
+                        props.row.actualizado_por.nombreCompleto
+                      }}</span>
+                    </div>
+                    <div v-else class="text-grey-5">—</div>
+                  </q-td>
+                </template>
+
+                <!-- Validado Por -->
+                <template v-slot:body-cell-validado_por="props">
+                  <q-td :props="props">
+                    <div
+                      v-if="props.row.validado_por?.nombreCompleto"
+                      class="text-weight-medium text-positive flex items-center q-gutter-xs"
+                    >
+                      <q-icon name="verified" size="xs" color="positive" />
+                      <span>{{ props.row.validado_por.nombreCompleto }}</span>
+                    </div>
+                    <div
+                      v-else-if="
+                        (props.row.monto_pagado !== null &&
+                          Number(props.row.monto_pagado) > 0) ||
+                        Boolean(props.row.fecha_liquidado)
+                      "
+                    >
+                      <q-badge
+                        color="amber-1"
+                        text-color="amber-9"
+                        class="text-weight-medium q-pa-xs"
+                      >
+                        <q-icon name="pending" size="xs" class="q-mr-xs" />
+                        Pendiente de validar
+                      </q-badge>
                     </div>
                     <div v-else class="text-grey-5">—</div>
                   </q-td>
@@ -412,10 +537,51 @@
         <q-btn flat label="Cerrar" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
+
+    <!-- Modal de Previsualización de PDF del Comprobante -->
+    <q-dialog v-model="modalPdf" full-width full-height>
+      <q-card class="column no-wrap" style="height: 100%">
+        <q-card-section
+          class="bg-primary text-white row items-center justify-between q-py-sm"
+        >
+          <div
+            class="text-subtitle1 text-weight-bold flex items-center q-gutter-sm"
+          >
+            <q-icon name="picture_as_pdf" />
+            <span>
+              {{
+                docPdfSeleccionado?.documento?.nombre ||
+                docPdfSeleccionado?.nombre ||
+                "Comprobante de Pago"
+              }}
+            </span>
+          </div>
+          <div class="row items-center q-gutter-xs">
+            <q-btn
+              flat
+              dense
+              icon="open_in_new"
+              label="Abrir en pestaña"
+              @click="abrirPdfExterno(docPdfSeleccionado)"
+            />
+            <q-btn flat round dense icon="close" v-close-popup />
+          </div>
+        </q-card-section>
+
+        <q-card-section class="col q-pa-none bg-grey-3">
+          <iframe
+            v-if="docPdfSeleccionadoUrl"
+            :src="docPdfSeleccionadoUrl"
+            style="width: 100%; height: 100%; border: none"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-dialog>
 </template>
 
 <script setup>
+import { ref, computed } from "vue";
 import {
   formatPhoneNumber,
   formatCurrency,
@@ -458,6 +624,19 @@ const columnsPagos = [
     align: "right",
   },
   {
+    name: "comprobante",
+    label: "Comprobante",
+    field: (row) => row.documento?.path || "-",
+    align: "center",
+  },
+  {
+    name: "saldo_pendiente",
+    label: "Saldo Pendiente",
+    field: (row) => row.saldo_pendiente,
+    align: "right",
+    sortable: true,
+  },
+  {
     name: "estatus",
     label: "Estatus",
     field: (row) => row.estatus?.nombre || row.estatus || "Pendiente",
@@ -469,5 +648,45 @@ const columnsPagos = [
     field: (row) => row.fecha_liquidado || "",
     align: "left",
   },
+  {
+    name: "actualizado_por",
+    label: "Registrado Por",
+    field: (row) => row.actualizado_por?.nombreCompleto || "-",
+    align: "left",
+  },
+  {
+    name: "validado_por",
+    label: "Validado Por",
+    field: (row) => row.validado_por?.nombreCompleto || "-",
+    align: "left",
+  },
 ];
+
+// --- Previsualización de PDF del Comprobante ---
+const modalPdf = ref(false);
+const docPdfSeleccionado = ref(null);
+
+const docPdfSeleccionadoUrl = computed(() => {
+  if (!docPdfSeleccionado.value) return null;
+  return (
+    docPdfSeleccionado.value.realpath ||
+    docPdfSeleccionado.value.url ||
+    docPdfSeleccionado.value.base64 ||
+    null
+  );
+});
+
+const previsualizarPdf = (doc) => {
+  if (!doc) return;
+  docPdfSeleccionado.value = doc;
+  modalPdf.value = true;
+};
+
+const abrirPdfExterno = (doc) => {
+  if (!doc) return;
+  const url = doc.realpath || doc.url || doc.base64;
+  if (url) {
+    window.open(url, "_blank");
+  }
+};
 </script>

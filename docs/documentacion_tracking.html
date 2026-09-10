@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Documentación Módulo de Tracking - ETBSA</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+    @page {
+      size: letter;
+      margin: 18mm 15mm 18mm 15mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.55;
+      font-size: 13px;
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+    }
+
+    /* Cover / Header Banner */
+    .header-banner {
+      background: linear-gradient(135deg, #1b4d20 0%, #2e7d32 60%, #388e3c 100%);
+      color: white;
+      padding: 30px 25px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-left: 8px solid #ffcc00;
+    }
+
+    .header-banner h1 {
+      margin: 0 0 8px 0;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-banner h2 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      font-weight: 400;
+      opacity: 0.92;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #ffeb3b;
+      text-transform: uppercase;
+      font-size: 9.5px;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    /* Headings */
+    h2.section-title {
+      color: #1b4d20;
+      font-size: 18px;
+      font-weight: 700;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 30px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h2.section-title::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 18px;
+      background: #2e7d32;
+      border-radius: 3px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      margin-top: 18px;
+      margin-bottom: 8px;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+      color: #334155;
+    }
+
+    /* Badges & Pills */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .badge-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-blue { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+    .badge-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-red { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 20px 0;
+      font-size: 11.5px;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+      color: #334155;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafafa;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Cards / Boxes */
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .alert-box {
+      border-left: 4px solid #2563eb;
+      background: #eff6ff;
+      padding: 12px 14px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-size: 12px;
+    }
+    .alert-box.success {
+      border-left-color: #16a34a;
+      background: #f0fdf4;
+    }
+    .alert-box.warning {
+      border-left-color: #d97706;
+      background: #fffbeb;
+    }
+
+    /* Flow Diagram Visual */
+    .flow-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 16px 12px;
+      border-radius: 10px;
+      margin: 15px 0 20px 0;
+    }
+
+    .flow-step {
+      flex: 1;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .flow-step.active {
+      border-color: #2e7d32;
+      background: #f0fdf4;
+    }
+
+    .flow-step-num {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      background: #2e7d32;
+      color: white;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .flow-step-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .flow-step-desc {
+      font-size: 9.5px;
+      color: #64748b;
+    }
+
+    .flow-arrow {
+      font-size: 16px;
+      color: #94a3b8;
+      font-weight: bold;
+    }
+
+    /* Code Blocks */
+    pre, code {
+      font-family: 'Fira Code', Consolas, Monaco, monospace;
+    }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 10.5px;
+      line-height: 1.45;
+      overflow-x: auto;
+      margin: 10px 0;
+      border: 1px solid #1e293b;
+    }
+
+    code:not(pre code) {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 10px 0;
+    }
+
+    /* Avoid page breaks inside critical elements */
+    .no-break {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    .page-break {
+      page-break-before: always;
+      break-before: always;
+    }
+
+    ul, ol {
+      margin: 0 0 12px 0;
+      padding-left: 20px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid #e2e8f0;
+      color: #94a3b8;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header-banner">
+    <h1>ETBSA | Documentación de Sistema</h1>
+    <h2>Módulo de Tracking, Aprobación de Pedidos y Asignación de Serie</h2>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Módulo</strong>
+        Tracking / Cotizaciones
+      </div>
+      <div class="meta-item">
+        <strong>Plataforma</strong>
+        Intranet ETBSA
+      </div>
+      <div class="meta-item">
+        <strong>Versión Doc</strong>
+        1.0 (Producción)
+      </div>
+      <div class="meta-item">
+        <strong>Frontend / Framework</strong>
+        Vue 3 + Quasar
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. RESUMEN EJECUTIVO -->
+  <div class="no-break">
+    <h2 class="section-title">1. Visión General y Propósito del Módulo</h2>
+    <p>
+      El <strong>Módulo de Tracking</strong> (accesible desde el menú de <em>Cotizaciones</em>) es el motor de flujo de trabajo encargado de gestionar la validación comercial y administrativa de los pedidos formalizados por los asesores de ventas, su trazabilidad histórica auditada y la vinculación final de maquinaria física del inventario mediante número de serie.
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-top:0; color:#1b4d20;">🎯 Objetivos Principales</h3>
+        <ul>
+          <li><strong>Control de Validación Escalonada:</strong> Aprobación en dos fases (Formalizados &rarr; Autorizados).</li>
+          <li><strong>Auditoría & Trazabilidad:</strong> Registro inmutable de cada cambio de estatus, usuario responsable y retroalimentación.</li>
+          <li><strong>Asignación de Activos:</strong> Reserva y asociación física de tractores o maquinaria de inventario a cada pedido.</li>
+          <li><strong>Generación de Documentos:</strong> Emisión automática de pedidos en PDF con un clic.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0; color:#1b4d20;">🏢 Unidades de Negocio Impactadas</h3>
+        <ul>
+          <li><strong>Ventas & Asesores:</strong> Formalización de cotizaciones de clientes.</li>
+          <li><strong>Gerencia de Ventas / Crédito:</strong> Aprobación de precios, condiciones y anticipos.</li>
+          <li><strong>Almacén & Abastecimiento:</strong> Control de números de serie (S/N), RD y entrega física.</li>
+          <li><strong>Dirección General:</strong> Monitoreo de conversiones y pedidos activos.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ROLES Y SEGURIDAD -->
+  <div class="no-break">
+    <h2 class="section-title">2. Matriz de Roles y Permisos (RBAC)</h2>
+    <p>El acceso al módulo está asegurado mediante verificación de permisos a nivel de rutas (Vue Router Middleware) y renderizado condicional de elementos de menú.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rol / Permiso</th>
+          <th>Ruta en Frontend</th>
+          <th>Nivel de Acceso</th>
+          <th>Descripción Funcional</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-green">crm</span></td>
+          <td><code>/cotizaciones/*</code></td>
+          <td>Acceso Raíz</td>
+          <td>Permite visualizar y desplegar la rama de Cotizaciones en el menú principal.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">crm.formalizados</span></td>
+          <td><code>/cotizaciones/pedidosFormalizados</code></td>
+          <td>Fase 1: Validación</td>
+          <td>Permite revisar pedidos recién formalizados, ver condiciones comerciales y autorizar o rechazar hacia "Sin Formalizar".</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-amber">crm.autorizados</span></td>
+          <td><code>/cotizaciones/pedidosAutorizados</code></td>
+          <td>Fase 2: Autorización</td>
+          <td>Revisión final de gerencia. Autoriza el pedido hacia estado "Para Asignar" o regresa a "Formalizado".</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">crm.asignacion_serie</span></td>
+          <td><code>/cotizaciones/asignacionSerie</code></td>
+          <td>Fase 3: Inventario</td>
+          <td>Permite consultar el catálogo de existencias y vincular la unidad física (Serie, RD, Eco) al pedido.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. CICLO DE VIDA Y MÁQUINA DE ESTADOS -->
+  <div class="no-break page-break">
+    <h2 class="section-title">3. Ciclo de Vida y Máquina de Estados</h2>
+    <p>El flujo del pedido sigue una máquina de estados estricta. Ningún pedido puede brincar etapas sin su correspondiente validación:</p>
+
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="flow-step-num">0</div>
+        <div class="flow-step-title">Cotización</div>
+        <div class="flow-step-desc">Vendedor crea cotización y formaliza</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step active">
+        <div class="flow-step-num">1</div>
+        <div class="flow-step-title">Formalizado</div>
+        <div class="flow-step-desc">Revisión de condiciones y anticipo</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step active">
+        <div class="flow-step-num">2</div>
+        <div class="flow-step-title">Autorizado</div>
+        <div class="flow-step-desc">Visto bueno de gerencia / crédito</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step active">
+        <div class="flow-step-num">3</div>
+        <div class="flow-step-title">Para Asignar</div>
+        <div class="flow-step-desc">Selección de tractor en inventario</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-step">
+        <div class="flow-step-num">4</div>
+        <div class="flow-step-title">Asignado</div>
+        <div class="flow-step-desc">Serie vinculada y listo para entrega</div>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Estado Actual</th>
+          <th>Acción en Pantalla</th>
+          <th>Estado Resultante</th>
+          <th>Endpoint API</th>
+          <th>Regla de Negocio</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">Formalizado</span></td>
+          <td>Toggle: <strong>AUTORIZADO</strong></td>
+          <td><span class="badge badge-green">Autorizado</span></td>
+          <td><code>POST .../autorizarPedido/{id}/Autorizado</code></td>
+          <td>Pasa a la bandeja de Pedidos Autorizados.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">Formalizado</span></td>
+          <td>Toggle: <strong>RECHAZADO</strong></td>
+          <td><span class="badge badge-red">Sin Formalizar</span></td>
+          <td><code>POST .../autorizarPedido/{id}/Sin Formalizar</code></td>
+          <td><strong>Obligatorio</strong> ingresar comentario de retroalimentación. Regresa al asesor.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">Autorizado</span></td>
+          <td>Toggle: <strong>AUTORIZADO</strong></td>
+          <td><span class="badge badge-purple">Para Asignar</span></td>
+          <td><code>POST .../autorizarPedido/{id}/Para Asignar</code></td>
+          <td>Habilita el pedido en la pantalla de Asignación de Serie.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">Autorizado</span></td>
+          <td>Toggle: <strong>RECHAZADO</strong></td>
+          <td><span class="badge badge-blue">Formalizado</span></td>
+          <td><code>POST .../autorizarPedido/{id}/Formalizado</code></td>
+          <td>Regresa a la bandeja previa con comentarios correctivos.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-purple">Para Asignar</span></td>
+          <td>Seleccionar y guardar tractor</td>
+          <td><span class="badge badge-green">Asignado</span></td>
+          <td><code>POST .../asignar-serie/{id}</code></td>
+          <td>Asocia <code>inv_item_id</code> y actualiza estatus con badge verde.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 4. ARQUITECTURA TÉCNICA FRONTEND -->
+  <div class="no-break">
+    <h2 class="section-title">4. Arquitectura Frontend (Vue 3 / Quasar)</h2>
+    <p>El frontend está modularizado con base en el patrón de componentes reutilizables y stores reactivos con Pinia:</p>
+
+    <div class="card">
+      <pre><code>src/
+├── pages/Cotizaciones/
+│   ├── PedidosFormalizadosPage.vue    # Catálogo de fase 1 (Formalizados)
+│   ├── PedidosAutorizadosPage.vue       # Catálogo de fase 2 (Autorizados)
+│   └── AsignacionSeriePage.vue          # Catálogo de fase 3 (Asignación de Series)
+├── components/Cotizaciones/
+│   ├── DetallesModal.vue                # Formulario modal de aprobación fase 1
+│   ├── DetallesAutorizadoModal.vue      # Formulario modal de aprobación fase 2
+│   ├── AsignacionSerieModal.vue         # Modal con buscador de inventario y asignación
+│   └── HistorialTrackingModal.vue       # Línea de tiempo con historial de cambios
+├── bases/
+│   ├── BaseCatalogo.vue                 # Tabla reactiva con skeleton, búsqueda y paginación
+│   ├── BaseDialog.vue                   # Contenedor de ventanas modales
+│   └── BasePagination.vue               # Paginador estándar
+└── stores/
+    └── crud.js                          # Store centralizado de peticiones HTTP</code></pre>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <h3>Componente <code>BaseCatalogo.vue</code></h3>
+        <p>Provee soporte nativo para búsquedas con <em>debounce</em> de 1 segundo, paginación remota, estados de carga mediante <em>TableSkeleton</em> y personalización mediante <em>scoped slots</em>.</p>
+      </div>
+      <div>
+        <h3>Impresión Directa de PDF</h3>
+        <p>Se realiza mediante petición binaria (<code>responseType: 'blob'</code>) al endpoint <code>/api/intranet/tracking/print-quote/{id}</code>, abriendo el documento directamente en una nueva pestaña del navegador.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ENDPOINTS Y SERVICIOS API -->
+  <div class="no-break page-break">
+    <h2 class="section-title">5. Catálogo de Endpoints y Servicios API</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Método</th>
+          <th>Endpoint</th>
+          <th>Descripción</th>
+          <th>Parámetros / Payload</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/intranet/trackingAutorizaciones/Formalizado</code></td>
+          <td>Obtiene lista paginada de pedidos formalizados.</td>
+          <td>Query params: <code>search</code>, <code>page</code>.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/intranet/trackingAutorizaciones/Autorizado</code></td>
+          <td>Obtiene lista paginada de pedidos autorizados.</td>
+          <td>Query params: <code>search</code>, <code>page</code>.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/intranet/trackingAutorizaciones/Para Asignar/Asignado</code></td>
+          <td>Obtiene pedidos listos para asignación y ya asignados.</td>
+          <td>Query params: <code>search</code>, <code>page</code>.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/intranet/trackingAutorizacion/autorizarPedido/{id}/{situacion}</code></td>
+          <td>Cambia el estado de autorización y guarda feedback.</td>
+          <td>
+            <code>{ "comentario": string, "validation": 0|1 }</code>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-green">POST</span></td>
+          <td><code>/api/intranet/trackingAutorizacion/asignar-serie/{id}</code></td>
+          <td>Vincula una unidad física de inventario al pedido.</td>
+          <td>
+            <code>{ "inv_item_id": number, "comentarios": string }</code>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/intranet/invItem/inventario</code></td>
+          <td>Catálogo de tractores y maquinaria disponibles en inventario.</td>
+          <td>Retorna array de unidades con serie, modelo y sucursal.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-blue">GET</span></td>
+          <td><code>/api/intranet/tracking/print-quote/{id}</code></td>
+          <td>Descarga la cotización formalizada en formato PDF.</td>
+          <td>Respuesta: <code>Blob (application/pdf)</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert-box success">
+      <strong>Estructura del Payload de Historial Tracking:</strong> Cada vez que se ejecuta una autorización o rechazo, el backend genera un registro en la tabla de historial vinculando: <code>cotizacion_id</code>, <code>empleado_id</code> (sesión actual), <code>situacion_id</code> (nuevo estado) y el <code>comentario</code> emitido.
+    </div>
+  </div>
+
+  <!-- 6. MODELO DE DATOS -->
+  <div class="no-break">
+    <h2 class="section-title">6. Modelo de Datos y Estructuras JSON</h2>
+    <p>Ejemplo de la estructura de datos que procesa el módulo para una cotización en tracking:</p>
+
+    <pre><code>{
+  "id": 105,
+  "folio": "COT-2026-0045",
+  "subtotal": 1500000.00,
+  "iva_monto": 240000.00,
+  "descuento": 0.00,
+  "total": 1740000.00,
+  "anticipo_monto": 350000.00,
+  "notas": "Entrega pactada en sucursal Irapuato",
+  "cliente": { "id": 12, "nombre": "Agrícola Los Pinos S.P.R. de R.L." },
+  "categoria": { "id": 1, "name": "Tractores" },
+  "condicion_pago": { "id": 2, "name": "Crédito John Deere Financial" },
+  "sucursal": { "id": 3, "nombre": "Irapuato" },
+  "vendedor": { "id": 45, "nombreCompleto": "Juan Pérez González" },
+  "depto": { "id": 2, "nombre": "Maquinaria Agrícola" },
+  "currency": { "id": 1, "name": "MXN" },
+  "situacion": { "id": 3, "nombre": "Autorizado" },
+  "detalles": [
+    {
+      "id": 1,
+      "cantidad": 1,
+      "precio_unidad": 1500000.00,
+      "subtotal": 1500000.00,
+      "productos": { "sku": "TRAC-6120M", "name": "Tractor John Deere 6120M" }
+    }
+  ],
+  "historial": [
+    {
+      "id": 1,
+      "created_at": "2026-09-08T10:30:00.000Z",
+      "comentario": "Anticipo recibido y validado en cuenta.",
+      "empleado": { "nombreCompleto": "María Gerente Crédito" },
+      "situacion": { "nombre": "Autorizado" }
+    }
+  ],
+  "asignacion": {
+    "inv_item_id": 88,
+    "comentarios": "Unidad en patio lista para inspección previa a entrega.",
+    "inv_item": {
+      "s_n": "1PY6120MXXXXXX",
+      "rd": "RD-9821",
+      "e_n": "ECO-102",
+      "shipping_date": "2026-08-15",
+      "inv_model": { "name": "6120M 4WD" },
+      "sucursal": { "nombre": "Irapuato" }
+    }
+  }
+}</code></pre>
+  </div>
+
+  <!-- 7. MANUAL OPERATIVO -->
+  <div class="no-break page-break">
+    <h2 class="section-title">7. Manual Operativo Paso a Paso</h2>
+
+    <div class="card">
+      <h3 style="margin-top:0; color:#1b4d20;">Paso 1: Validación de Pedido Formalizado</h3>
+      <ol>
+        <li>Navegar a <strong>Cotizaciones &gt; Formalizados</strong>.</li>
+        <li>Hacer clic en el icono azul <strong>👁️ (Detalles)</strong> en el pedido a revisar.</li>
+        <li>Revisar detenidamente los productos, extras, montos, anticipo y notas del vendedor.</li>
+        <li>Seleccionar el toggle:
+          <ul>
+            <li><strong>AUTORIZADO (Verde):</strong> Para aprobar y pasar a la siguiente fase.</li>
+            <li><strong>RECHAZADO (Rojo):</strong> Obliga a ingresar un texto en el campo <em>Retroalimentación</em> explicando el motivo.</li>
+          </ul>
+        </li>
+        <li>Hacer clic en <strong>"Guardar Validación"</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; color:#1b4d20;">Paso 2: Autorización Gerencial</h3>
+      <ol>
+        <li>Navegar a <strong>Cotizaciones &gt; Autorizados</strong>.</li>
+        <li>Abrir la ventana de detalles y realizar la validación final.</li>
+        <li>Al autorizar, el pedido queda automáticamente marcado como <strong>"Para Asignar"</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; color:#1b4d20;">Paso 3: Asignación de Número de Serie de Inventario</h3>
+      <ol>
+        <li>Navegar a <strong>Cotizaciones &gt; Asignación #Serie</strong>.</li>
+        <li>Localizar el registro con icono gris y hacer clic en <strong>👁️ (Detalles)</strong>.</li>
+        <li>Hacer clic en el botón <strong>"Seleccionar Tractor"</strong>. Se abrirá el catálogo de inventario.</li>
+        <li>Usar el buscador para filtrar por Número de Serie (<code>s_n</code>), Registro (<code>rd</code>), Económico (<code>e_n</code>) o Modelo.</li>
+        <li>Hacer clic en <strong>"Seleccionar"</strong> sobre el tractor correspondiente.</li>
+        <li>Verificar la tarjeta con los datos del tractor asignado, capturar comentarios opcionales y hacer clic en <strong>"Asignar Número de Serie"</strong>.</li>
+        <li>El estado en la tabla cambiará a una marca de verificación verde ✔️ <strong>Asignado</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0; color:#1b4d20;">Paso 4: Auditoría de Historial y Descarga de PDF</h3>
+      <ul>
+        <li><strong>Ver Historial:</strong> Hacer clic en el icono azul de reloj <strong>📜 (Historial)</strong> para ver todos los cambios registrados.</li>
+        <li><strong>Descargar PDF:</strong> Hacer clic en el icono verde <strong>📥 (Descargar)</strong> para generar y abrir el PDF oficial.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-note">
+    Documentación generada automáticamente para la Intranet de Equipos y Tractores del Bajío S.A. de C.V. (ETBSA). Todos los derechos reservados.
+  </div>
+
+</body>
+</html>

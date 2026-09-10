@@ -327,6 +327,7 @@ const postCredito = async () => {
   if (!refCredito.value) return;
 
   const data = { ...refCredito.value.formCredito };
+  // return console.log(data);
 
   await crud.postItem(
     "/api/intranet/creditoInterno",

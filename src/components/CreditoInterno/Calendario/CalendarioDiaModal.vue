@@ -15,7 +15,7 @@
               Pagos del {{ formatFechaLarga(dia?.fecha) }}
             </div>
             <div class="text-caption text-blue-1">
-              {{ dia?.pagos?.length || 0 }} {{ (dia?.pagos?.length === 1) ? 'pago programado' : 'pagos programados' }}
+              {{ dia?.pagos?.length || 0 }} {{ (dia?.pagos?.length === 1) ? 'pago / movimiento' : 'pagos / movimientos' }}
             </div>
           </div>
         </div>
@@ -57,7 +57,7 @@
         <div v-if="dia?.pagos && dia.pagos.length > 0" class="q-gutter-y-sm">
           <q-card
             v-for="pago in dia.pagos"
-            :key="pago.id"
+            :key="'pago-modal-' + pago.id + '-' + (pago.tipo_evento || '')"
             flat
             bordered
             class="rounded-borders bg-white shadow-1"
@@ -75,6 +75,28 @@
                 </div>
 
                 <div class="row items-center q-gutter-xs">
+                  <!-- Badge Cobro Recibido en este día -->
+                  <q-badge
+                    v-if="pago.tipo_evento === 'cobro' || (pago.fecha_liquidado && pago.fecha_liquidado.startsWith(dia?.fecha))"
+                    color="green-1"
+                    text-color="green-9"
+                    class="text-weight-bold q-pa-xs"
+                  >
+                    <q-icon name="payments" size="xs" class="q-mr-xs" />
+                    Cobro Recibido
+                  </q-badge>
+
+                  <!-- Badge Programado para este día -->
+                  <q-badge
+                    v-if="pago.tipo_evento === 'programado' || (pago.fecha_a_pagar && pago.fecha_a_pagar.startsWith(dia?.fecha))"
+                    color="blue-1"
+                    text-color="blue-9"
+                    class="text-weight-bold q-pa-xs"
+                  >
+                    <q-icon name="event" size="xs" class="q-mr-xs" />
+                    Programado
+                  </q-badge>
+
                   <!-- Badge de Validación -->
                   <q-badge
                     v-if="pago.esta_validado"

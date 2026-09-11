@@ -303,19 +303,37 @@ const pagosPorTipo = computed(() => {
   switch (props.tipoKpi) {
     case "pagado":
       return props.pagos.filter(
-        (p) => p.estado_cobro === "liquidado" || Number(p.monto_pagado) > 0
+        (p) =>
+          p.fue_cobrado_en_mes === true ||
+          (p.fue_cobrado_en_mes === undefined &&
+            (p.estado_cobro === "liquidado" || Number(p.monto_pagado) > 0))
       );
     case "validado":
-      return props.pagos.filter((p) => p.esta_validado === true);
+      return props.pagos.filter(
+        (p) =>
+          (p.fue_cobrado_en_mes === true || p.fue_cobrado_en_mes === undefined) &&
+          p.esta_validado === true
+      );
     case "por_validar":
       return props.pagos.filter(
-        (p) => !p.esta_validado && (p.estado_validacion === "por_validar" || Number(p.monto_pagado) > 0 || p.comprobante_url || p.estado_cobro === "liquidado")
+        (p) =>
+          (p.fue_cobrado_en_mes === true || p.fue_cobrado_en_mes === undefined) &&
+          !p.esta_validado &&
+          (p.estado_validacion === "por_validar" ||
+            Number(p.monto_pagado) > 0 ||
+            p.comprobante_url ||
+            p.estado_cobro === "liquidado")
       );
     case "vencido":
-      return props.pagos.filter((p) => p.estado_cobro === "vencido");
+      return props.pagos.filter(
+        (p) => p.estado_cobro === "vencido" && p.fue_programado_en_mes !== false
+      );
     case "pendiente":
-      return props.pagos.filter((p) => p.estado_cobro === "pendiente");
+      return props.pagos.filter(
+        (p) => p.estado_cobro === "pendiente" && p.fue_programado_en_mes !== false
+      );
     case "prospectado":
+      return props.pagos.filter((p) => p.fue_programado_en_mes !== false);
     default:
       return props.pagos;
   }

@@ -28,6 +28,7 @@
           'day-has-events': dia.conteo_pagos > 0,
           'day-has-pending': getConteoPendientes(dia) > 0,
           'day-has-vencido': (dia.conteo_vencidos || 0) > 0 || Number(dia.total_vencido || 0) > 0,
+          'day-has-cobrado': Number(dia.total_pagado || 0) > 0,
           'day-selected': selectedFecha === dia.fecha,
         }"
         @click="$emit('select-dia', dia)"
@@ -43,8 +44,20 @@
             {{ dia.dia }}
           </q-badge>
 
-          <!-- Badges de Conteo -->
+          <!-- Badges de Conteo en el encabezado del día -->
           <div class="row items-center q-gutter-xs">
+            <!-- Dinero Cobrado en este día -->
+            <q-badge
+              v-if="Number(dia.total_pagado || 0) > 0"
+              color="green-1"
+              text-color="green-9"
+              class="text-weight-bold"
+            >
+              <q-icon name="check_circle" size="10px" class="q-mr-xs" />
+              {{ dia.conteo_liquidados || 1 }}
+            </q-badge>
+
+            <!-- Pagos Pendientes -->
             <q-badge
               v-if="getConteoPendientes(dia) > 0"
               color="amber-2"
@@ -55,20 +68,34 @@
               {{ getConteoPendientes(dia) }}
             </q-badge>
 
+            <!-- Pagos Vencidos -->
             <q-badge
-              v-else-if="dia.conteo_pagos > 0"
-              color="indigo-1"
-              text-color="indigo-9"
+              v-if="(dia.conteo_vencidos || 0) > 0"
+              color="red-1"
+              text-color="red-9"
               class="text-weight-bold"
             >
-              {{ dia.conteo_pagos }}
+              <q-icon name="error_outline" size="10px" class="q-mr-xs" />
+              {{ dia.conteo_vencidos }}
             </q-badge>
           </div>
         </div>
 
         <!-- Mini resumen de pagos en el día -->
-        <div v-if="dia.conteo_pagos > 0" class="column q-gutter-xs day-indicators">
-          <!-- Pagos Pendientes (Ámbar) - Primer orden visual -->
+        <div v-if="dia.conteo_pagos > 0 || Number(dia.total_pagado || 0) > 0" class="column q-gutter-xs day-indicators">
+          <!-- 1. Dinero Cobrado este día (Verde) -->
+          <div
+            v-if="Number(dia.total_pagado || 0) > 0"
+            class="indicator-chip bg-green-1 text-positive text-weight-bold row items-center justify-between no-wrap"
+          >
+            <span class="flex items-center q-gutter-xs ellipsis">
+              <q-icon name="check_circle" size="12px" />
+              <span>Cobrado</span>
+            </span>
+            <span>{{ formatCompact(dia.total_pagado) }}</span>
+          </div>
+
+          <!-- 2. Pagos Pendientes (Ámbar) -->
           <div
             v-if="getConteoPendientes(dia) > 0"
             class="indicator-chip bg-amber-1 text-amber-10 text-weight-bold row items-center justify-between no-wrap"
@@ -79,24 +106,7 @@
             </span>
           </div>
 
-          <!-- Mini etiquetas con detalle de clientes pendientes -->
-          <div
-            v-for="pago in getPagosPendientes(dia).slice(0, 2)"
-            :key="'p-pend-' + pago.id"
-            class="mini-pago-tag bg-amber-50 text-amber-10 ellipsis"
-          >
-            <span class="text-weight-bold">#{{ pago.folio }}</span> {{ pago.cliente }}
-          </div>
-
-          <div
-            v-if="getPagosPendientes(dia).length > 2"
-            class="text-caption text-amber-10 text-weight-medium q-px-xs"
-            style="font-size: 9.5px; line-height: 1"
-          >
-            +{{ getPagosPendientes(dia).length - 2 }} pendiente(s) más
-          </div>
-
-          <!-- Monto Vencido (Rojo) -->
+          <!-- 3. Monto Vencido (Rojo) -->
           <div
             v-if="(dia.conteo_vencidos || 0) > 0 || Number(dia.total_vencido || 0) > 0"
             class="indicator-chip bg-red-1 text-negative text-weight-bold row items-center justify-between no-wrap"
@@ -108,16 +118,28 @@
             <span>{{ formatCompact(dia.total_vencido) }}</span>
           </div>
 
-          <!-- Monto Pagado (Verde) -->
+          <!-- Mini etiquetas con detalle de clientes SOLO para pagos programados en este día -->
           <div
-            v-if="Number(dia.total_pagado || 0) > 0"
-            class="indicator-chip bg-green-1 text-positive text-weight-bold row items-center justify-between no-wrap"
+            v-for="pago in getPagosVisibles(dia).slice(0, 3)"
+            :key="'p-tag-' + pago.id + '-' + (pago.tipo_evento || '')"
+            class="mini-pago-tag ellipsis"
+            :class="getClaseMiniTag(pago)"
           >
-            <span class="flex items-center q-gutter-xs ellipsis">
-              <q-icon name="check_circle" size="12px" />
-              <span>Cobrado</span>
+            <span class="text-weight-bold">#{{ pago.folio }}</span> {{ pago.cliente }}
+            <span v-if="pago.estado_cobro === 'liquidado' || pago.tipo_evento === 'cobro'" class="text-weight-bold q-ml-xs">
+              ✓ {{ Number(pago.monto_pagado) > 0 ? formatCompact(pago.monto_pagado) : '' }}
             </span>
-            <span>{{ formatCompact(dia.total_pagado) }}</span>
+            <span v-else-if="pago.estado_cobro === 'vencido'" class="text-weight-bold q-ml-xs">
+              (!)
+            </span>
+          </div>
+
+          <div
+            v-if="getPagosVisibles(dia).length > 3"
+            class="text-caption text-grey-8 text-weight-medium q-px-xs"
+            style="font-size: 9.5px; line-height: 1"
+          >
+            +{{ getPagosVisibles(dia).length - 3 }} pago(s) más
           </div>
         </div>
 
@@ -165,6 +187,33 @@ const getConteoPendientes = (dia) => {
     return dia.conteo_pendientes;
   }
   return getPagosPendientes(dia).length;
+};
+
+const getPagosVisibles = (dia) => {
+  if (!dia?.pagos) return [];
+  // Solo se listan en el recuadro del día los pagos PROGRAMADOS para esta fecha
+  const programados = dia.pagos.filter((p) => {
+    if (p.tipo_evento === "cobro") return false;
+    if (p.tipo_evento === "programado" || p.tipo_evento === "ambos") return true;
+    return p.fecha_a_pagar && p.fecha_a_pagar.startsWith(dia.fecha);
+  });
+
+  // Orden de prioridad: pendientes primero, luego vencidos, luego ya liquidados
+  return programados.sort((a, b) => {
+    const score = (p) =>
+      p.estado_cobro === "pendiente" ? 1 : p.estado_cobro === "vencido" ? 2 : 3;
+    return score(a) - score(b);
+  });
+};
+
+const getClaseMiniTag = (pago) => {
+  if (pago.estado_cobro === "liquidado" || pago.tipo_evento === "cobro") {
+    return "border-green text-positive";
+  }
+  if (pago.estado_cobro === "vencido") {
+    return "border-red text-negative";
+  }
+  return "border-amber text-amber-10";
 };
 
 const formatCompact = (val) => {
@@ -224,6 +273,10 @@ const formatCompact = (val) => {
   border-left: 3px solid #d32f2f;
 }
 
+.day-has-cobrado {
+  border-bottom: 3px solid #2e7d32;
+}
+
 .day-selected {
   border: 2px solid #1976d2 !important;
   background-color: #e3f2fd;
@@ -254,9 +307,22 @@ const formatCompact = (val) => {
   font-size: 10px;
   padding: 1px 4px;
   border-radius: 3px;
+  line-height: 1.2;
+}
+
+.border-green {
+  border: 1px solid #c8e6c9;
+  background-color: #f1f8e9;
+}
+
+.border-amber {
   border: 1px solid #ffe082;
   background-color: #fffde7;
-  line-height: 1.2;
+}
+
+.border-red {
+  border: 1px solid #ffcdd2;
+  background-color: #ffebee;
 }
 
 .day-no-events {

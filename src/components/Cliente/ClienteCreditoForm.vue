@@ -57,7 +57,7 @@
             </q-item>
           </div>
 
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-3">
             <q-item dense class="q-pa-none">
               <q-item-section avatar style="min-width: 32px">
                 <q-icon name="phone" color="positive" size="xs" />
@@ -75,7 +75,7 @@
             </q-item>
           </div>
 
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-3">
             <q-item dense class="q-pa-none">
               <q-item-section avatar style="min-width: 32px">
                 <q-icon name="email" color="negative" size="xs" />
@@ -89,7 +89,7 @@
             </q-item>
           </div>
 
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-3">
             <q-item dense class="q-pa-none">
               <q-item-section avatar style="min-width: 32px">
                 <q-icon name="place" color="orange-8" size="xs" />
@@ -102,215 +102,383 @@
               </q-item-section>
             </q-item>
           </div>
+
+          <div class="col-12 col-md-3">
+            <q-item dense class="q-pa-none">
+              <q-item-section avatar style="min-width: 32px">
+                <q-icon
+                  :name="esListaNegra ? 'report_problem' : 'verified_user'"
+                  :color="
+                    esListaNegra
+                      ? 'negative'
+                      : cliente?.credito_classification?.name
+                      ? 'teal-7'
+                      : 'grey-6'
+                  "
+                  size="xs"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label caption>Clasificación Crédito</q-item-label>
+                <q-item-label class="text-weight-medium">
+                  <q-badge
+                    :color="
+                      esListaNegra
+                        ? 'negative'
+                        : cliente?.credito_classification?.name
+                        ? 'teal-8'
+                        : 'grey-6'
+                    "
+                    text-color="white"
+                    class="text-weight-bold q-px-xs"
+                    :icon="esListaNegra ? 'block' : undefined"
+                  >
+                    {{
+                      cliente?.credito_classification?.name || "No especificada"
+                    }}
+                  </q-badge>
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </div>
         </div>
       </q-card-section>
     </q-card>
 
-    <q-separator class="q-my-sm" />
-
-    <q-item>
-      <q-item-section>
-        <q-item-label caption align="center">
-          -Datos de la Solicitud de Crédito-
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-
-    <!-- Fila 1: Asesor, Sucursal, Notificar a -->
-    <q-item>
-      <q-item-section class="col-12 col-md-4">
-        <q-select
-          v-model="formCredito.asesor_id"
-          :options="filterEmpleados"
-          label="Asesor"
-          option-value="id"
-          option-label="nombreCompleto"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          use-input
-          input-debounce="0"
-          @filter="filterEmpleadosFn"
-          :clearable="puedeSeleccionarAsesor"
-          :disable="!puedeSeleccionarAsesor"
-          :rules="[(val) => !!val || 'El asesor es obligatorio']"
+    <!-- 🚫 Alerta de Lista Negra -->
+    <q-banner
+      v-if="esListaNegra"
+      class="bg-red-1 text-negative rounded-borders q-mb-md shadow-2"
+      style="border: 2px solid #ef5350"
+    >
+      <template v-slot:avatar>
+        <q-avatar
+          icon="block"
+          color="negative"
+          text-color="white"
+          size="40px"
         />
-      </q-item-section>
+      </template>
+      <div class="text-subtitle1 text-weight-bold text-negative">
+        Cliente en Lista Negra de Crédito
+      </div>
+      <div class="text-body2 text-grey-9 q-mt-xs">
+        Este cliente se encuentra clasificado en la
+        <strong>Lista Negra</strong> de crédito. No es posible continuar con la
+        solicitud ni enviarla para su autorización.
+      </div>
+    </q-banner>
 
-      <q-item-section class="col-12 col-md-4">
-        <q-select
-          disable
-          v-model="formCredito.sucursal_id"
-          :options="crud.items.sucursales || []"
-          label="Sucursal"
-          option-value="id"
-          option-label="nombre"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          :rules="[(val) => !!val || 'La sucursal es obligatoria']"
-        />
-      </q-item-section>
+    <fieldset
+      :disabled="esListaNegra"
+      class="q-pa-none"
+      style="border: none; margin: 0"
+    >
+      <q-separator class="q-my-sm" />
 
-      <q-item-section class="col-12 col-md-4">
-        <q-select
-          disable
-          v-model="formCredito.notificado_id"
-          :options="crud.items.gerentes || []"
-          label="Notificar a (Gerente Territorial)"
-          option-value="id"
-          option-label="nombreCompleto"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          clearable
-          :rules="[(val) => !!val || 'El empleado a notificar es obligatorio']"
-        />
-      </q-item-section>
-    </q-item>
+      <q-item>
+        <q-item-section>
+          <q-item-label caption align="center">
+            -Datos de la Solicitud de Crédito-
+          </q-item-label>
+        </q-item-section>
+      </q-item>
 
-    <!-- Fila 2: Línea de crédito, Tipo de anticipo -->
-    <q-item>
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          v-model="formCredito.linea_id"
-          :options="crud.items.creditoLineas || []"
-          label="Línea de crédito"
-          option-value="id"
-          option-label="name"
-          option-disable="inactive"
-          emit-value
-          map-options
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          filled
-          dense
-          options-dense
-          clearable
-          :rules="[(val) => !!val || 'La línea de crédito es obligatoria']"
-        />
-      </q-item-section>
-
-      <q-item-section class="col-12 col-md-6">
-        <q-select
-          v-model="formCredito.tipo_enganche_id"
-          :options="tipoEngancheOptions"
-          label="Tipo de Enganche"
-          option-value="id"
-          option-label="nombre"
-          emit-value
-          map-options
-          filled
-          dense
-          options-dense
-          transition-show="jump-up"
-          transition-hide="jump-up"
-          :rules="[(val) => !!val || 'El tipo de enganche es obligatorio']"
-        />
-      </q-item-section>
-    </q-item>
-
-    <!-- Fila 3: Monto solicitado, Anticipo -->
-    <q-item>
-      <q-item-section class="col-12 col-md-6">
-        <q-input
-          v-model="formCredito.monto_solicitado"
-          filled
-          dense
-          label="Monto solicitado"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          lazy-rules
-          :rules="[
-            (val) => !!val || 'El monto solicitado es obligatorio',
-            (val) => Number(val) > 0 || 'El monto debe ser mayor a 0',
-          ]"
-        />
-      </q-item-section>
-
-      <q-item-section class="col-12 col-md-6">
-        <q-input
-          v-model="formCredito.valor_enganche"
-          filled
-          dense
-          :label="anticipoLabel"
-          :disable="esSinAnticipo"
-          prefix="$"
-          mask="###,###,###"
-          reverse-fill-mask
-          unmasked-value
-          lazy-rules
-        />
-        <!-- Nota informativa para Servicio si el anticipo es menor al 50% -->
-        <div
-          v-if="mostrarAlertaAnticipoServicio"
-          class="q-mt-xs q-pa-xs rounded-borders bg-orange-1 text-orange-9 text-caption row items-center no-wrap"
-          style="border: 1px solid #ffb74d"
-        >
-          <q-icon
-            name="warning_amber"
-            color="orange-9"
-            size="18px"
-            class="q-mr-xs flex-shrink-0"
+      <!-- Fila 1: Asesor, Sucursal, Notificar a -->
+      <q-item>
+        <q-item-section class="col-12 col-md-4">
+          <q-select
+            v-model="formCredito.asesor_id"
+            :options="filterEmpleados"
+            label="Asesor"
+            option-value="id"
+            option-label="nombreCompleto"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            filled
+            dense
+            options-dense
+            use-input
+            input-debounce="0"
+            @filter="filterEmpleadosFn"
+            :clearable="puedeSeleccionarAsesor"
+            :disable="!puedeSeleccionarAsesor"
+            :rules="[(val) => !!val || 'El asesor es obligatorio']"
           />
-          <div>
-            <span>
-              Nota: Para la línea de <strong>Servicio</strong> lo recomendable
-              sería dar un <strong>50%</strong> de anticipo<span
-                v-if="montoSolicitadoNum > 0"
-              >
-                ({{ formatCurrency(anticipoMinimoRecomendado) }})</span
-              >.
-            </span>
+        </q-item-section>
+
+        <q-item-section class="col-12 col-md-4">
+          <q-select
+            disable
+            v-model="formCredito.sucursal_id"
+            :options="crud.items.sucursales || []"
+            label="Sucursal"
+            option-value="id"
+            option-label="nombre"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            filled
+            dense
+            options-dense
+            :rules="[(val) => !!val || 'La sucursal es obligatoria']"
+          />
+        </q-item-section>
+
+        <q-item-section class="col-12 col-md-4">
+          <q-select
+            disable
+            v-model="formCredito.notificado_id"
+            :options="crud.items.gerentes || []"
+            label="Notificar a (Gerente Territorial)"
+            option-value="id"
+            option-label="nombreCompleto"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            filled
+            dense
+            options-dense
+            clearable
+            :rules="[
+              (val) => !!val || 'El empleado a notificar es obligatorio',
+            ]"
+          />
+        </q-item-section>
+      </q-item>
+
+      <!-- Fila 2: Línea de crédito, Tipo de anticipo -->
+      <q-item>
+        <q-item-section class="col-12 col-md-6">
+          <q-select
+            v-model="formCredito.linea_id"
+            :options="crud.items.creditoLineas || []"
+            label="Línea de crédito"
+            option-value="id"
+            option-label="name"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            filled
+            dense
+            options-dense
+            clearable
+            :rules="[(val) => !!val || 'La línea de crédito es obligatoria']"
+          />
+        </q-item-section>
+
+        <q-item-section class="col-12 col-md-6">
+          <q-select
+            v-model="formCredito.tipo_enganche_id"
+            :options="tipoEngancheOptions"
+            label="Tipo de Enganche"
+            option-value="id"
+            option-label="nombre"
+            emit-value
+            map-options
+            filled
+            dense
+            options-dense
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            :rules="[(val) => !!val || 'El tipo de enganche es obligatorio']"
+          />
+        </q-item-section>
+      </q-item>
+
+      <!-- Fila 3: Monto solicitado, Anticipo -->
+      <q-item>
+        <q-item-section class="col-12 col-md-6">
+          <q-input
+            v-model="formCredito.monto_solicitado"
+            filled
+            dense
+            label="Monto solicitado"
+            prefix="$"
+            mask="###,###,###"
+            reverse-fill-mask
+            unmasked-value
+            lazy-rules
+            :rules="[
+              (val) => !!val || 'El monto solicitado es obligatorio',
+              (val) => Number(val) > 0 || 'El monto debe ser mayor a 0',
+            ]"
+          />
+        </q-item-section>
+
+        <q-item-section class="col-12 col-md-6">
+          <q-input
+            v-model="formCredito.valor_enganche"
+            filled
+            dense
+            :label="anticipoLabel"
+            :disable="esSinAnticipo"
+            prefix="$"
+            mask="###,###,###"
+            reverse-fill-mask
+            unmasked-value
+            lazy-rules
+          />
+          <!-- Nota informativa para Servicio si el anticipo es menor al 50% -->
+          <div
+            v-if="mostrarAlertaAnticipoServicio"
+            class="q-mt-xs q-pa-xs rounded-borders bg-orange-1 text-orange-9 text-caption row items-center no-wrap"
+            style="border: 1px solid #ffb74d"
+          >
+            <q-icon
+              name="warning_amber"
+              color="orange-9"
+              size="18px"
+              class="q-mr-xs flex-shrink-0"
+            />
+            <div>
+              <span>
+                Nota: Para la línea de <strong>Servicio</strong> lo recomendable
+                sería dar un <strong>50%</strong> de anticipo<span
+                  v-if="montoSolicitadoNum > 0"
+                >
+                  ({{ formatCurrency(anticipoMinimoRecomendado) }})</span
+                >.
+              </span>
+            </div>
+          </div>
+        </q-item-section>
+      </q-item>
+
+      <q-item>
+        <q-item-section class="col-12">
+          <q-input
+            v-model.number="formCredito.numero_pagos"
+            type="number"
+            min="1"
+            max="120"
+            filled
+            dense
+            label="Número de pagos"
+            hint="Cantidad total de pagos en los que se dividirá el crédito"
+            :rules="[
+              (val) => !!val || 'El número de pagos es obligatorio',
+              (val) => Number(val) >= 1 || 'Debe ser al menos 1 pago',
+            ]"
+          >
+            <template v-slot:prepend>
+              <q-icon name="payments" />
+            </template>
+          </q-input>
+        </q-item-section>
+      </q-item>
+
+      <!-- Lista enumerada dinámica de fechas de pago -->
+      <template v-if="formCredito.pagos && formCredito.pagos.length > 0">
+        <q-separator class="q-my-md" />
+
+        <q-item>
+          <q-item-section>
+            <q-item-label
+              caption
+              align="center"
+              class="text-primary text-weight-bold"
+            >
+              -Programación de Fechas de Pago ({{ formCredito.pagos.length }}
+              {{ formCredito.pagos.length === 1 ? "Registro" : "Registros" }})-
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <div class="row q-col-gutter-sm q-px-md q-pb-sm">
+          <div
+            v-for="(pago, index) in formCredito.pagos"
+            :key="index"
+            class="col-12 col-sm-6 col-md-4"
+          >
+            <q-card
+              flat
+              bordered
+              :class="
+                pago.es_anticipo ? 'q-pa-xs bg-amber-1' : 'q-pa-xs bg-grey-1'
+              "
+            >
+              <q-item dense class="q-pa-xs items-center">
+                <q-item-section avatar style="min-width: 90px">
+                  <q-chip
+                    :color="pago.es_anticipo ? 'amber-9' : 'primary'"
+                    text-color="white"
+                    dense
+                    class="text-weight-bold q-ma-none"
+                    :icon="pago.es_anticipo ? 'savings' : undefined"
+                  >
+                    {{ pago.etiqueta }}
+                  </q-chip>
+                </q-item-section>
+
+                <q-item-section>
+                  <q-input
+                    v-model="pago.fecha"
+                    filled
+                    dense
+                    :label="
+                      pago.es_anticipo
+                        ? 'Fecha pago de enganche'
+                        : 'Fecha de pago'
+                    "
+                    mask="####-##-##"
+                    :rules="[
+                      (val) => !!val || 'Fecha obligatoria',
+                      (val) =>
+                        validateFechaPago
+                          ? validateFechaPago(val, index)
+                          : true,
+                    ]"
+                    hide-bottom-space
+                  >
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy
+                          cover
+                          transition-show="scale"
+                          transition-hide="scale"
+                        >
+                          <q-date
+                            minimal
+                            v-model="pago.fecha"
+                            mask="YYYY-MM-DD"
+                            :options="
+                              (d) =>
+                                isDateAllowed ? isDateAllowed(d, index) : true
+                            "
+                          >
+                            <div class="row items-center justify-end">
+                              <q-btn
+                                v-close-popup
+                                label="Cerrar"
+                                color="primary"
+                                flat
+                              />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                </q-item-section>
+              </q-item>
+            </q-card>
           </div>
         </div>
-      </q-item-section>
-    </q-item>
+      </template>
 
-    <q-item>
-      <q-item-section class="col-12">
-        <q-input
-          v-model.number="formCredito.numero_pagos"
-          type="number"
-          min="1"
-          max="120"
-          filled
-          dense
-          label="Número de pagos"
-          hint="Cantidad total de pagos en los que se dividirá el crédito"
-          :rules="[
-            (val) => !!val || 'El número de pagos es obligatorio',
-            (val) => Number(val) >= 1 || 'Debe ser al menos 1 pago',
-          ]"
-        >
-          <template v-slot:prepend>
-            <q-icon name="payments" />
-          </template>
-        </q-input>
-      </q-item-section>
-    </q-item>
-
-    <!-- Lista enumerada dinámica de fechas de pago -->
-    <template v-if="formCredito.pagos && formCredito.pagos.length > 0">
       <q-separator class="q-my-md" />
 
+      <!-- 📎 Sección de Documentación Obligatoria -->
       <q-item>
         <q-item-section>
           <q-item-label
@@ -318,495 +486,402 @@
             align="center"
             class="text-primary text-weight-bold"
           >
-            -Programación de Fechas de Pago ({{ formCredito.pagos.length }}
-            {{ formCredito.pagos.length === 1 ? "Registro" : "Registros" }})-
+            -Documentación Obligatoria del Crédito (Persona
+            {{ clienteEsMoral ? "Moral" : "Física"
+            }}{{ esEngancheACuenta ? " - A Cuenta" : "" }})-
           </q-item-label>
         </q-item-section>
       </q-item>
 
-      <div class="row q-col-gutter-sm q-px-md q-pb-sm">
-        <div
-          v-for="(pago, index) in formCredito.pagos"
-          :key="index"
-          class="col-12 col-sm-6 col-md-4"
-        >
-          <q-card
-            flat
-            bordered
-            :class="
-              pago.es_anticipo ? 'q-pa-xs bg-amber-1' : 'q-pa-xs bg-grey-1'
-            "
-          >
-            <q-item dense class="q-pa-xs items-center">
-              <q-item-section avatar style="min-width: 90px">
-                <q-chip
-                  :color="pago.es_anticipo ? 'amber-9' : 'primary'"
-                  text-color="white"
-                  dense
-                  class="text-weight-bold q-ma-none"
-                  :icon="pago.es_anticipo ? 'savings' : undefined"
-                >
-                  {{ pago.etiqueta }}
-                </q-chip>
-              </q-item-section>
-
-              <q-item-section>
-                <q-input
-                  v-model="pago.fecha"
-                  filled
-                  dense
-                  :label="
-                    pago.es_anticipo
-                      ? 'Fecha pago de enganche'
-                      : 'Fecha de pago'
-                  "
-                  mask="####-##-##"
-                  :rules="[
-                    (val) => !!val || 'Fecha obligatoria',
-                    (val) =>
-                      validateFechaPago ? validateFechaPago(val, index) : true,
-                  ]"
-                  hide-bottom-space
-                >
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy
-                        cover
-                        transition-show="scale"
-                        transition-hide="scale"
-                      >
-                        <q-date
-                          minimal
-                          v-model="pago.fecha"
-                          mask="YYYY-MM-DD"
-                          :options="
-                            (d) =>
-                              isDateAllowed ? isDateAllowed(d, index) : true
-                          "
-                        >
-                          <div class="row items-center justify-end">
-                            <q-btn
-                              v-close-popup
-                              label="Cerrar"
-                              color="primary"
-                              flat
-                            />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-              </q-item-section>
-            </q-item>
-          </q-card>
-        </div>
-      </div>
-    </template>
-
-    <q-separator class="q-my-md" />
-
-    <!-- 📎 Sección de Documentación Obligatoria -->
-    <q-item>
-      <q-item-section>
-        <q-item-label
-          caption
-          align="center"
-          class="text-primary text-weight-bold"
-        >
-          -Documentación Obligatoria del Crédito (Persona
-          {{ clienteEsMoral ? "Moral" : "Física"
-          }}{{ esEngancheACuenta ? " - A Cuenta" : "" }})-
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-
-    <div
-      v-if="listaDocsObligatorios && listaDocsObligatorios.length > 0"
-      class="row q-col-gutter-sm q-px-md q-pb-sm"
-    >
       <div
-        v-for="item in listaDocsObligatorios"
-        :key="item.doc_id"
-        class="col-12 col-md-6"
+        v-if="listaDocsObligatorios && listaDocsObligatorios.length > 0"
+        class="row q-col-gutter-sm q-px-md q-pb-sm"
       >
-        <q-card flat bordered class="rounded-borders bg-white shadow-1">
-          <q-card-section class="q-pa-sm">
-            <!-- Título del documento y Badge de estado -->
-            <div class="row items-center justify-between no-wrap q-mb-xs">
-              <div
-                class="text-subtitle2 text-weight-bold text-primary flex items-center q-gutter-xs ellipsis"
-              >
-                <q-icon name="description" size="18px" color="primary" />
-                <span class="ellipsis">{{ item.nombre }}</span>
-                <span class="text-negative text-weight-bolder">*</span>
+        <div
+          v-for="item in listaDocsObligatorios"
+          :key="item.doc_id"
+          class="col-12 col-md-6"
+        >
+          <q-card flat bordered class="rounded-borders bg-white shadow-1">
+            <q-card-section class="q-pa-sm">
+              <!-- Título del documento y Badge de estado -->
+              <div class="row items-center justify-between no-wrap q-mb-xs">
+                <div
+                  class="text-subtitle2 text-weight-bold text-primary flex items-center q-gutter-xs ellipsis"
+                >
+                  <q-icon name="description" size="18px" color="primary" />
+                  <span class="ellipsis">{{ item.nombre }}</span>
+                  <span class="text-negative text-weight-bolder">*</span>
+                </div>
+
+                <q-badge
+                  :color="getDocExpedienteInfo(item).color"
+                  text-color="white"
+                  class="text-weight-bold q-px-xs"
+                >
+                  <q-icon
+                    :name="getDocExpedienteInfo(item).icono"
+                    size="xs"
+                    class="q-mr-xs"
+                  />
+                  {{ getDocExpedienteInfo(item).badgeText }}
+                </q-badge>
               </div>
 
-              <q-badge
-                :color="getDocExpedienteInfo(item).color"
-                text-color="white"
-                class="text-weight-bold q-px-xs"
+              <!-- Caso 1: Documento vigente en expediente y no se ha seleccionado reemplazar -->
+              <template
+                v-if="
+                  getDocExpedienteInfo(item).estado === 'vigente' &&
+                  !reemplazarDoc[item.doc_id] &&
+                  !archivosObligatorios[item.doc_id]
+                "
               >
-                <q-icon
-                  :name="getDocExpedienteInfo(item).icono"
-                  size="xs"
-                  class="q-mr-xs"
-                />
-                {{ getDocExpedienteInfo(item).badgeText }}
-              </q-badge>
-            </div>
-
-            <!-- Caso 1: Documento vigente en expediente y no se ha seleccionado reemplazar -->
-            <template
-              v-if="
-                getDocExpedienteInfo(item).estado === 'vigente' &&
-                !reemplazarDoc[item.doc_id] &&
-                !archivosObligatorios[item.doc_id]
-              "
-            >
-              <div
-                class="q-pa-xs rounded-borders bg-green-1 text-green-9 text-caption row items-center justify-between no-wrap"
-                style="border: 1px solid #a5d6a7"
-              >
-                <div class="row items-center q-gutter-xs col ellipsis">
-                  <q-icon
-                    name="check_circle"
-                    color="positive"
-                    size="18px"
-                    class="flex-shrink-0"
-                  />
-                  <span class="ellipsis">
-                    Guardado en expediente
-                    <strong
-                      v-if="getDocExpedienteInfo(item).doc?.expiration_date"
+                <div
+                  class="q-pa-xs rounded-borders bg-green-1 text-green-9 text-caption row items-center justify-between no-wrap"
+                  style="border: 1px solid #a5d6a7"
+                >
+                  <div class="row items-center q-gutter-xs col ellipsis">
+                    <q-icon
+                      name="check_circle"
+                      color="positive"
+                      size="18px"
+                      class="flex-shrink-0"
+                    />
+                    <span class="ellipsis">
+                      Guardado en expediente
+                      <strong
+                        v-if="getDocExpedienteInfo(item).doc?.expiration_date"
+                      >
+                        (Vence:
+                        {{ getDocExpedienteInfo(item).doc.expiration_date }})
+                      </strong>
+                    </span>
+                  </div>
+                  <div
+                    class="row items-center q-gutter-xs no-wrap flex-shrink-0"
+                  >
+                    <q-btn
+                      v-if="getDocExpedienteInfo(item).doc?.realpath"
+                      flat
+                      dense
+                      size="sm"
+                      color="primary"
+                      icon="visibility"
+                      label="Ver"
+                      @click="
+                        openDocWindow(getDocExpedienteInfo(item).doc.realpath)
+                      "
                     >
-                      (Vence:
-                      {{ getDocExpedienteInfo(item).doc.expiration_date }})
-                    </strong>
-                  </span>
+                      <q-tooltip>Ver documento del expediente</q-tooltip>
+                    </q-btn>
+                    <q-btn
+                      flat
+                      dense
+                      size="sm"
+                      color="grey-8"
+                      icon="swap_horiz"
+                      label="Reemplazar"
+                      @click="activarReemplazo(item.doc_id)"
+                    >
+                      <q-tooltip>Subir una versión nueva</q-tooltip>
+                    </q-btn>
+                  </div>
                 </div>
-                <div class="row items-center q-gutter-xs no-wrap flex-shrink-0">
+              </template>
+
+              <!-- Caso 2: Próximo a caducar, Caducado, No subido o el usuario eligió reemplazar -->
+              <template v-else>
+                <!-- Mensaje de estado -->
+                <div
+                  v-if="
+                    getDocExpedienteInfo(item).estado === 'proximo_a_caducar' ||
+                    getDocExpedienteInfo(item).estado === 'caducado'
+                  "
+                  class="q-mb-xs q-pa-xs rounded-borders text-caption row items-center justify-between no-wrap"
+                  :class="
+                    getDocExpedienteInfo(item).estado === 'caducado'
+                      ? 'bg-red-1 text-negative'
+                      : 'bg-orange-1 text-orange-9'
+                  "
+                  :style="
+                    getDocExpedienteInfo(item).estado === 'caducado'
+                      ? 'border: 1px solid #ef9a9a'
+                      : 'border: 1px solid #ffcc80'
+                  "
+                >
+                  <div class="row items-center q-gutter-xs col ellipsis">
+                    <q-icon
+                      :name="getDocExpedienteInfo(item).icono"
+                      size="16px"
+                      class="flex-shrink-0"
+                    />
+                    <span class="ellipsis">{{
+                      getDocExpedienteInfo(item).mensaje
+                    }}</span>
+                  </div>
                   <q-btn
                     v-if="getDocExpedienteInfo(item).doc?.realpath"
                     flat
                     dense
-                    size="sm"
+                    size="xs"
                     color="primary"
                     icon="visibility"
-                    label="Ver"
+                    label="Ver actual"
+                    class="flex-shrink-0"
                     @click="
                       openDocWindow(getDocExpedienteInfo(item).doc.realpath)
                     "
-                  >
-                    <q-tooltip>Ver documento del expediente</q-tooltip>
-                  </q-btn>
-                  <q-btn
-                    flat
-                    dense
-                    size="sm"
-                    color="grey-8"
-                    icon="swap_horiz"
-                    label="Reemplazar"
-                    @click="activarReemplazo(item.doc_id)"
-                  >
-                    <q-tooltip>Subir una versión nueva</q-tooltip>
-                  </q-btn>
-                </div>
-              </div>
-            </template>
-
-            <!-- Caso 2: Próximo a caducar, Caducado, No subido o el usuario eligió reemplazar -->
-            <template v-else>
-              <!-- Mensaje de estado -->
-              <div
-                v-if="
-                  getDocExpedienteInfo(item).estado === 'proximo_a_caducar' ||
-                  getDocExpedienteInfo(item).estado === 'caducado'
-                "
-                class="q-mb-xs q-pa-xs rounded-borders text-caption row items-center justify-between no-wrap"
-                :class="
-                  getDocExpedienteInfo(item).estado === 'caducado'
-                    ? 'bg-red-1 text-negative'
-                    : 'bg-orange-1 text-orange-9'
-                "
-                :style="
-                  getDocExpedienteInfo(item).estado === 'caducado'
-                    ? 'border: 1px solid #ef9a9a'
-                    : 'border: 1px solid #ffcc80'
-                "
-              >
-                <div class="row items-center q-gutter-xs col ellipsis">
-                  <q-icon
-                    :name="getDocExpedienteInfo(item).icono"
-                    size="16px"
-                    class="flex-shrink-0"
                   />
-                  <span class="ellipsis">{{
-                    getDocExpedienteInfo(item).mensaje
-                  }}</span>
                 </div>
-                <q-btn
-                  v-if="getDocExpedienteInfo(item).doc?.realpath"
-                  flat
-                  dense
-                  size="xs"
-                  color="primary"
-                  icon="visibility"
-                  label="Ver actual"
-                  class="flex-shrink-0"
-                  @click="
-                    openDocWindow(getDocExpedienteInfo(item).doc.realpath)
-                  "
-                />
-              </div>
 
-              <!-- Selector de Archivo -->
-              <div class="row q-col-gutter-xs items-center">
-                <div class="col">
-                  <q-file
-                    v-model="archivosObligatoriosFiles[item.doc_id]"
+                <!-- Selector de Archivo -->
+                <div class="row q-col-gutter-xs items-center">
+                  <div class="col">
+                    <q-file
+                      v-model="archivosObligatoriosFiles[item.doc_id]"
+                      filled
+                      dense
+                      :label="
+                        archivosObligatorios[item.doc_id]
+                          ? archivosObligatorios[item.doc_id].nombre
+                          : `Seleccionar PDF (${item.nombre})`
+                      "
+                      accept=".pdf,application/pdf"
+                      clearable
+                      :rules="[
+                        () =>
+                          validarDocObligatorio(item) ||
+                          `El documento ${item.nombre} es obligatorio`,
+                      ]"
+                      hide-bottom-space
+                      @update:model-value="
+                        (file) => onObligatorioFileSelected(file, item)
+                      "
+                    >
+                      <template v-slot:prepend>
+                        <q-icon
+                          name="picture_as_pdf"
+                          :color="
+                            archivosObligatorios[item.doc_id]
+                              ? 'positive'
+                              : 'negative'
+                          "
+                        />
+                      </template>
+                    </q-file>
+                  </div>
+
+                  <!-- Botón Cancelar Reemplazo si era vigente -->
+                  <div
+                    v-if="
+                      getDocExpedienteInfo(item).estado === 'vigente' &&
+                      reemplazarDoc[item.doc_id]
+                    "
+                    class="col-auto"
+                  >
+                    <q-btn
+                      flat
+                      dense
+                      round
+                      color="grey-7"
+                      icon="close"
+                      @click="cancelarReemplazo(item.doc_id)"
+                    >
+                      <q-tooltip>Conservar archivo del expediente</q-tooltip>
+                    </q-btn>
+                  </div>
+                </div>
+
+                <!-- Campo de fecha de vencimiento si subió archivo nuevo -->
+                <div
+                  v-if="archivosObligatorios[item.doc_id]"
+                  class="row items-center q-mt-xs"
+                >
+                  <q-input
+                    v-model="archivosObligatorios[item.doc_id].expiration_date"
                     filled
                     dense
-                    :label="
-                      archivosObligatorios[item.doc_id]
-                        ? archivosObligatorios[item.doc_id].nombre
-                        : `Seleccionar PDF (${item.nombre})`
-                    "
-                    accept=".pdf,application/pdf"
-                    clearable
-                    :rules="[
-                      () =>
-                        validarDocObligatorio(item) ||
-                        `El documento ${item.nombre} es obligatorio`,
-                    ]"
+                    label="Fecha de vencimiento (para expediente)"
+                    mask="####-##-##"
+                    class="full-width"
                     hide-bottom-space
-                    @update:model-value="
-                      (file) => onObligatorioFileSelected(file, item)
-                    "
                   >
-                    <template v-slot:prepend>
-                      <q-icon
-                        name="picture_as_pdf"
-                        :color="
-                          archivosObligatorios[item.doc_id]
-                            ? 'positive'
-                            : 'negative'
-                        "
-                      />
-                    </template>
-                  </q-file>
-                </div>
-
-                <!-- Botón Cancelar Reemplazo si era vigente -->
-                <div
-                  v-if="
-                    getDocExpedienteInfo(item).estado === 'vigente' &&
-                    reemplazarDoc[item.doc_id]
-                  "
-                  class="col-auto"
-                >
-                  <q-btn
-                    flat
-                    dense
-                    round
-                    color="grey-7"
-                    icon="close"
-                    @click="cancelarReemplazo(item.doc_id)"
-                  >
-                    <q-tooltip>Conservar archivo del expediente</q-tooltip>
-                  </q-btn>
-                </div>
-              </div>
-
-              <!-- Campo de fecha de vencimiento si subió archivo nuevo -->
-              <div
-                v-if="archivosObligatorios[item.doc_id]"
-                class="row items-center q-mt-xs"
-              >
-                <q-input
-                  v-model="archivosObligatorios[item.doc_id].expiration_date"
-                  filled
-                  dense
-                  label="Fecha de vencimiento (para expediente)"
-                  mask="####-##-##"
-                  class="full-width"
-                  hide-bottom-space
-                >
-                  <template v-slot:append>
-                    <q-icon name="event" class="cursor-pointer">
-                      <q-popup-proxy
-                        cover
-                        transition-show="scale"
-                        transition-hide="scale"
-                      >
-                        <q-date
-                          minimal
-                          v-model="
-                            archivosObligatorios[item.doc_id].expiration_date
-                          "
-                          mask="YYYY-MM-DD"
+                    <template v-slot:append>
+                      <q-icon name="event" class="cursor-pointer">
+                        <q-popup-proxy
+                          cover
+                          transition-show="scale"
+                          transition-hide="scale"
                         >
-                          <div class="row items-center justify-end">
-                            <q-btn
-                              v-close-popup
-                              label="Cerrar"
-                              color="primary"
-                              flat
-                            />
-                          </div>
-                        </q-date>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </template>
-                </q-input>
-              </div>
+                          <q-date
+                            minimal
+                            v-model="
+                              archivosObligatorios[item.doc_id].expiration_date
+                            "
+                            mask="YYYY-MM-DD"
+                          >
+                            <div class="row items-center justify-end">
+                              <q-btn
+                                v-close-popup
+                                label="Cerrar"
+                                color="primary"
+                                flat
+                              />
+                            </div>
+                          </q-date>
+                        </q-popup-proxy>
+                      </q-icon>
+                    </template>
+                  </q-input>
+                </div>
+              </template>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+      <div v-else class="q-px-md q-pb-sm text-caption text-grey-6 text-center">
+        No hay documentos obligatorios configurados para esta categoría.
+      </div>
+
+      <q-separator class="q-my-sm" />
+
+      <!-- 📎 Sección de Documentación Adicional (Opcional) -->
+      <q-item>
+        <q-item-section>
+          <q-item-label
+            caption
+            align="center"
+            class="text-grey-8 text-weight-bold"
+          >
+            -Documentación Adicional (Opcional)-
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <div class="row q-col-gutter-sm q-px-md q-pb-sm items-center">
+        <!-- Droplist de Tipos de Documento -->
+        <div class="col-12 col-md-5">
+          <q-select
+            v-model="tempDoc.tipo"
+            :options="tiposDocumentosOpcionales"
+            label="Tipo de documento adicional"
+            filled
+            dense
+            options-dense
+            clearable
+          />
+        </div>
+
+        <!-- Selector de Archivo (Solo PDF) -->
+        <div class="col-12 col-md-5">
+          <q-file
+            v-model="tempDoc.file"
+            filled
+            dense
+            label="Seleccionar archivo (Solo PDF)"
+            accept=".pdf,application/pdf"
+            clearable
+            @update:model-value="onFileSelected"
+          >
+            <template v-slot:prepend>
+              <q-icon name="picture_as_pdf" color="red-7" />
             </template>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
-    <div v-else class="q-px-md q-pb-sm text-caption text-grey-6 text-center">
-      No hay documentos obligatorios configurados para esta categoría.
-    </div>
+          </q-file>
+        </div>
 
-    <q-separator class="q-my-sm" />
-
-    <!-- 📎 Sección de Documentación Adicional (Opcional) -->
-    <q-item>
-      <q-item-section>
-        <q-item-label
-          caption
-          align="center"
-          class="text-grey-8 text-weight-bold"
-        >
-          -Documentación Adicional (Opcional)-
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-
-    <div class="row q-col-gutter-sm q-px-md q-pb-sm items-center">
-      <!-- Droplist de Tipos de Documento -->
-      <div class="col-12 col-md-5">
-        <q-select
-          v-model="tempDoc.tipo"
-          :options="tiposDocumentosOpcionales"
-          label="Tipo de documento adicional"
-          filled
-          dense
-          options-dense
-          clearable
-        />
+        <!-- Botón Agregar Documento -->
+        <div class="col-12 col-md-2 text-center">
+          <q-btn
+            label="Adjuntar"
+            icon="add"
+            color="primary"
+            dense
+            class="full-width q-py-xs"
+            :disable="!tempDoc.tipo || !tempDoc.base64"
+            @click="agregarArchivoOpcional"
+          />
+        </div>
       </div>
 
-      <!-- Selector de Archivo (Solo PDF) -->
-      <div class="col-12 col-md-5">
-        <q-file
-          v-model="tempDoc.file"
-          filled
-          dense
-          label="Seleccionar archivo (Solo PDF)"
-          accept=".pdf,application/pdf"
-          clearable
-          @update:model-value="onFileSelected"
-        >
-          <template v-slot:prepend>
-            <q-icon name="picture_as_pdf" color="red-7" />
-          </template>
-        </q-file>
-      </div>
+      <!-- Lista de Archivos Opcionales Adjuntos -->
+      <div
+        v-if="archivosOpcionales && archivosOpcionales.length > 0"
+        class="q-px-md q-pb-sm"
+      >
+        <q-list bordered separator class="rounded-borders bg-white">
+          <q-item
+            v-for="(arch, idx) in archivosOpcionales"
+            :key="idx"
+            dense
+            class="q-py-xs"
+          >
+            <q-item-section avatar style="min-width: 36px">
+              <q-icon name="picture_as_pdf" color="red-7" />
+            </q-item-section>
 
-      <!-- Botón Agregar Documento -->
-      <div class="col-12 col-md-2 text-center">
-        <q-btn
-          label="Adjuntar"
-          icon="add"
-          color="primary"
-          dense
-          class="full-width q-py-xs"
-          :disable="!tempDoc.tipo || !tempDoc.base64"
-          @click="agregarArchivoOpcional"
-        />
-      </div>
-    </div>
+            <q-item-section>
+              <q-item-label class="text-weight-bold text-primary">
+                {{ arch.tipo }}
+                <q-badge color="grey-6" class="q-ml-xs">Opcional</q-badge>
+              </q-item-label>
+              <q-item-label caption class="text-grey-8">
+                {{ arch.nombre }}
+                <span v-if="arch.size" class="text-grey-6"
+                  >({{ arch.size }})</span
+                >
+              </q-item-label>
+            </q-item-section>
 
-    <!-- Lista de Archivos Opcionales Adjuntos -->
-    <div
-      v-if="archivosOpcionales && archivosOpcionales.length > 0"
-      class="q-px-md q-pb-sm"
-    >
-      <q-list bordered separator class="rounded-borders bg-white">
-        <q-item
-          v-for="(arch, idx) in archivosOpcionales"
-          :key="idx"
-          dense
-          class="q-py-xs"
-        >
-          <q-item-section avatar style="min-width: 36px">
-            <q-icon name="picture_as_pdf" color="red-7" />
-          </q-item-section>
-
-          <q-item-section>
-            <q-item-label class="text-weight-bold text-primary">
-              {{ arch.tipo }}
-              <q-badge color="grey-6" class="q-ml-xs">Opcional</q-badge>
-            </q-item-label>
-            <q-item-label caption class="text-grey-8">
-              {{ arch.nombre }}
-              <span v-if="arch.size" class="text-grey-6"
-                >({{ arch.size }})</span
+            <q-item-section side>
+              <q-btn
+                flat
+                round
+                dense
+                color="negative"
+                icon="delete"
+                @click="eliminarArchivoOpcional(idx)"
               >
-            </q-item-label>
-          </q-item-section>
+                <q-tooltip>Eliminar documento</q-tooltip>
+              </q-btn>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
 
-          <q-item-section side>
-            <q-btn
-              flat
-              round
-              dense
-              color="negative"
-              icon="delete"
-              @click="eliminarArchivoOpcional(idx)"
-            >
-              <q-tooltip>Eliminar documento</q-tooltip>
-            </q-btn>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+      <q-separator class="q-my-sm" />
 
-    <q-separator class="q-my-sm" />
+      <q-item>
+        <q-item-section>
+          <q-input
+            v-model="formCredito.motivo"
+            filled
+            dense
+            type="textarea"
+            rows="2"
+            label="Justificación / Motivo del crédito"
+            hint
+            :rules="[
+              (val) =>
+                (val && val.length > 0) || 'La justificación es obligatoria',
+            ]"
+          />
+        </q-item-section>
+      </q-item>
 
-    <q-item>
-      <q-item-section>
-        <q-input
-          v-model="formCredito.motivo"
-          filled
-          dense
-          type="textarea"
-          rows="2"
-          label="Justificación / Motivo del crédito"
-          hint
-          :rules="[
-            (val) =>
-              (val && val.length > 0) || 'La justificación es obligatoria',
-          ]"
-        />
-      </q-item-section>
-    </q-item>
-
-    <q-item>
-      <q-item-section>
-        <q-input
-          v-model="formCredito.notas"
-          filled
-          dense
-          type="textarea"
-          rows="2"
-          label="Notas u observaciones adicionales (opcional)"
-          hint
-        />
-      </q-item-section>
-    </q-item>
+      <q-item>
+        <q-item-section>
+          <q-input
+            v-model="formCredito.notas"
+            filled
+            dense
+            type="textarea"
+            rows="2"
+            label="Notas u observaciones adicionales (opcional)"
+            hint
+          />
+        </q-item-section>
+      </q-item>
+    </fieldset>
   </q-form>
 </template>
 
@@ -815,13 +890,48 @@ import { ref, watch, onMounted, computed } from "vue";
 import { formatPhoneNumber, formatCurrency } from "src/boot/format";
 import { useCrudStore } from "src/stores/crud";
 import { useAuthStore } from "src/stores/auth";
-import { checkRole, sendRequest } from "src/boot/functions";
+import { checkRole, sendRequest, show_notify } from "src/boot/functions";
 
-const { cliente } = defineProps(["cliente"]);
+const props = defineProps(["cliente"]);
 
 const crud = useCrudStore();
 const authStore = useAuthStore();
 const myForm = ref(null);
+
+const normalizeStr = (str) => {
+  if (!str) return "";
+  return String(str)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+};
+
+const clienteActivo = computed(() => {
+  return props.cliente || {};
+});
+
+const creditoClassification = computed(() => {
+  const c = clienteActivo.value;
+  return (
+    c.credito_classification ||
+    c.creditoClassification ||
+    c.credito_classif ||
+    null
+  );
+});
+
+const creditoClassificationNombre = computed(() => {
+  const classif = creditoClassification.value;
+  if (!classif) return "";
+  if (typeof classif === "string") return classif;
+  return classif.name || classif.nombre || classif.label || "";
+});
+
+const esListaNegra = computed(() => {
+  const nombre = normalizeStr(creditoClassificationNombre.value);
+  return nombre === "lista negra" || nombre.includes("lista negra");
+});
 
 const puedeSeleccionarAsesor = computed(() => {
   const roles = authStore.authUser?.roles || [];
@@ -859,7 +969,7 @@ const filterEmpleadosFn = (val, update) => {
 };
 
 const formCredito = ref({
-  cliente_id: cliente ? cliente.id : null,
+  cliente_id: props.cliente ? props.cliente.id : null,
   monto_solicitado: null,
   tipo_enganche_id: null,
   valor_enganche: null,
@@ -976,7 +1086,7 @@ const mostrarAlertaAnticipoServicio = computed(() => {
 });
 
 const clienteEsMoral = computed(() => {
-  const tipoCliente = (cliente?.tipo || "").toLowerCase().trim();
+  const tipoCliente = (props.cliente?.tipo || "").toLowerCase().trim();
   return tipoCliente === "moral" || tipoCliente.includes("moral");
 });
 
@@ -1031,7 +1141,7 @@ const clienteDocs = ref([]);
 const reemplazarDoc = ref({});
 
 const getClienteDocs = async () => {
-  const clienteId = cliente?.id || formCredito.value.cliente_id;
+  const clienteId = props.cliente?.id || formCredito.value.cliente_id;
   if (!clienteId) return;
   try {
     const res = await sendRequest(
@@ -1049,15 +1159,6 @@ const getClienteDocs = async () => {
     clienteDocs.value = [];
   }
   actualizarArchivosEnForm();
-};
-
-const normalizeStr = (str) => {
-  if (!str) return "";
-  return String(str)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
 };
 
 const getDocExpedienteInfo = (item) => {
@@ -1598,11 +1699,19 @@ const formatLocation = (cli) => {
 };
 
 const validate = async () => {
+  if (esListaNegra.value) {
+    show_notify(
+      "El cliente está en la Lista Negra de crédito y no se puede continuar con la solicitud",
+      "block",
+      "red"
+    );
+    return false;
+  }
   return await myForm.value.validate();
 };
 
 watch(
-  () => cliente?.id,
+  () => props.cliente?.id,
   (newId) => {
     if (newId) {
       formCredito.value.cliente_id = newId;
@@ -1621,5 +1730,7 @@ defineExpose({
   validate,
   isDateAllowed,
   validateFechaPago,
+  esListaNegra,
+  creditoClassificationNombre,
 });
 </script>

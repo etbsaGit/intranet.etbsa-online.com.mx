@@ -207,6 +207,38 @@
         />
       </q-item-section>
     </q-item>
+    <!-- CLASIFICACIÓN DEL CLIENTE -->
+    <template v-if="checkRole('Admin') || checkRole('Credito')">
+      <q-separator />
+      <q-item>
+        <q-item-section>
+          <q-item-label caption align="center">
+            -Clasificacion de Credito-
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item>
+        <q-item-section>
+          <q-select
+            v-model="formCliente.credito_classif_id"
+            :options="crud.items.classifications"
+            label="Clasificacion de Crédito"
+            option-value="id"
+            option-label="name"
+            option-disable="inactive"
+            emit-value
+            map-options
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            filled
+            dense
+            options-dense
+            clearable
+          />
+        </q-item-section>
+      </q-item>
+    </template>
+    <!-- segmentacion -->
     <q-separator />
     <q-item>
       <q-item-section>
@@ -326,7 +358,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { sendRequest } from "src/boot/functions";
+import { sendRequest, checkRole } from "src/boot/functions";
 import { useCrudStore } from "src/stores/crud";
 
 const crud = useCrudStore();
@@ -363,6 +395,7 @@ const formCliente = ref({
   construction_classification_id: cliente
     ? cliente.construction_classification_id
     : null,
+  credito_classif_id: cliente ? cliente.credito_classif_id : null,
   nivel_partner_riego_id: cliente ? cliente.nivel_partner_riego_id : null,
 });
 

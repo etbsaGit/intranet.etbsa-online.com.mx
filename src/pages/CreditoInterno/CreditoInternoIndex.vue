@@ -29,6 +29,12 @@
         label="Solicitudes y Catálogo"
         class="text-weight-bold q-px-md"
       />
+      <q-tab
+        name="aplazamientos"
+        icon="pending_actions"
+        label="Solicitudes de Aplazamiento"
+        class="text-weight-bold q-px-md"
+      />
     </q-tabs>
 
     <q-separator />
@@ -107,12 +113,16 @@
                   <div class="text-weight-bold text-primary text-body2">
                     {{ props.row.cliente?.nombre || "Cliente no especificado" }}
                   </div>
-                  <div class="text-caption text-grey-7 flex items-center q-gutter-xs">
+                  <div
+                    class="text-caption text-grey-7 flex items-center q-gutter-xs"
+                  >
                     <span v-if="props.row.cliente?.rfc">
                       RFC: {{ props.row.cliente.rfc }}
                     </span>
                     <span
-                      v-if="props.row.cliente?.rfc && props.row.cliente?.telefono"
+                      v-if="
+                        props.row.cliente?.rfc && props.row.cliente?.telefono
+                      "
                     >
                       •
                     </span>
@@ -192,7 +202,9 @@
                 >
                   Enganche:
                   {{
-                    formatCurrency(props.row.valor_enganche || props.row.anticipo)
+                    formatCurrency(
+                      props.row.valor_enganche || props.row.anticipo
+                    )
                   }}
                 </div>
               </div>
@@ -209,7 +221,9 @@
                   backgroundColor: props.row.estatus?.color || '#1976d2',
                 }"
               >
-                {{ props.row.estatus?.nombre || props.row.estatus || "Pendiente" }}
+                {{
+                  props.row.estatus?.nombre || props.row.estatus || "Pendiente"
+                }}
               </q-chip>
             </q-td>
           </template>
@@ -274,7 +288,9 @@
                   color="primary"
                   @click="verDetalles(props.row)"
                 >
-                  <q-tooltip class="bg-primary">Ver detalles completos</q-tooltip>
+                  <q-tooltip class="bg-primary"
+                    >Ver detalles completos</q-tooltip
+                  >
                 </q-btn>
                 <q-btn
                   flat
@@ -284,7 +300,9 @@
                   color="teal-8"
                   @click="verPagos(props.row)"
                 >
-                  <q-tooltip class="bg-teal-8">Control y gestión de pagos</q-tooltip>
+                  <q-tooltip class="bg-teal-8"
+                    >Control y gestión de pagos</q-tooltip
+                  >
                 </q-btn>
                 <q-btn
                   flat
@@ -294,12 +312,19 @@
                   color="indigo"
                   @click="verHistorial(props.row)"
                 >
-                  <q-tooltip class="bg-indigo">Ver historial de cambios</q-tooltip>
+                  <q-tooltip class="bg-indigo"
+                    >Ver historial de cambios</q-tooltip
+                  >
                 </q-btn>
               </div>
             </q-td>
           </template>
         </BaseCatalogo>
+      </q-tab-panel>
+
+      <!-- Pestaña 4: Solicitudes de Aplazamiento de Pagos -->
+      <q-tab-panel name="aplazamientos" class="q-pa-none">
+        <CreditoAplazamientosIndex />
       </q-tab-panel>
     </q-tab-panels>
 
@@ -338,6 +363,7 @@ import CreditoHistorialModal from "src/components/CreditoInterno/CreditoHistoria
 import CreditoPagosModal from "src/components/CreditoInterno/CreditoPagosModal.vue";
 import CreditoInternoDashboard from "src/components/CreditoInterno/Dashboard/CreditoInternoDashboard.vue";
 import CreditoInternoCalendario from "src/components/CreditoInterno/Calendario/CreditoInternoCalendario.vue";
+import CreditoAplazamientosIndex from "src/components/CreditoInterno/Aplazamientos/CreditoAplazamientosIndex.vue";
 
 const isAdminOrCredito = computed(() => {
   return checkRole("Admin") || checkRole("Credito");

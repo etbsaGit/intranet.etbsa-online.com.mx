@@ -162,6 +162,23 @@
                   }}
                 </span>
               </div>
+              <div
+                v-if="
+                  getUltimaSolicitudAplazo(props.row)?.estatus?.nombre ===
+                  'Aplazo Solicitado'
+                "
+                class="text-caption text-orange-9 flex items-center q-gutter-xs q-mt-xs"
+              >
+                <q-icon name="schedule" size="xs" color="orange-9" />
+                <span class="text-weight-bold">
+                  Propuesta:
+                  {{
+                    formatFechaLarga(
+                      getUltimaSolicitudAplazo(props.row).fecha_nueva
+                    )
+                  }}
+                </span>
+              </div>
             </q-td>
           </template>
 
@@ -183,6 +200,138 @@
                   (props.row.fecha_liquidado ? "Liquidado" : "Pendiente")
                 }}
               </q-chip>
+            </q-td>
+          </template>
+
+          <!-- Columna: Aplazamiento de Pago -->
+          <template v-slot:body-cell-aplazamiento="props">
+            <q-td :props="props" align="center">
+              <!-- Caso 1: Pago ya liquidado o realizado -->
+              <div
+                v-if="
+                  props.row.estatus?.nombre === 'Pago Realizado' ||
+                  Boolean(props.row.fecha_liquidado) ||
+                  (props.row.monto_pagado !== null &&
+                    Number(props.row.monto_pagado) > 0 &&
+                    Number(props.row.saldo_pendiente) === 0)
+                "
+                class="text-grey-5"
+              >
+                —
+              </div>
+
+              <!-- Caso 2: Tiene solicitud activa de 'Aplazo Solicitado' -->
+              <div
+                v-else-if="
+                  getUltimaSolicitudAplazo(props.row)?.estatus?.nombre ===
+                  'Aplazo Solicitado'
+                "
+                class="row items-center justify-center q-gutter-xs"
+              >
+                <q-chip
+                  dense
+                  clickable
+                  color="orange-1"
+                  text-color="orange-10"
+                  icon="schedule_send"
+                  class="text-weight-bold q-px-sm"
+                  @click="abrirModalAplazarPago(props.row)"
+                >
+                  Aplazo Solicitado
+                  <q-tooltip class="bg-dark text-white text-body2">
+                    <div>
+                      <strong>Nueva fecha:</strong>
+                      {{
+                        formatFechaLarga(
+                          getUltimaSolicitudAplazo(props.row).fecha_nueva
+                        )
+                      }}
+                    </div>
+                    <div v-if="getUltimaSolicitudAplazo(props.row).motivo">
+                      <strong>Motivo:</strong>
+                      {{ getUltimaSolicitudAplazo(props.row).motivo }}
+                    </div>
+                    <div
+                      v-if="
+                        getUltimaSolicitudAplazo(props.row).solicitante
+                          ?.nombreCompleto
+                      "
+                    >
+                      <strong>Solicitó:</strong>
+                      {{
+                        getUltimaSolicitudAplazo(props.row).solicitante
+                          .nombreCompleto
+                      }}
+                    </div>
+                  </q-tooltip>
+                </q-chip>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="edit_calendar"
+                  color="orange-9"
+                  @click="abrirModalAplazarPago(props.row)"
+                >
+                  <q-tooltip>Modificar solicitud de aplazamiento</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  round
+                  dense
+                  size="sm"
+                  icon="cancel"
+                  color="negative"
+                  @click="abrirModalCancelarAplazo(props.row)"
+                >
+                  <q-tooltip>Cancelar solicitud de aplazamiento</q-tooltip>
+                </q-btn>
+              </div>
+
+              <!-- Caso 3: Solicitud cancelada previamente pero pago aún pendiente -->
+              <div
+                v-else-if="
+                  getUltimaSolicitudAplazo(props.row)?.estatus?.nombre ===
+                  'Aplazo Cancelado'
+                "
+                class="row items-center justify-center q-gutter-xs"
+              >
+                <q-badge
+                  color="grey-3"
+                  text-color="grey-8"
+                  class="text-weight-medium q-pa-xs"
+                >
+                  Aplazo cancelado
+                </q-badge>
+                <q-btn
+                  dense
+                  outline
+                  size="sm"
+                  color="orange-9"
+                  icon="update"
+                  label="Nuevo Aplazo"
+                  class="text-weight-bold"
+                  @click="abrirModalAplazarPago(props.row)"
+                >
+                  <q-tooltip>Generar nueva solicitud de aplazamiento</q-tooltip>
+                </q-btn>
+              </div>
+
+              <!-- Caso 4: Pago pendiente y disponible para solicitar aplazo -->
+              <div v-else>
+                <q-btn
+                  dense
+                  outline
+                  color="orange-9"
+                  icon="update"
+                  label="Solicitar Aplazo"
+                  class="text-weight-bold"
+                  @click="abrirModalAplazarPago(props.row)"
+                >
+                  <q-tooltip>Solicitar aplazar la fecha de este pago</q-tooltip>
+                </q-btn>
+              </div>
             </q-td>
           </template>
 
@@ -597,6 +746,241 @@
       </q-card>
     </q-dialog>
 
+    <!-- Modal para Solicitar Aplazamiento de Pago -->
+    <q-dialog
+      v-model="modalAplazarPago"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+    >
+      <q-card
+        style="min-width: 420px; max-width: 520px; width: 100%"
+        class="rounded-borders"
+      >
+        <q-card-section
+          class="bg-orange-8 text-white row items-center justify-between q-py-sm"
+        >
+          <div
+            class="text-subtitle1 text-weight-bold flex items-center q-gutter-xs"
+          >
+            <q-icon name="update" size="sm" />
+            <span>
+              Solicitar Aplazamiento -
+              {{
+                pagoSeleccionadoAplazo?.etiqueta ||
+                `Pago #${pagoSeleccionadoAplazo?.n_pago}`
+              }}
+            </span>
+          </div>
+          <q-btn
+            flat
+            round
+            dense
+            icon="close"
+            v-close-popup
+            :disable="savingAplazo"
+          />
+        </q-card-section>
+
+        <q-card-section class="q-pa-md q-gutter-y-md">
+          <!-- Resumen del Pago Actual -->
+          <div class="bg-grey-2 q-pa-sm rounded-borders text-body2">
+            <div class="row justify-between q-mb-xs">
+              <span class="text-grey-7">Concepto:</span>
+              <span class="text-weight-bold">
+                {{
+                  pagoSeleccionadoAplazo?.etiqueta ||
+                  `Pago #${pagoSeleccionadoAplazo?.n_pago}`
+                }}
+              </span>
+            </div>
+            <div class="row justify-between q-mb-xs">
+              <span class="text-grey-7">Fecha Programada Actual:</span>
+              <span class="text-weight-bold text-teal-9">
+                {{
+                  formatFechaLarga(
+                    pagoSeleccionadoAplazo?.fecha_a_pagar ||
+                      pagoSeleccionadoAplazo?.fecha
+                  )
+                }}
+              </span>
+            </div>
+            <div
+              class="row justify-between"
+              v-if="pagoSeleccionadoAplazo?.saldo_pendiente !== null"
+            >
+              <span class="text-grey-7">Saldo Pendiente:</span>
+              <span class="text-weight-bolder text-primary text-subtitle2">
+                {{
+                  formatCurrency(pagoSeleccionadoAplazo?.saldo_pendiente || 0)
+                }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Formulario de Aplazamiento -->
+          <div>
+            <div class="text-caption text-weight-bold text-grey-8 q-mb-xs">
+              Nueva Fecha de Pago <span class="text-negative">*</span>
+            </div>
+            <q-input
+              dense
+              outlined
+              v-model="formAplazo.fecha_nueva"
+              type="date"
+              :min="minFechaNueva"
+              :rules="[
+                (val) => !!val || 'La nueva fecha de pago es obligatoria',
+                (val) =>
+                  validarFechaNueva(val) ||
+                  'La nueva fecha debe ser posterior o igual a la fecha actual',
+              ]"
+            >
+              <template v-slot:prepend>
+                <q-icon name="event" color="orange-9" />
+              </template>
+            </q-input>
+          </div>
+
+          <div>
+            <div class="text-caption text-weight-bold text-grey-8 q-mb-xs">
+              Motivo del Aplazamiento <span class="text-negative">*</span>
+            </div>
+            <q-input
+              dense
+              outlined
+              type="textarea"
+              rows="3"
+              v-model="formAplazo.motivo"
+              placeholder="Explique el motivo o justificación por el cual se solicita aplazar este pago..."
+              :rules="[
+                (val) =>
+                  (val && val.trim().length >= 3) ||
+                  'Ingrese un motivo detallado (mínimo 3 caracteres)',
+              ]"
+            />
+          </div>
+
+          <div class="text-caption text-grey-7 bg-orange-1 q-pa-sm rounded-borders">
+            <q-icon name="info" size="xs" color="orange-9" class="q-mr-xs" />
+            La solicitud se guardará con el estatus
+            <strong>Aplazo Solicitado</strong> y se registrará en la bitácora del crédito.
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1 q-gutter-sm">
+          <q-btn
+            flat
+            label="Cancelar"
+            color="grey-8"
+            v-close-popup
+            :disable="savingAplazo"
+          />
+          <q-btn
+            unelevated
+            label="Enviar Solicitud"
+            color="orange-9"
+            icon="send"
+            :loading="savingAplazo"
+            @click="guardarSolicitudAplazo"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal para Confirmar Cancelación de Solicitud de Aplazamiento -->
+    <q-dialog
+      v-model="modalCancelarAplazo"
+      persistent
+      transition-show="scale"
+      transition-hide="scale"
+    >
+      <q-card
+        style="min-width: 380px; max-width: 480px; width: 100%"
+        class="rounded-borders"
+      >
+        <q-card-section
+          class="bg-red-8 text-white row items-center justify-between q-py-sm"
+        >
+          <div
+            class="text-subtitle1 text-weight-bold flex items-center q-gutter-xs"
+          >
+            <q-icon name="event_busy" size="sm" />
+            <span>Cancelar Solicitud de Aplazamiento</span>
+          </div>
+          <q-btn
+            flat
+            round
+            dense
+            icon="close"
+            v-close-popup
+            :disable="cancelingAplazo"
+          />
+        </q-card-section>
+
+        <q-card-section class="q-pa-md q-gutter-y-sm">
+          <div class="text-body1">
+            ¿Confirmas que deseas <strong>cancelar</strong> la solicitud de aplazamiento para
+            <strong>{{ pagoACancelarAplazo?.etiqueta || `Pago #${pagoACancelarAplazo?.n_pago}` }}</strong>?
+          </div>
+
+          <div class="bg-grey-2 q-pa-sm rounded-borders text-body2">
+            <div class="row justify-between q-mb-xs">
+              <span class="text-grey-7">Fecha Programada Original:</span>
+              <span class="text-weight-bold text-teal-9">
+                {{ formatFechaLarga(pagoACancelarAplazo?.fecha_a_pagar || pagoACancelarAplazo?.fecha) }}
+              </span>
+            </div>
+            <div class="row justify-between">
+              <span class="text-grey-7">Fecha Propuesta a Anular:</span>
+              <span class="text-weight-bold text-negative">
+                {{ formatFechaLarga(getUltimaSolicitudAplazo(pagoACancelarAplazo)?.fecha_nueva) }}
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-caption text-weight-bold text-grey-8 q-mb-xs">
+              Motivo de la Cancelación (opcional)
+            </div>
+            <q-input
+              dense
+              outlined
+              v-model="motivoCancelacionAplazo"
+              placeholder="Ej. El cliente realizó el pago en la fecha acordada"
+            />
+          </div>
+
+          <div class="text-caption text-grey-7 bg-red-1 q-pa-sm rounded-borders">
+            <q-icon name="info" size="xs" color="negative" class="q-mr-xs" />
+            La solicitud pasará al estatus <strong>Aplazo Cancelado</strong> y se registrará en la bitácora del crédito.
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right" class="q-pa-md bg-grey-1 q-gutter-sm">
+          <q-btn
+            flat
+            label="Volver"
+            color="grey-8"
+            v-close-popup
+            :disable="cancelingAplazo"
+          />
+          <q-btn
+            unelevated
+            label="Confirmar Cancelación"
+            color="negative"
+            icon="cancel"
+            :loading="cancelingAplazo"
+            @click="ejecutarCancelacionAplazo"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <!-- Modal de Confirmación de Validación de Pago -->
     <q-dialog
       v-model="modalValidar"
@@ -819,6 +1203,13 @@ const columns = [
     field: (row) => row.estatus?.nombre || row.estatus || "Pendiente",
     align: "center",
     sortable: true,
+  },
+  {
+    name: "aplazamiento",
+    label: "Aplazamiento",
+    field: (row) => getUltimaSolicitudAplazo(row)?.estatus?.nombre || "-",
+    align: "center",
+    sortable: false,
   },
   {
     name: "monto_pagado",
@@ -1096,6 +1487,184 @@ const abrirPdfExterno = (doc) => {
   const url = doc.realpath || doc.url || doc.base64;
   if (url) {
     window.open(url, "_blank");
+  }
+};
+
+// --- Solicitud de Aplazamiento de Pago ---
+const modalAplazarPago = ref(false);
+const pagoSeleccionadoAplazo = ref(null);
+const savingAplazo = ref(false);
+const formAplazo = ref({
+  fecha_nueva: "",
+  motivo: "",
+});
+
+const getUltimaSolicitudAplazo = (pago) => {
+  if (!pago) return null;
+  if (pago.solicitud_aplazar_pago) return pago.solicitud_aplazar_pago;
+  if (
+    pago.solicitudes_aplazar_pago &&
+    Array.isArray(pago.solicitudes_aplazar_pago) &&
+    pago.solicitudes_aplazar_pago.length > 0
+  ) {
+    return pago.solicitudes_aplazar_pago[
+      pago.solicitudes_aplazar_pago.length - 1
+    ];
+  }
+  return null;
+};
+
+const minFechaNueva = computed(() => {
+  const fechaActual =
+    pagoSeleccionadoAplazo.value?.fecha_a_pagar ||
+    pagoSeleccionadoAplazo.value?.fecha;
+  if (fechaActual) {
+    return fechaActual;
+  }
+  const today = new Date();
+  return today.toISOString().split("T")[0];
+});
+
+const validarFechaNueva = (val) => {
+  if (!val) return false;
+  const fechaActual =
+    pagoSeleccionadoAplazo.value?.fecha_a_pagar ||
+    pagoSeleccionadoAplazo.value?.fecha;
+  if (fechaActual) {
+    return val >= fechaActual;
+  }
+  return true;
+};
+
+const abrirModalAplazarPago = (pago) => {
+  pagoSeleccionadoAplazo.value = pago;
+  const ultima = getUltimaSolicitudAplazo(pago);
+  formAplazo.value = {
+    fecha_nueva: ultima?.fecha_nueva || "",
+    motivo: ultima?.motivo || "",
+  };
+  modalAplazarPago.value = true;
+};
+
+const guardarSolicitudAplazo = async () => {
+  if (savingAplazo.value) return;
+
+  const pago = pagoSeleccionadoAplazo.value;
+  if (!pago) return;
+
+  const fechaNueva = formAplazo.value.fecha_nueva;
+  const motivo = formAplazo.value.motivo ? formAplazo.value.motivo.trim() : "";
+
+  if (!fechaNueva) {
+    show_notify(
+      "Debe seleccionar la nueva fecha de pago.",
+      "warning",
+      "warning"
+    );
+    return;
+  }
+
+  if (!motivo || motivo.length < 3) {
+    show_notify(
+      "Debe ingresar un motivo válido para el aplazamiento (mínimo 3 caracteres).",
+      "warning",
+      "warning"
+    );
+    return;
+  }
+
+  savingAplazo.value = true;
+
+  try {
+    const payload = {
+      fecha_nueva: fechaNueva,
+      motivo: motivo,
+    };
+
+    const res = await api.post(
+      `/api/intranet/creditoInternoPagos/${pago.id}/aplazar`,
+      payload
+    );
+
+    if (res?.data?.data) {
+      pago.solicitud_aplazar_pago = res.data.data;
+      if (!pago.solicitudes_aplazar_pago) {
+        pago.solicitudes_aplazar_pago = [];
+      }
+      pago.solicitudes_aplazar_pago.push(res.data.data);
+    }
+
+    show_notify(
+      "Solicitud de aplazamiento registrada correctamente",
+      "check",
+      "positive"
+    );
+    modalAplazarPago.value = false;
+    emit("updated");
+  } catch (error) {
+    console.error("Error al solicitar aplazamiento de pago:", error);
+    show_notify(
+      error?.response?.data?.message || "Error al solicitar aplazamiento de pago",
+      "error",
+      "negative"
+    );
+  } finally {
+    savingAplazo.value = false;
+  }
+};
+
+// --- Cancelación de Solicitud de Aplazamiento ---
+const modalCancelarAplazo = ref(false);
+const pagoACancelarAplazo = ref(null);
+const cancelingAplazo = ref(false);
+const motivoCancelacionAplazo = ref("");
+
+const abrirModalCancelarAplazo = (pago) => {
+  pagoACancelarAplazo.value = pago;
+  motivoCancelacionAplazo.value = "";
+  modalCancelarAplazo.value = true;
+};
+
+const ejecutarCancelacionAplazo = async () => {
+  if (!pagoACancelarAplazo.value || cancelingAplazo.value) return;
+
+  const pago = pagoACancelarAplazo.value;
+  cancelingAplazo.value = true;
+
+  try {
+    const payload = {
+      motivo_cancelacion: motivoCancelacionAplazo.value ? motivoCancelacionAplazo.value.trim() : null,
+    };
+
+    const res = await api.post(
+      `/api/intranet/creditoInternoPagos/${pago.id}/cancelar-aplazo`,
+      payload
+    );
+
+    if (res?.data?.data) {
+      pago.solicitud_aplazar_pago = res.data.data;
+      if (!pago.solicitudes_aplazar_pago) {
+        pago.solicitudes_aplazar_pago = [];
+      }
+      pago.solicitudes_aplazar_pago.push(res.data.data);
+    }
+
+    show_notify(
+      "Solicitud de aplazamiento cancelada correctamente",
+      "check",
+      "positive"
+    );
+    modalCancelarAplazo.value = false;
+    emit("updated");
+  } catch (error) {
+    console.error("Error al cancelar la solicitud de aplazamiento:", error);
+    show_notify(
+      error?.response?.data?.message || "Error al cancelar la solicitud de aplazamiento",
+      "error",
+      "negative"
+    );
+  } finally {
+    cancelingAplazo.value = false;
   }
 };
 </script>

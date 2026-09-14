@@ -145,7 +145,7 @@
       </q-card-section>
     </q-card>
 
-    <!-- 🚫 Alerta de Lista Negra -->
+    <!--  Alerta de Lista Negra -->
     <q-banner
       v-if="esListaNegra"
       class="bg-red-1 text-negative rounded-borders q-mb-md shadow-2"
@@ -936,13 +936,7 @@ const esListaNegra = computed(() => {
 const puedeSeleccionarAsesor = computed(() => {
   const roles = authStore.authUser?.roles || [];
   return (
-    roles.some(
-      (r) =>
-        r.name === "Admin" ||
-        r.name === "Credito" ||
-        r.name === "Crédito" ||
-        r.name === "Intranet.CreditoInterno"
-    ) ||
+    roles.some((r) => r.name === "Admin" || r.name === "Credito") ||
     checkRole("Admin") ||
     checkRole("Credito")
   );

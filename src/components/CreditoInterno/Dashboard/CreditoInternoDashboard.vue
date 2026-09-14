@@ -26,9 +26,17 @@
       />
     </div>
 
-    <!-- Bloque 2: Gráfica de Flujo Mensual (Ancho Completo) -->
+    <!-- Bloque 2: Gráfica de Flujo Mensual (Área) -->
     <div class="q-mb-md">
       <ChartFlujoMensual
+        :data="dashboardData?.flujo_mensual"
+        :year="filters.year"
+      />
+    </div>
+
+    <!-- Bloque 2b: Gráfica de Flujo Mensual (Barras) -->
+    <div class="q-mb-md">
+      <ChartFlujoMensualBarras
         :data="dashboardData?.flujo_mensual"
         :year="filters.year"
       />
@@ -76,6 +84,7 @@ import { show_notify } from "src/boot/functions";
 import DashboardFiltros from "./DashboardFiltros.vue";
 import DashboardKpis from "./DashboardKpis.vue";
 import ChartFlujoMensual from "./ChartFlujoMensual.vue";
+import ChartFlujoMensualBarras from "./ChartFlujoMensualBarras.vue";
 import ChartCarteraLineas from "./ChartCarteraLineas.vue";
 import ChartSucursales from "./ChartSucursales.vue";
 import ChartAntiguedadSaldos from "./ChartAntiguedadSaldos.vue";

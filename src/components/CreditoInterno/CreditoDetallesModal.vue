@@ -137,17 +137,49 @@
                     }}
                   </q-chip>
                 </div>
-                <div
-                  class="col-12 col-md-6"
-                  v-if="credito.notificado?.nombreCompleto"
-                >
-                  <div class="text-caption text-grey-7">Gerente Notificado</div>
-                  <div class="text-weight-medium">
-                    {{ credito.notificado.nombreCompleto }}
-                  </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-caption text-grey-7">VoBo de Crédito</div>
+                  <q-chip
+                    v-if="credito.vobo === true || credito.vobo_credito === true || credito.vobo === 1 || credito.vobo_credito === 1"
+                    dense
+                    color="green-1"
+                    text-color="green-9"
+                    icon="check_circle"
+                    class="text-weight-bold q-px-sm"
+                  >
+                    VoBo Otorgado
+                    <q-tooltip v-if="credito.vobo_fecha || credito.vobo_observaciones">
+                      <div v-if="credito.vobo_fecha"><strong>Fecha:</strong> {{ formatFechaLarga(credito.vobo_fecha) }}</div>
+                      <div v-if="credito.vobo_observaciones"><strong>Notas:</strong> {{ credito.vobo_observaciones }}</div>
+                    </q-tooltip>
+                  </q-chip>
+                  <q-chip
+                    v-else-if="credito.vobo === false || credito.vobo_credito === false || credito.vobo === 0 || credito.vobo_credito === 0"
+                    dense
+                    color="red-1"
+                    text-color="red-9"
+                    icon="cancel"
+                    class="text-weight-bold q-px-sm"
+                  >
+                    No Otorgado
+                    <q-tooltip v-if="credito.vobo_fecha || credito.vobo_observaciones">
+                      <div v-if="credito.vobo_fecha"><strong>Fecha:</strong> {{ formatFechaLarga(credito.vobo_fecha) }}</div>
+                      <div v-if="credito.vobo_observaciones"><strong>Motivo:</strong> {{ credito.vobo_observaciones }}</div>
+                    </q-tooltip>
+                  </q-chip>
+                  <q-chip
+                    v-else
+                    dense
+                    color="grey-2"
+                    text-color="grey-8"
+                    icon="pending"
+                    class="text-weight-medium q-px-xs"
+                  >
+                    Sin VoBo
+                  </q-chip>
                 </div>
                 <div
-                  class="col-12 col-md-6"
+                  class="col-12 col-md-4"
                   v-if="credito.linea?.name || credito.linea_id"
                 >
                   <div class="text-caption text-grey-7">Línea de Crédito</div>
@@ -157,6 +189,15 @@
                       credito.credito_linea?.name ||
                       "Línea Asignada"
                     }}
+                  </div>
+                </div>
+                <div
+                  class="col-12 col-md-12"
+                  v-if="credito.notificado?.nombreCompleto"
+                >
+                  <div class="text-caption text-grey-7">Gerente Notificado</div>
+                  <div class="text-weight-medium">
+                    {{ credito.notificado.nombreCompleto }}
                   </div>
                 </div>
               </div>
@@ -231,7 +272,11 @@
           <q-card
             flat
             bordered
-            v-if="analiticaVinculada || credito.analitica_solicitada || cargandoAnalitica"
+            v-if="
+              analiticaVinculada ||
+              credito.analitica_solicitada ||
+              cargandoAnalitica
+            "
             class="bg-purple-1"
             style="border: 1px solid #ce93d8"
           >
@@ -243,15 +288,10 @@
                   <q-icon name="insights" size="sm" />
                   <span>Analítica Financiera</span>
                 </div>
-                <div v-if="analiticaVinculada" class="row items-center q-gutter-xs">
-                  <q-chip
-                    dense
-                    :color="getDropdownPropsAut(analiticaVinculada.status).color"
-                    :text-color="getDropdownPropsAut(analiticaVinculada.status).textColor"
-                    :icon="getDropdownPropsAut(analiticaVinculada.status).icon"
-                    :label="getDropdownPropsAut(analiticaVinculada.status).label"
-                    class="text-weight-bold q-px-sm"
-                  />
+                <div
+                  v-if="analiticaVinculada"
+                  class="row items-center q-gutter-xs"
+                >
                   <q-btn
                     dense
                     color="purple-8"
@@ -260,7 +300,9 @@
                     class="text-weight-bold q-px-sm"
                     @click="modalReporteAnalitica = true"
                   >
-                    <q-tooltip>Abrir reporte completo de la analítica</q-tooltip>
+                    <q-tooltip
+                      >Abrir reporte completo de la analítica</q-tooltip
+                    >
                   </q-btn>
                 </div>
               </div>
@@ -281,7 +323,9 @@
                 <div class="col-12 col-md-4">
                   <div class="text-caption text-grey-7">Periodo / Título</div>
                   <div class="text-weight-medium text-dark">
-                    {{ analiticaVinculada.titulo || "Sin periodo especificado" }}
+                    {{
+                      analiticaVinculada.titulo || "Sin periodo especificado"
+                    }}
                   </div>
                 </div>
                 <div class="col-12 col-md-4">
@@ -289,7 +333,8 @@
                   <div class="text-weight-medium text-dark">
                     {{
                       formatFechaLarga(
-                        analiticaVinculada.created_at || analiticaVinculada.fecha
+                        analiticaVinculada.created_at ||
+                          analiticaVinculada.fecha
                       )
                     }}
                   </div>
@@ -309,7 +354,10 @@
                 class="text-caption text-purple-9 row items-center q-gutter-xs"
               >
                 <q-icon name="info" color="purple-8" size="18px" />
-                <span>Analítica solicitada para este crédito (aún no se encuentra captura registrada para este registro).</span>
+                <span
+                  >Analítica solicitada para este crédito (aún no se encuentra
+                  captura registrada para este registro).</span
+                >
               </div>
             </q-card-section>
           </q-card>
@@ -849,13 +897,23 @@ const sonMismoDia = (dateA, dateB) => {
   const dA = new Date(dateA);
   const dB = new Date(dateB);
   if (!isNaN(dA.getTime()) && !isNaN(dB.getTime())) {
-    const localA = `${dA.getFullYear()}-${String(dA.getMonth() + 1).padStart(2, "0")}-${String(dA.getDate()).padStart(2, "0")}`;
-    const localB = `${dB.getFullYear()}-${String(dB.getMonth() + 1).padStart(2, "0")}-${String(dB.getDate()).padStart(2, "0")}`;
+    const localA = `${dA.getFullYear()}-${String(dA.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(dA.getDate()).padStart(2, "0")}`;
+    const localB = `${dB.getFullYear()}-${String(dB.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(dB.getDate()).padStart(2, "0")}`;
     if (localA === localB) return true;
 
     // 3. Comparar fecha en UTC
-    const utcA = `${dA.getUTCFullYear()}-${String(dA.getUTCMonth() + 1).padStart(2, "0")}-${String(dA.getUTCDate()).padStart(2, "0")}`;
-    const utcB = `${dB.getUTCFullYear()}-${String(dB.getUTCMonth() + 1).padStart(2, "0")}-${String(dB.getUTCDate()).padStart(2, "0")}`;
+    const utcA = `${dA.getUTCFullYear()}-${String(
+      dA.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(dA.getUTCDate()).padStart(2, "0")}`;
+    const utcB = `${dB.getUTCFullYear()}-${String(
+      dB.getUTCMonth() + 1
+    ).padStart(2, "0")}-${String(dB.getUTCDate()).padStart(2, "0")}`;
     if (utcA === utcB) return true;
 
     // 4. Si la diferencia de tiempo es menor a 24 horas
@@ -878,8 +936,10 @@ const buscarAnaliticaVinculada = async () => {
     return;
   }
 
-  const clienteId = creditoObj.cliente_id || creditoObj.cliente?.id || creditoObj.id_cliente;
-  const creditoCreatedAt = creditoObj.created_at || creditoObj.fecha || creditoObj.createdAt;
+  const clienteId =
+    creditoObj.cliente_id || creditoObj.cliente?.id || creditoObj.id_cliente;
+  const creditoCreatedAt =
+    creditoObj.created_at || creditoObj.fecha || creditoObj.createdAt;
 
   if (!clienteId) return;
 
@@ -922,12 +982,18 @@ const buscarAnaliticaVinculada = async () => {
           analiticaVinculada.value = delMismoDia[0];
         } else {
           // Si hay más de una el mismo día, elegir la más cercana en timestamp
-          const timeCredito = creditoCreatedAt ? new Date(creditoCreatedAt).getTime() : 0;
+          const timeCredito = creditoCreatedAt
+            ? new Date(creditoCreatedAt).getTime()
+            : 0;
           delMismoDia.sort((a, b) => {
             const timeA = new Date(a.created_at || a.fecha).getTime();
             const timeB = new Date(b.created_at || b.fecha).getTime();
-            const diffA = isNaN(timeA) ? Infinity : Math.abs(timeA - timeCredito);
-            const diffB = isNaN(timeB) ? Infinity : Math.abs(timeB - timeCredito);
+            const diffA = isNaN(timeA)
+              ? Infinity
+              : Math.abs(timeA - timeCredito);
+            const diffB = isNaN(timeB)
+              ? Infinity
+              : Math.abs(timeB - timeCredito);
             return diffA - diffB;
           });
           analiticaVinculada.value = delMismoDia[0];
@@ -941,31 +1007,6 @@ const buscarAnaliticaVinculada = async () => {
     console.error("Error al buscar analítica vinculada:", error);
   } finally {
     cargandoAnalitica.value = false;
-  }
-};
-
-const getDropdownPropsAut = (validated) => {
-  if (validated === 0) {
-    return {
-      color: "red",
-      textColor: "white",
-      icon: "close",
-      label: "Rechazado",
-    };
-  } else if (validated === 1) {
-    return {
-      color: "green",
-      textColor: "white",
-      icon: "check_circle",
-      label: "Autorizada",
-    };
-  } else {
-    return {
-      color: "primary",
-      textColor: "white",
-      icon: "hourglass_empty",
-      label: "Esperando autorización",
-    };
   }
 };
 

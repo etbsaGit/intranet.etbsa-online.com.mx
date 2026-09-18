@@ -53,6 +53,7 @@
       <!-- Pestaña 3: Listado y Gestión de Solicitudes -->
       <q-tab-panel name="solicitudes" class="q-pa-none">
         <BaseCatalogo
+          ref="catalogoRef"
           :onCreate="false"
           title="Solicitudes Crédito Interno"
           :columns="columns"
@@ -228,6 +229,24 @@
             </q-td>
           </template>
 
+          <!-- Columna: VoBo Credito -->
+          <template v-slot:body-cell-vobo_credito="props">
+            <q-td :props="props" align="center">
+              <q-chip
+                dense
+                class="text-weight-bold text-white q-px-sm"
+                :style="{
+                  backgroundColor:
+                    props.row.vo_bo_credito?.[0]?.estatus?.color || '#1976d2',
+                }"
+              >
+                {{
+                  props.row.vo_bo_credito?.[0]?.estatus?.nombre || "Pendiente"
+                }}
+              </q-chip>
+            </q-td>
+          </template>
+
           <!-- Columna: Pagos -->
           <template v-slot:body-cell-pagos="props">
             <q-td :props="props">
@@ -281,6 +300,19 @@
             <q-td :props="props" align="center">
               <div class="row items-center justify-center q-gutter-xs no-wrap">
                 <q-btn
+                  v-if="isCredito"
+                  flat
+                  round
+                  dense
+                  icon="fact_check"
+                  color="purple-8"
+                  @click="verVoBo(props.row)"
+                >
+                  <q-tooltip class="bg-purple-8"
+                    >Dictamen de VoBo de Crédito</q-tooltip
+                  >
+                </q-btn>
+                <q-btn
                   flat
                   round
                   dense
@@ -331,6 +363,13 @@
     <!-- Modal de Detalles modular -->
     <CreditoDetallesModal v-model="showDetallesModal" :credito="selectedItem" />
 
+    <!-- Modal de Dictamen VoBo de Crédito -->
+    <CreditoVoBoModal
+      v-model="showVoBoModal"
+      :credito="selectedVoBoItem"
+      @updated="onVoBoUpdated"
+    />
+
     <!-- Modal de Pagos del Crédito -->
     <CreditoPagosModal
       v-model="showPagosModal"
@@ -361,6 +400,7 @@ import CreditoFiltros from "src/components/CreditoInterno/CreditoFiltros.vue";
 import CreditoDetallesModal from "src/components/CreditoInterno/CreditoDetallesModal.vue";
 import CreditoHistorialModal from "src/components/CreditoInterno/CreditoHistorialModal.vue";
 import CreditoPagosModal from "src/components/CreditoInterno/CreditoPagosModal.vue";
+import CreditoVoBoModal from "src/components/CreditoInterno/CreditoVoBoModal.vue";
 import CreditoInternoDashboard from "src/components/CreditoInterno/Dashboard/CreditoInternoDashboard.vue";
 import CreditoInternoCalendario from "src/components/CreditoInterno/Calendario/CreditoInternoCalendario.vue";
 import CreditoAplazamientosIndex from "src/components/CreditoInterno/Aplazamientos/CreditoAplazamientosIndex.vue";
@@ -369,12 +409,19 @@ const isAdminOrCredito = computed(() => {
   return checkRole("Admin") || checkRole("Credito");
 });
 
-const activeTab = ref(
-  checkRole("Admin") || checkRole("Credito") ? "dashboard" : "calendario"
-);
+const isCredito = computed(() => {
+  return checkRole("Credito");
+});
+
+const activeTab = ref("solicitudes");
+
+const catalogoRef = ref(null);
 
 const showDetallesModal = ref(false);
 const selectedItem = ref(null);
+
+const showVoBoModal = ref(false);
+const selectedVoBoItem = ref(null);
 
 const showPagosModal = ref(false);
 const selectedPagosItem = ref(null);
@@ -426,7 +473,14 @@ const columns = [
   {
     name: "estatus",
     label: "Estatus",
-    field: (row) => row.estatus?.nombre || row.estatus || "Pendiente",
+    field: (row) => row.estatus?.nombre || "Pendiente",
+    sortable: true,
+    align: "center",
+  },
+  {
+    name: "vobo_credito",
+    label: "VoBo Crédito",
+    field: (row) => row.vo_bo_credito[0]?.estatus?.nombre ?? "",
     sortable: true,
     align: "center",
   },
@@ -434,6 +488,7 @@ const columns = [
     name: "pagos",
     label: "Progreso de Pagos",
     field: (row) => row.resumen_pagos || "",
+    sortable: true,
     align: "left",
   },
   {
@@ -456,6 +511,11 @@ const verDetalles = (row) => {
   showDetallesModal.value = true;
 };
 
+const verVoBo = (row) => {
+  selectedVoBoItem.value = row;
+  showVoBoModal.value = true;
+};
+
 const verPagos = (row) => {
   selectedPagosItem.value = row;
   showPagosModal.value = true;
@@ -466,8 +526,20 @@ const verHistorial = (row) => {
   showHistorialModal.value = true;
 };
 
+const onVoBoUpdated = async () => {
+  if (catalogoRef.value?.reload) {
+    await catalogoRef.value.reload();
+  } else {
+    await crud.getPaginatedItems("/api/intranet/creditoInternos");
+  }
+};
+
 const onPagosUpdated = async () => {
-  await crud.getPaginatedItems("/api/intranet/creditoInternos");
+  if (catalogoRef.value?.reload) {
+    await catalogoRef.value.reload();
+  } else {
+    await crud.getPaginatedItems("/api/intranet/creditoInternos");
+  }
   if (selectedPagosItem.value?.id) {
     const updated = (crud.paginatedItems || []).find(
       (c) => c.id === selectedPagosItem.value.id

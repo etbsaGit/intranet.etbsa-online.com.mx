@@ -227,6 +227,93 @@
             </q-card-section>
           </q-card>
 
+          <!-- Tarjeta: Analítica Financiera (si existe o fue solicitada) -->
+          <q-card
+            flat
+            bordered
+            v-if="analiticaVinculada || credito.analitica_solicitada || cargandoAnalitica"
+            class="bg-purple-1"
+            style="border: 1px solid #ce93d8"
+          >
+            <q-card-section class="q-pb-xs">
+              <div class="row items-center justify-between">
+                <div
+                  class="text-subtitle2 text-weight-bold text-purple-9 flex items-center q-gutter-xs"
+                >
+                  <q-icon name="insights" size="sm" />
+                  <span>Analítica Financiera</span>
+                </div>
+                <div v-if="analiticaVinculada" class="row items-center q-gutter-xs">
+                  <q-chip
+                    dense
+                    :color="getDropdownPropsAut(analiticaVinculada.status).color"
+                    :text-color="getDropdownPropsAut(analiticaVinculada.status).textColor"
+                    :icon="getDropdownPropsAut(analiticaVinculada.status).icon"
+                    :label="getDropdownPropsAut(analiticaVinculada.status).label"
+                    class="text-weight-bold q-px-sm"
+                  />
+                  <q-btn
+                    dense
+                    color="purple-8"
+                    icon="assessment"
+                    label="Ver Analítica"
+                    class="text-weight-bold q-px-sm"
+                    @click="modalReporteAnalitica = true"
+                  >
+                    <q-tooltip>Abrir reporte completo de la analítica</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+            </q-card-section>
+
+            <q-card-section class="q-pt-xs">
+              <div
+                v-if="cargandoAnalitica"
+                class="row items-center q-gutter-sm q-py-xs text-caption text-grey-7"
+              >
+                <q-spinner color="purple" size="20px" />
+                <span>Consultando analítica vinculada...</span>
+              </div>
+              <div
+                v-else-if="analiticaVinculada"
+                class="row q-col-gutter-sm items-center"
+              >
+                <div class="col-12 col-md-4">
+                  <div class="text-caption text-grey-7">Periodo / Título</div>
+                  <div class="text-weight-medium text-dark">
+                    {{ analiticaVinculada.titulo || "Sin periodo especificado" }}
+                  </div>
+                </div>
+                <div class="col-12 col-md-4">
+                  <div class="text-caption text-grey-7">Fecha de Registro</div>
+                  <div class="text-weight-medium text-dark">
+                    {{
+                      formatFechaLarga(
+                        analiticaVinculada.created_at || analiticaVinculada.fecha
+                      )
+                    }}
+                  </div>
+                </div>
+                <div
+                  class="col-12 col-md-4"
+                  v-if="analiticaVinculada.comentarios"
+                >
+                  <div class="text-caption text-grey-7">Comentarios</div>
+                  <div class="text-weight-medium text-dark ellipsis">
+                    {{ analiticaVinculada.comentarios }}
+                  </div>
+                </div>
+              </div>
+              <div
+                v-else-if="credito.analitica_solicitada"
+                class="text-caption text-purple-9 row items-center q-gutter-xs"
+              >
+                <q-icon name="info" color="purple-8" size="18px" />
+                <span>Analítica solicitada para este crédito (aún no se encuentra captura registrada para este registro).</span>
+              </div>
+            </q-card-section>
+          </q-card>
+
           <!-- Tarjeta 4: Programación de Pagos (si existen) -->
           <q-card
             flat
@@ -577,19 +664,52 @@
         </q-card-section>
       </q-card>
     </q-dialog>
+
+    <!-- Modal de Reporte de Analítica Financiera -->
+    <q-dialog v-model="modalReporteAnalitica" full-width full-height>
+      <q-card class="column no-wrap" style="height: 100%">
+        <q-card-section
+          class="bg-purple-8 text-white row items-center justify-between q-py-sm"
+        >
+          <div
+            class="text-subtitle1 text-weight-bold flex items-center q-gutter-sm"
+          >
+            <q-icon name="assessment" />
+            <span>
+              Reporte de Analítica Financiera
+              {{
+                analiticaVinculada?.titulo
+                  ? `— ${analiticaVinculada.titulo}`
+                  : ""
+              }}
+            </span>
+          </div>
+          <q-btn flat round dense icon="close" v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="col q-pa-none bg-grey-2 scroll">
+          <analitica-report
+            v-if="analiticaVinculada?.id"
+            :id="analiticaVinculada.id"
+          />
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-dialog>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import {
   formatPhoneNumber,
   formatCurrency,
   formatFechaLarga,
 } from "src/boot/format";
+import { sendRequest } from "src/boot/functions";
 import CreditoDocumentacionCard from "./CreditoDocumentacionCard.vue";
+import AnaliticaReport from "src/components/Analitica/AnaliticaReport.vue";
 
-defineProps({
+const props = defineProps({
   modelValue: {
     type: Boolean,
     default: false,
@@ -689,4 +809,175 @@ const abrirPdfExterno = (doc) => {
     window.open(url, "_blank");
   }
 };
+
+// --- Gestión y Vinculación de Analítica Financiera ---
+const cargandoAnalitica = ref(false);
+const analiticaVinculada = ref(null);
+const modalReporteAnalitica = ref(false);
+
+const obtenerFechaDia = (dateStr) => {
+  if (!dateStr) return null;
+  const str = String(dateStr).trim();
+  if (str.length >= 10) {
+    const match = str.match(/^(\d{4}[-/]\d{2}[-/]\d{2})/);
+    if (match) {
+      return match[1].replace(/\//g, "-");
+    }
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  return null;
+};
+
+const sonMismoDia = (dateA, dateB) => {
+  if (!dateA || !dateB) return false;
+  if (dateA === dateB) return true;
+
+  // 1. Comparar los primeros 10 caracteres (YYYY-MM-DD) directamente del string
+  const strA = String(dateA).trim().substring(0, 10).replace(/\//g, "-");
+  const strB = String(dateB).trim().substring(0, 10).replace(/\//g, "-");
+  if (strA.length === 10 && strB.length === 10 && strA === strB) {
+    return true;
+  }
+
+  // 2. Comparar fecha en zona horaria local del navegador
+  const dA = new Date(dateA);
+  const dB = new Date(dateB);
+  if (!isNaN(dA.getTime()) && !isNaN(dB.getTime())) {
+    const localA = `${dA.getFullYear()}-${String(dA.getMonth() + 1).padStart(2, "0")}-${String(dA.getDate()).padStart(2, "0")}`;
+    const localB = `${dB.getFullYear()}-${String(dB.getMonth() + 1).padStart(2, "0")}-${String(dB.getDate()).padStart(2, "0")}`;
+    if (localA === localB) return true;
+
+    // 3. Comparar fecha en UTC
+    const utcA = `${dA.getUTCFullYear()}-${String(dA.getUTCMonth() + 1).padStart(2, "0")}-${String(dA.getUTCDate()).padStart(2, "0")}`;
+    const utcB = `${dB.getUTCFullYear()}-${String(dB.getUTCMonth() + 1).padStart(2, "0")}-${String(dB.getUTCDate()).padStart(2, "0")}`;
+    if (utcA === utcB) return true;
+
+    // 4. Si la diferencia de tiempo es menor a 24 horas
+    if (Math.abs(dA.getTime() - dB.getTime()) <= 86400000) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const buscarAnaliticaVinculada = async () => {
+  analiticaVinculada.value = null;
+  const creditoObj = props.credito;
+  if (!creditoObj) return;
+
+  // 1. Si ya viene directamente en el objeto del crédito
+  if (creditoObj.analitica && typeof creditoObj.analitica === "object") {
+    analiticaVinculada.value = creditoObj.analitica;
+    return;
+  }
+
+  const clienteId = creditoObj.cliente_id || creditoObj.cliente?.id || creditoObj.id_cliente;
+  const creditoCreatedAt = creditoObj.created_at || creditoObj.fecha || creditoObj.createdAt;
+
+  if (!clienteId) return;
+
+  try {
+    cargandoAnalitica.value = true;
+    const res = await sendRequest(
+      "GET",
+      null,
+      `/api/intranet/analitica/cliente/${clienteId}`
+    );
+
+    // Extraer array de analíticas según la estructura de respuesta del backend
+    let lista = [];
+    if (Array.isArray(res)) {
+      lista = res;
+    } else if (Array.isArray(res?.analiticas)) {
+      lista = res.analiticas;
+    } else if (Array.isArray(res?.data?.analiticas)) {
+      lista = res.data.analiticas;
+    } else if (Array.isArray(res?.data)) {
+      lista = res.data;
+    } else if (typeof res === "object" && res !== null) {
+      const foundArray = Object.values(res).find((v) => Array.isArray(v));
+      if (foundArray) lista = foundArray;
+    }
+
+    if (lista.length > 0) {
+      // Filtrar analíticas del mismo cliente y del mismo día
+      const delMismoDia = lista.filter((a) => {
+        const aClienteId = a.cliente_id || a.cliente?.id || a.id_cliente;
+        if (aClienteId && String(aClienteId) !== String(clienteId)) {
+          return false;
+        }
+        if (!creditoCreatedAt) return true;
+        return sonMismoDia(a.created_at || a.fecha, creditoCreatedAt);
+      });
+
+      if (delMismoDia.length > 0) {
+        if (delMismoDia.length === 1) {
+          analiticaVinculada.value = delMismoDia[0];
+        } else {
+          // Si hay más de una el mismo día, elegir la más cercana en timestamp
+          const timeCredito = creditoCreatedAt ? new Date(creditoCreatedAt).getTime() : 0;
+          delMismoDia.sort((a, b) => {
+            const timeA = new Date(a.created_at || a.fecha).getTime();
+            const timeB = new Date(b.created_at || b.fecha).getTime();
+            const diffA = isNaN(timeA) ? Infinity : Math.abs(timeA - timeCredito);
+            const diffB = isNaN(timeB) ? Infinity : Math.abs(timeB - timeCredito);
+            return diffA - diffB;
+          });
+          analiticaVinculada.value = delMismoDia[0];
+        }
+      } else if (lista.length === 1) {
+        // Fallback: Si el cliente solo tiene 1 analítica en su expediente
+        analiticaVinculada.value = lista[0];
+      }
+    }
+  } catch (error) {
+    console.error("Error al buscar analítica vinculada:", error);
+  } finally {
+    cargandoAnalitica.value = false;
+  }
+};
+
+const getDropdownPropsAut = (validated) => {
+  if (validated === 0) {
+    return {
+      color: "red",
+      textColor: "white",
+      icon: "close",
+      label: "Rechazado",
+    };
+  } else if (validated === 1) {
+    return {
+      color: "green",
+      textColor: "white",
+      icon: "check_circle",
+      label: "Autorizada",
+    };
+  } else {
+    return {
+      color: "primary",
+      textColor: "white",
+      icon: "hourglass_empty",
+      label: "Esperando autorización",
+    };
+  }
+};
+
+watch(
+  [() => props.modelValue, () => props.credito],
+  ([isOpen, cred]) => {
+    if (isOpen && cred) {
+      buscarAnaliticaVinculada();
+    } else {
+      analiticaVinculada.value = null;
+    }
+  },
+  { immediate: true }
+);
 </script>

@@ -354,8 +354,9 @@
         </q-item-section>
       </q-item>
 
+      <!-- Fila 4: Número de pagos y Solicitar analítica -->
       <q-item>
-        <q-item-section class="col-12">
+        <q-item-section class="col-12 col-md-6">
           <q-input
             v-model.number="formCredito.numero_pagos"
             type="number"
@@ -374,6 +375,35 @@
               <q-icon name="payments" />
             </template>
           </q-input>
+        </q-item-section>
+
+        <q-item-section class="col-12 col-md-6" style="margin-bottom: 20px">
+          <div
+            class="row items-center justify-between q-px-md rounded-borders bg-grey-2"
+            style="height: 40px; border: 1px solid #e0e0e0"
+          >
+            <div class="row items-center q-gutter-sm">
+              <q-icon name="analytics" color="primary" size="20px" />
+              <span class="text-body2 text-weight-medium">Solicitar analítica</span>
+              <q-badge
+                v-if="esAnaliticaObligatoria"
+                color="primary"
+                text-color="white"
+                label="Obligatorio"
+                class="q-ml-xs text-caption"
+              />
+            </div>
+            <q-toggle
+              v-model="formCredito.analitica_solicitada"
+              :disable="esAnaliticaObligatoria"
+              color="primary"
+              dense
+            >
+              <q-tooltip v-if="esAnaliticaObligatoria">
+                La analítica es obligatoria para la línea seleccionada
+              </q-tooltip>
+            </q-toggle>
+          </div>
         </q-item-section>
       </q-item>
 
@@ -968,6 +998,7 @@ const formCredito = ref({
   tipo_enganche_id: null,
   valor_enganche: null,
   linea_id: null,
+  analitica_solicitada: false,
   sucursal_id:
     authStore.authUser?.empleado?.sucursal_id ||
     authStore.authUser?.empleado?.sucursal?.id ||
@@ -1011,6 +1042,21 @@ const esLineaServicio = computed(() => {
   ).toLowerCase();
   const clean = txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return clean.includes("servicio");
+});
+
+const esLineaConAnaliticaAutomatica = (lineaObj) => {
+  if (!lineaObj) return false;
+  const nombre = normalizeStr(lineaObj.name || lineaObj.nombre || "");
+  return (
+    nombre.includes("maquinaria") ||
+    nombre.includes("riego") ||
+    nombre.includes("usado") ||
+    nombre.includes("dron")
+  );
+};
+
+const esAnaliticaObligatoria = computed(() => {
+  return esLineaConAnaliticaAutomatica(lineaSeleccionada.value);
 });
 
 const tipoEngancheOptions = computed(() => {
@@ -1584,6 +1630,12 @@ watch(
     } else {
       formCredito.value.tipo_enganche_id = null;
     }
+
+    if (esLineaConAnaliticaAutomatica(lineaSeleccionada.value)) {
+      formCredito.value.analitica_solicitada = true;
+    } else {
+      formCredito.value.analitica_solicitada = false;
+    }
   }
 );
 
@@ -1701,6 +1753,13 @@ const validate = async () => {
     );
     return false;
   }
+  if (esAnaliticaObligatoria.value) {
+    formCredito.value.analitica_solicitada = true;
+  } else {
+    formCredito.value.analitica_solicitada = Boolean(
+      formCredito.value.analitica_solicitada
+    );
+  }
   return await myForm.value.validate();
 };
 
@@ -1726,5 +1785,6 @@ defineExpose({
   validateFechaPago,
   esListaNegra,
   creditoClassificationNombre,
+  esAnaliticaObligatoria,
 });
 </script>

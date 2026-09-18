@@ -861,10 +861,13 @@
             />
           </div>
 
-          <div class="text-caption text-grey-7 bg-orange-1 q-pa-sm rounded-borders">
+          <div
+            class="text-caption text-grey-7 bg-orange-1 q-pa-sm rounded-borders"
+          >
             <q-icon name="info" size="xs" color="orange-9" class="q-mr-xs" />
             La solicitud se guardará con el estatus
-            <strong>Aplazo Solicitado</strong> y se registrará en la bitácora del crédito.
+            <strong>Aplazo Solicitado</strong> y se registrará en la bitácora
+            del crédito.
           </div>
         </q-card-section>
 
@@ -922,21 +925,35 @@
 
         <q-card-section class="q-pa-md q-gutter-y-sm">
           <div class="text-body1">
-            ¿Confirmas que deseas <strong>cancelar</strong> la solicitud de aplazamiento para
-            <strong>{{ pagoACancelarAplazo?.etiqueta || `Pago #${pagoACancelarAplazo?.n_pago}` }}</strong>?
+            ¿Confirmas que deseas <strong>cancelar</strong> la solicitud de
+            aplazamiento para
+            <strong>{{
+              pagoACancelarAplazo?.etiqueta ||
+              `Pago #${pagoACancelarAplazo?.n_pago}`
+            }}</strong
+            >?
           </div>
 
           <div class="bg-grey-2 q-pa-sm rounded-borders text-body2">
             <div class="row justify-between q-mb-xs">
               <span class="text-grey-7">Fecha Programada Original:</span>
               <span class="text-weight-bold text-teal-9">
-                {{ formatFechaLarga(pagoACancelarAplazo?.fecha_a_pagar || pagoACancelarAplazo?.fecha) }}
+                {{
+                  formatFechaLarga(
+                    pagoACancelarAplazo?.fecha_a_pagar ||
+                      pagoACancelarAplazo?.fecha
+                  )
+                }}
               </span>
             </div>
             <div class="row justify-between">
               <span class="text-grey-7">Fecha Propuesta a Anular:</span>
               <span class="text-weight-bold text-negative">
-                {{ formatFechaLarga(getUltimaSolicitudAplazo(pagoACancelarAplazo)?.fecha_nueva) }}
+                {{
+                  formatFechaLarga(
+                    getUltimaSolicitudAplazo(pagoACancelarAplazo)?.fecha_nueva
+                  )
+                }}
               </span>
             </div>
           </div>
@@ -953,9 +970,12 @@
             />
           </div>
 
-          <div class="text-caption text-grey-7 bg-red-1 q-pa-sm rounded-borders">
+          <div
+            class="text-caption text-grey-7 bg-red-1 q-pa-sm rounded-borders"
+          >
             <q-icon name="info" size="xs" color="negative" class="q-mr-xs" />
-            La solicitud pasará al estatus <strong>Aplazo Cancelado</strong> y se registrará en la bitácora del crédito.
+            La solicitud pasará al estatus <strong>Aplazo Cancelado</strong> y
+            se registrará en la bitácora del crédito.
           </div>
         </q-card-section>
 
@@ -1604,7 +1624,8 @@ const guardarSolicitudAplazo = async () => {
   } catch (error) {
     console.error("Error al solicitar aplazamiento de pago:", error);
     show_notify(
-      error?.response?.data?.message || "Error al solicitar aplazamiento de pago",
+      error?.response?.data?.message ||
+        "Error al solicitar aplazamiento de pago",
       "error",
       "negative"
     );
@@ -1633,7 +1654,9 @@ const ejecutarCancelacionAplazo = async () => {
 
   try {
     const payload = {
-      motivo_cancelacion: motivoCancelacionAplazo.value ? motivoCancelacionAplazo.value.trim() : null,
+      motivo_cancelacion: motivoCancelacionAplazo.value
+        ? motivoCancelacionAplazo.value.trim()
+        : null,
     };
 
     const res = await api.post(
@@ -1659,7 +1682,8 @@ const ejecutarCancelacionAplazo = async () => {
   } catch (error) {
     console.error("Error al cancelar la solicitud de aplazamiento:", error);
     show_notify(
-      error?.response?.data?.message || "Error al cancelar la solicitud de aplazamiento",
+      error?.response?.data?.message ||
+        "Error al cancelar la solicitud de aplazamiento",
       "error",
       "negative"
     );

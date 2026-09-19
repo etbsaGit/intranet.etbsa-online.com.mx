@@ -11,17 +11,17 @@
     >
       <!-- Encabezado del Modal -->
       <q-card-section
-        class="bg-purple-9 text-white row items-center justify-between q-py-sm"
+        class="bg-indigo-9 text-white row items-center justify-between q-py-sm"
       >
         <div
           class="text-subtitle1 text-weight-bold flex items-center q-gutter-sm"
         >
-          <q-icon name="fact_check" size="sm" />
-          <span>Dictamen de VoBo — Crédito</span>
+          <q-icon name="how_to_reg" size="sm" />
+          <span>Aprobación de Gerencia Territorial</span>
           <q-badge
             v-if="credito?.folio"
             color="white"
-            text-color="purple-10"
+            text-color="indigo-10"
             class="text-weight-bold"
           >
             #{{ credito.folio }}
@@ -32,8 +32,8 @@
 
       <!-- Banner Informativo -->
       <div
-        class="bg-purple-1 text-purple-10 q-pa-sm text-caption row items-center no-wrap"
-        style="border-bottom: 1px solid #e1bee7"
+        class="bg-indigo-1 text-indigo-10 q-pa-sm text-caption row items-center no-wrap"
+        style="border-bottom: 1px solid #c5cae9"
       >
         <q-icon
           name="verified_user"
@@ -42,14 +42,16 @@
         />
         <div>
           Este dictamen queda registrado como
-          <strong>evidencia formal</strong> de que el departamento de
-          <strong>Crédito</strong> revisó y evaluó la solicitud.
+          <strong>evidencia formal</strong> de que
+          <strong>Gerencia Territorial</strong> revisó y evaluó la solicitud.
         </div>
       </div>
 
       <!-- Contenido del Modal (Scroll) -->
       <q-card-section class="q-pa-md scroll" style="max-height: 70vh">
         <div v-if="credito" class="q-gutter-y-md">
+          <!-- Dictámenes y Vistos Buenos (VoBo Crédito y VoBo Gerencia) -->
+
           <!-- Tarjeta 1: Información del Cliente -->
           <q-card flat bordered class="bg-grey-1">
             <q-card-section class="q-pb-xs">
@@ -133,13 +135,15 @@
                     {{ formatCurrency(credito.monto_solicitado || 0) }}
                   </div>
                 </div>
-                <div class="col-6 col-sm-3">
+                <div
+                  class="col-6 col-sm-3"
+                  v-if="credito.tipo_enganche?.nombre"
+                >
                   <div class="text-caption text-grey-8">Tipo de Enganche</div>
                   <div class="text-h6 text-weight-bolder text-dark">
                     {{ credito.tipo_enganche?.nombre }}
                   </div>
                 </div>
-
                 <div class="col-6 col-sm-3">
                   <div class="text-caption text-grey-8">
                     {{
@@ -158,7 +162,6 @@
                     {{ formatCurrency(credito.valor_enganche || 0) }}
                   </div>
                 </div>
-
                 <div class="col-6 col-sm-3">
                   <div class="text-caption text-grey-8">Número de Pagos</div>
                   <div class="text-h6 text-weight-bolder text-indigo">
@@ -188,7 +191,7 @@
             </q-card-section>
           </q-card>
 
-          <!-- Tarjeta 3: Analítica Financiera (si existe o fue solicitada) -->
+          <!-- Tarjeta 4: Analítica Financiera (si existe o fue solicitada) -->
           <q-card
             flat
             bordered
@@ -208,6 +211,20 @@
                   v-if="analiticaVinculada"
                   class="row items-center q-gutter-xs"
                 >
+                  <q-chip
+                    dense
+                    :color="
+                      getDropdownPropsAut(analiticaVinculada.status).color
+                    "
+                    :text-color="
+                      getDropdownPropsAut(analiticaVinculada.status).textColor
+                    "
+                    :icon="getDropdownPropsAut(analiticaVinculada.status).icon"
+                    :label="
+                      getDropdownPropsAut(analiticaVinculada.status).label
+                    "
+                    class="text-weight-bold q-px-sm"
+                  />
                   <q-btn
                     dense
                     color="purple-8"
@@ -247,7 +264,12 @@
                 <div class="col-12 col-md-4">
                   <div class="text-caption text-grey-7">Fecha de Registro</div>
                   <div class="text-weight-medium text-dark">
-                    {{ formatFechaLarga(analiticaVinculada.created_at) }}
+                    {{
+                      formatFechaLarga(
+                        analiticaVinculada.created_at ||
+                          analiticaVinculada.fecha
+                      )
+                    }}
                   </div>
                 </div>
                 <div
@@ -273,12 +295,13 @@
             </q-card-section>
           </q-card>
 
-          <!-- Tarjeta 4: Documentación Adjunta -->
+          <!-- Tarjeta 5: Documentación Adjunta -->
           <CreditoDocumentacionCard
             :documentacion="credito.documentacion"
             :archivos="credito.archivos"
           />
-          <!-- Tarjeta 5: Motivo y Observaciones del Asesor -->
+
+          <!-- Tarjeta 6: Motivo y Observaciones del Asesor -->
           <q-card
             flat
             bordered
@@ -316,60 +339,59 @@
               </div>
             </q-card-section>
           </q-card>
-
-          <!-- Dictámenes y Vistos Buenos (VoBo Crédito y VoBo Gerencia) -->
           <CreditoVoBoStatusCard :credito="credito" />
 
-          <!-- SECCIÓN: DICTAMEN DE CRÉDITO -->
+          <!-- SECCIÓN: DICTAMEN DE GERENCIA TERRITORIAL| -->
           <q-card
             flat
             bordered
             class="bg-grey-2 shadow-2"
-            style="border: 2px solid #7b1fa2"
+            style="border: 2px solid #283593"
           >
-            <q-card-section class="bg-purple-9 text-white q-py-xs">
+            <q-card-section class="bg-indigo-9 text-white q-py-xs">
               <div
                 class="text-subtitle2 text-weight-bold flex items-center q-gutter-xs"
               >
-                <q-icon name="rate_review" />
-                <span>Dictamen del Visto Bueno (VoBo)</span>
+                <q-icon name="gavel" />
+                <span>Resolución de Gerencia Territorial</span>
               </div>
             </q-card-section>
 
             <q-card-section class="q-pa-md q-gutter-y-sm">
               <div class="text-body2 text-grey-9">
-                Seleccione la resolución del departamento de Crédito e ingrese
-                observaciones de evidencia si aplica:
+                Seleccione la resolución de
+                <strong>Gerencia Territorial</strong> e ingrese observaciones de
+                evidencia si aplica:
               </div>
 
-              <!-- Input de Observaciones / Comentarios -->
+              <!-- Input de Observaciones / Notas -->
               <q-input
                 v-model="observaciones"
                 filled
                 dense
                 type="textarea"
                 rows="3"
-                label="Notas / Justificación del Dictamen (Obligatorio para No Dar VoBo)"
-                placeholder="Ingrese notas o justificación del dictamen de Crédito..."
+                label="Notas / Justificación del Dictamen (Obligatorio para No Aprobar)"
+                placeholder="Ingrese notas o justificación del dictamen de Gerencia Territorial..."
                 bg-color="white"
                 :disable="saving"
               />
 
-              <!-- Botones de Acción para Dar o No Dar VoBo -->
+              <!-- Botones de Acción para Dar o No Dar VoBo / Aprobación -->
               <div class="row q-col-gutter-md q-mt-xs">
                 <div class="col-12 col-sm-6">
                   <q-btn
                     unelevated
                     color="positive"
                     icon="thumb_up"
-                    label="Dar VoBo (Favorable)"
+                    label="Aprobar (Favorable)"
                     class="full-width text-weight-bold q-py-sm"
                     :loading="saving && dictamenSeleccionado === true"
                     :disable="saving"
-                    @click="ejecutarVoBo(true)"
+                    @click="ejecutarVoBoGerencia(true)"
                   >
                     <q-tooltip
-                      >Otorgar el Visto Bueno de Crédito a esta
+                      >Otorgar la aprobación de Gerencia Territorial a esta
                       solicitud</q-tooltip
                     >
                   </q-btn>
@@ -379,14 +401,15 @@
                     unelevated
                     color="negative"
                     icon="thumb_down"
-                    label="No Dar VoBo (Desfavorable)"
+                    label="No Aprobar (Desfavorable)"
                     class="full-width text-weight-bold q-py-sm"
                     :loading="saving && dictamenSeleccionado === false"
                     :disable="saving"
-                    @click="ejecutarVoBo(false)"
+                    @click="ejecutarVoBoGerencia(false)"
                   >
                     <q-tooltip
-                      >Indicar que Crédito no otorga el Visto Bueno</q-tooltip
+                      >Indicar que Gerencia Territorial no aprueba la
+                      solicitud</q-tooltip
                     >
                   </q-btn>
                 </div>
@@ -472,6 +495,35 @@ const emit = defineEmits(["update:modelValue", "updated"]);
 const saving = ref(false);
 const dictamenSeleccionado = ref(null);
 const observaciones = ref("");
+
+const tieneVoBoGerenciaPrevio = computed(() => {
+  const c = props.credito;
+  if (!c) return false;
+  return (
+    (c.vobo_gerencia !== null &&
+      c.vobo_gerencia !== undefined &&
+      c.vobo_gerencia !== "") ||
+    (c.gerencia_vobo !== null &&
+      c.gerencia_vobo !== undefined &&
+      c.gerencia_vobo !== "") ||
+    (c.aprobado_gerencia !== null &&
+      c.aprobado_gerencia !== undefined &&
+      c.aprobado_gerencia !== "")
+  );
+});
+
+const esVoBoGerenciaPrevioAprobado = computed(() => {
+  const c = props.credito;
+  if (!c) return false;
+  const val = c.vobo_gerencia ?? c.gerencia_vobo ?? c.aprobado_gerencia;
+  return (
+    val === true ||
+    val === 1 ||
+    val === "1" ||
+    val === "true" ||
+    val === "aprobado"
+  );
+});
 
 // --- Gestión y Vinculación de Analítica Financiera ---
 const cargandoAnalitica = ref(false);
@@ -591,7 +643,10 @@ const buscarAnaliticaVinculada = async () => {
       }
     }
   } catch (error) {
-    console.error("Error al buscar analítica vinculada en VoBo:", error);
+    console.error(
+      "Error al buscar analítica vinculada en VoBo Gerencia:",
+      error
+    );
   } finally {
     cargandoAnalitica.value = false;
   }
@@ -622,15 +677,15 @@ const getDropdownPropsAut = (validated) => {
   }
 };
 
-// --- Ejecutar Dictamen VoBo ---
-const ejecutarVoBo = async (esAprobado) => {
+// --- Ejecutar Dictamen VoBo Gerencia ---
+const ejecutarVoBoGerencia = async (esAprobado) => {
   if (!props.credito?.id || saving.value) return;
 
   const obs = observaciones.value ? observaciones.value.trim() : null;
 
   if (!esAprobado && !obs) {
     show_notify(
-      "Debe ingresar las notas u observaciones para un dictamen desfavorable (No dar VoBo)",
+      "Debe ingresar las notas u observaciones para un dictamen desfavorable (No Aprobar)",
       "warning",
       "negative"
     );
@@ -648,23 +703,22 @@ const ejecutarVoBo = async (esAprobado) => {
 
   try {
     let res;
-    // Intentar endpoint principal definido en CreditoInternoController
     try {
       res = await api.post(
-        "/api/intranet/creditoInternos/voBoCredito",
+        "/api/intranet/creditoInternos/voBoGerencia",
         payload
       );
     } catch (err1) {
       if (err1?.response?.status === 404) {
         try {
           res = await api.post(
-            "/api/intranet/creditoInterno/voBoCredito",
+            "/api/intranet/creditoInterno/voBoGerencia",
             payload
           );
         } catch (err2) {
           if (err2?.response?.status === 404) {
             res = await api.post(
-              `/api/intranet/creditoInternos/${props.credito.id}/voBoCredito`,
+              `/api/intranet/creditoInternos/${props.credito.id}/voBoGerencia`,
               payload
             );
           } else {
@@ -679,8 +733,8 @@ const ejecutarVoBo = async (esAprobado) => {
     show_notify(
       res?.data?.message ||
         (esAprobado
-          ? "VoBo de Crédito otorgado correctamente"
-          : "Dictamen de VoBo no otorgado registrado"),
+          ? "Aprobación de Gerencia Territorial registrada correctamente"
+          : "Dictamen de no aprobación de Gerencia Territorial registrado"),
       "check",
       esAprobado ? "positive" : "orange-9"
     );
@@ -688,9 +742,10 @@ const ejecutarVoBo = async (esAprobado) => {
     emit("updated", res?.data?.data || res?.data);
     emit("update:modelValue", false);
   } catch (error) {
-    console.error("Error al registrar VoBo de crédito:", error);
+    console.error("Error al registrar aprobación de Gerencia:", error);
     show_notify(
-      error?.response?.data?.message || "Error al procesar el VoBo de crédito",
+      error?.response?.data?.message ||
+        "Error al procesar la aprobación de Gerencia",
       "error",
       "negative"
     );
@@ -705,9 +760,9 @@ watch(
   ([isOpen, cred]) => {
     if (isOpen && cred) {
       observaciones.value =
-        cred.vobo_notas ||
-        cred.vobo_observaciones ||
-        cred.vobo_comentarios ||
+        cred.vobo_gerencia_notas ||
+        cred.vobo_gerencia_observaciones ||
+        cred.gerencia_notas ||
         "";
       buscarAnaliticaVinculada();
     } else {

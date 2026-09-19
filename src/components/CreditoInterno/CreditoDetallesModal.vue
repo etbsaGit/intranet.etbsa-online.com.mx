@@ -137,47 +137,6 @@
                     }}
                   </q-chip>
                 </div>
-                <div class="col-12 col-md-4">
-                  <div class="text-caption text-grey-7">VoBo de Crédito</div>
-                  <q-chip
-                    v-if="credito.vobo === true || credito.vobo_credito === true || credito.vobo === 1 || credito.vobo_credito === 1"
-                    dense
-                    color="green-1"
-                    text-color="green-9"
-                    icon="check_circle"
-                    class="text-weight-bold q-px-sm"
-                  >
-                    VoBo Otorgado
-                    <q-tooltip v-if="credito.vobo_fecha || credito.vobo_observaciones">
-                      <div v-if="credito.vobo_fecha"><strong>Fecha:</strong> {{ formatFechaLarga(credito.vobo_fecha) }}</div>
-                      <div v-if="credito.vobo_observaciones"><strong>Notas:</strong> {{ credito.vobo_observaciones }}</div>
-                    </q-tooltip>
-                  </q-chip>
-                  <q-chip
-                    v-else-if="credito.vobo === false || credito.vobo_credito === false || credito.vobo === 0 || credito.vobo_credito === 0"
-                    dense
-                    color="red-1"
-                    text-color="red-9"
-                    icon="cancel"
-                    class="text-weight-bold q-px-sm"
-                  >
-                    No Otorgado
-                    <q-tooltip v-if="credito.vobo_fecha || credito.vobo_observaciones">
-                      <div v-if="credito.vobo_fecha"><strong>Fecha:</strong> {{ formatFechaLarga(credito.vobo_fecha) }}</div>
-                      <div v-if="credito.vobo_observaciones"><strong>Motivo:</strong> {{ credito.vobo_observaciones }}</div>
-                    </q-tooltip>
-                  </q-chip>
-                  <q-chip
-                    v-else
-                    dense
-                    color="grey-2"
-                    text-color="grey-8"
-                    icon="pending"
-                    class="text-weight-medium q-px-xs"
-                  >
-                    Sin VoBo
-                  </q-chip>
-                </div>
                 <div
                   class="col-12 col-md-4"
                   v-if="credito.linea?.name || credito.linea_id"
@@ -192,7 +151,7 @@
                   </div>
                 </div>
                 <div
-                  class="col-12 col-md-12"
+                  class="col-12 col-md-8"
                   v-if="credito.notificado?.nombreCompleto"
                 >
                   <div class="text-caption text-grey-7">Gerente Notificado</div>
@@ -203,6 +162,9 @@
               </div>
             </q-card-section>
           </q-card>
+
+          <!-- Tarjeta: Dictámenes y Vistos Buenos (VoBo Crédito y VoBo Gerencia) -->
+          <CreditoVoBoStatusCard :credito="credito" />
 
           <!-- Tarjeta 3: Condiciones Financieras -->
           <q-card flat bordered class="bg-blue-1">
@@ -755,6 +717,7 @@ import {
 } from "src/boot/format";
 import { sendRequest } from "src/boot/functions";
 import CreditoDocumentacionCard from "./CreditoDocumentacionCard.vue";
+import CreditoVoBoStatusCard from "./CreditoVoBoStatusCard.vue";
 import AnaliticaReport from "src/components/Analitica/AnaliticaReport.vue";
 
 const props = defineProps({

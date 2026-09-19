@@ -140,7 +140,7 @@
           <template v-slot:body-cell-linea="props">
             <q-td :props="props">
               <q-badge
-                v-if="props.row.linea?.name || props.row.credito_linea?.name"
+                v-if="props.row.linea?.name"
                 color="blue-grey-1"
                 text-color="blue-grey-9"
                 class="text-weight-bold q-pa-xs"
@@ -151,7 +151,7 @@
                   class="q-mr-xs"
                   color="blue-grey-8"
                 />
-                {{ props.row.linea?.name || props.row.credito_linea?.name }}
+                {{ props.row.linea?.name }}
               </q-badge>
               <div v-else class="text-caption text-grey-5">Sin línea</div>
             </q-td>
@@ -196,17 +196,13 @@
                 </div>
                 <div
                   v-if="
-                    (props.row.valor_enganche || props.row.anticipo) &&
-                    Number(props.row.valor_enganche || props.row.anticipo) > 0
+                    props.row.valor_enganche &&
+                    Number(props.row.valor_enganche) > 0
                   "
                   class="text-caption text-amber-9 text-weight-medium"
                 >
                   Enganche:
-                  {{
-                    formatCurrency(
-                      props.row.valor_enganche || props.row.anticipo
-                    )
-                  }}
+                  {{ formatCurrency(props.row.valor_enganche) }}
                 </div>
               </div>
             </q-td>
@@ -222,9 +218,7 @@
                   backgroundColor: props.row.estatus?.color || '#1976d2',
                 }"
               >
-                {{
-                  props.row.estatus?.nombre || props.row.estatus || "Pendiente"
-                }}
+                {{ props.row.estatus?.nombre || "Pendiente" }}
               </q-chip>
             </q-td>
           </template>
@@ -232,18 +226,138 @@
           <!-- Columna: VoBo Credito -->
           <template v-slot:body-cell-vobo_credito="props">
             <q-td :props="props" align="center">
-              <q-chip
-                dense
-                class="text-weight-bold text-white q-px-sm"
-                :style="{
-                  backgroundColor:
-                    props.row.vo_bo_credito?.[0]?.estatus?.color || '#1976d2',
-                }"
-              >
-                {{
-                  props.row.vo_bo_credito?.[0]?.estatus?.nombre || "Pendiente"
-                }}
-              </q-chip>
+              <div class="row items-center justify-center">
+                <!-- Aprobado (Like) -->
+                <q-avatar
+                  v-if="getVoBoTipo(props.row) === 'aprobado'"
+                  size="30px"
+                  color="green-1"
+                  text-color="positive"
+                  icon="thumb_up"
+                  class="shadow-1"
+                  :class="isCredito ? 'cursor-pointer' : ''"
+                  @click="isCredito ? verVoBo(props.row) : null"
+                >
+                  <q-tooltip class="bg-positive text-caption text-weight-bold">
+                    {{
+                      props.row.vo_bo_credito?.notas || "VoBo Crédito: Aprobado"
+                    }}
+                  </q-tooltip>
+                </q-avatar>
+
+                <!-- Rechazado (Dislike) -->
+                <q-avatar
+                  v-else-if="getVoBoTipo(props.row) === 'rechazado'"
+                  size="30px"
+                  color="red-1"
+                  text-color="negative"
+                  icon="thumb_down"
+                  class="shadow-1"
+                  :class="isCredito ? 'cursor-pointer' : ''"
+                  @click="isCredito ? verVoBo(props.row) : null"
+                >
+                  <q-tooltip class="bg-negative text-caption text-weight-bold">
+                    {{
+                      props.row.vo_bo_credito?.notas ||
+                      "VoBo Crédito: Rechazado"
+                    }}
+                  </q-tooltip>
+                </q-avatar>
+
+                <!-- Pendiente / Sin VoBo -->
+                <q-badge
+                  v-else
+                  color="grey-2"
+                  text-color="grey-7"
+                  class="q-px-sm q-py-xs text-caption text-weight-medium rounded-borders"
+                  :class="isCredito ? 'cursor-pointer' : ''"
+                  @click="isCredito ? verVoBo(props.row) : null"
+                >
+                  <q-icon
+                    name="hourglass_empty"
+                    size="14px"
+                    class="q-mr-xs text-grey-6"
+                  />
+                  <span>Pendiente</span>
+                  <q-tooltip class="bg-grey-8 text-caption">
+                    Sin VoBo de Crédito aún
+                  </q-tooltip>
+                </q-badge>
+              </div>
+            </q-td>
+          </template>
+
+          <!-- Columna: VoBo Gerencia -->
+          <template v-slot:body-cell-vobo_gerencia="props">
+            <q-td :props="props" align="center">
+              <div class="row items-center justify-center">
+                <!-- Aprobado (Like) -->
+                <q-avatar
+                  v-if="getVoBoGerenciaTipo(props.row) === 'aprobado'"
+                  size="30px"
+                  color="green-1"
+                  text-color="positive"
+                  icon="thumb_up"
+                  class="shadow-1"
+                  :class="isGerenteTerritorial ? 'cursor-pointer' : ''"
+                  @click="
+                    isGerenteTerritorial ? verVoBoGerencia(props.row) : null
+                  "
+                >
+                  <q-tooltip class="bg-positive text-caption text-weight-bold">
+                    {{
+                      props.row.vo_bo_gerencia?.notas ||
+                      "VoBo Gerencia: Aprobado"
+                    }}
+                  </q-tooltip>
+                </q-avatar>
+
+                <!-- Rechazado (Dislike) -->
+                <q-avatar
+                  v-else-if="getVoBoGerenciaTipo(props.row) === 'rechazado'"
+                  size="30px"
+                  color="red-1"
+                  text-color="negative"
+                  icon="thumb_down"
+                  class="shadow-1"
+                  :class="isGerenteTerritorial ? 'cursor-pointer' : ''"
+                  @click="
+                    isGerenteTerritorial ? verVoBoGerencia(props.row) : null
+                  "
+                >
+                  <q-tooltip class="bg-negative text-caption text-weight-bold">
+                    VoBo Gerencia: Rechazado
+                    <div
+                      v-if="parseVoBoGerencia(props.row).notas"
+                      class="text-weight-normal"
+                    >
+                      {{ parseVoBoGerencia(props.row).notas }}
+                    </div>
+                  </q-tooltip>
+                </q-avatar>
+
+                <!-- Pendiente / Sin VoBo -->
+                <q-badge
+                  v-else
+                  color="grey-2"
+                  text-color="grey-7"
+                  class="q-px-sm q-py-xs text-caption text-weight-medium rounded-borders"
+                  :class="isGerenteTerritorial ? 'cursor-pointer' : ''"
+                  @click="
+                    isGerenteTerritorial ? verVoBoGerencia(props.row) : null
+                  "
+                >
+                  <q-icon
+                    name="hourglass_empty"
+                    size="14px"
+                    class="q-mr-xs text-grey-6"
+                  />
+                  <span>Pendiente</span>
+                  <q-tooltip class="bg-grey-8 text-caption">
+                    Sin VoBo de Gerencia aún
+                  </q-tooltip>
+                </q-badge>
+              </div>
             </q-td>
           </template>
 
@@ -299,8 +413,13 @@
           <template v-slot:body-cell-detalles="props">
             <q-td :props="props" align="center">
               <div class="row items-center justify-center q-gutter-xs no-wrap">
+                <!-- btn vobo credito -->
                 <q-btn
-                  v-if="isCredito"
+                  v-if="
+                    isCredito &&
+                    props.row.vo_bo_gerencia &&
+                    props.row.estatus.nombre === 'Crédito en Proceso'
+                  "
                   flat
                   round
                   dense
@@ -312,6 +431,26 @@
                     >Dictamen de VoBo de Crédito</q-tooltip
                   >
                 </q-btn>
+                <!-- btn vobo gerencia -->
+                <q-btn
+                  v-if="
+                    (isGerenteTerritorial &&
+                      props.row.estatus.nombre === 'Crédito en Proceso') ||
+                    (isGerenteTerritorial &&
+                      props.row.estatus.nombre === 'Crédito Solicitado')
+                  "
+                  flat
+                  round
+                  dense
+                  icon="how_to_reg"
+                  color="indigo-8"
+                  @click="verVoBoGerencia(props.row)"
+                >
+                  <q-tooltip class="bg-indigo-8"
+                    >Aprobación de Gerencia Territorial</q-tooltip
+                  >
+                </q-btn>
+                <!-- btn ver detalles -->
                 <q-btn
                   flat
                   round
@@ -324,7 +463,12 @@
                     >Ver detalles completos</q-tooltip
                   >
                 </q-btn>
+                <!-- btn pagos -->
                 <q-btn
+                  v-if="
+                    props.row.estatus.nombre !== 'Crédito Rechazado' &&
+                    props.row.estatus.nombre !== 'Crédito Pagado'
+                  "
                   flat
                   round
                   dense
@@ -336,6 +480,7 @@
                     >Control y gestión de pagos</q-tooltip
                   >
                 </q-btn>
+                <!-- btn historial -->
                 <q-btn
                   flat
                   round
@@ -370,6 +515,13 @@
       @updated="onVoBoUpdated"
     />
 
+    <!-- Modal de Aprobación de Gerencia Territorial -->
+    <CreditoGerenciaModal
+      v-model="showGerenciaModal"
+      :credito="selectedGerenciaItem"
+      @updated="onVoBoGerenciaUpdated"
+    />
+
     <!-- Modal de Pagos del Crédito -->
     <CreditoPagosModal
       v-model="showPagosModal"
@@ -389,7 +541,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
-import { checkRole } from "src/boot/functions";
+import { checkRole, checkPuesto } from "src/boot/functions";
 import {
   formatPhoneNumber,
   formatCurrency,
@@ -401,6 +553,11 @@ import CreditoDetallesModal from "src/components/CreditoInterno/CreditoDetallesM
 import CreditoHistorialModal from "src/components/CreditoInterno/CreditoHistorialModal.vue";
 import CreditoPagosModal from "src/components/CreditoInterno/CreditoPagosModal.vue";
 import CreditoVoBoModal from "src/components/CreditoInterno/CreditoVoBoModal.vue";
+import CreditoGerenciaModal from "src/components/CreditoInterno/CreditoGerenciaModal.vue";
+import CreditoVoBoStatusCard, {
+  parseVoBoCredito,
+  parseVoBoGerencia,
+} from "src/components/CreditoInterno/CreditoVoBoStatusCard.vue";
 import CreditoInternoDashboard from "src/components/CreditoInterno/Dashboard/CreditoInternoDashboard.vue";
 import CreditoInternoCalendario from "src/components/CreditoInterno/Calendario/CreditoInternoCalendario.vue";
 import CreditoAplazamientosIndex from "src/components/CreditoInterno/Aplazamientos/CreditoAplazamientosIndex.vue";
@@ -413,6 +570,12 @@ const isCredito = computed(() => {
   return checkRole("Credito");
 });
 
+const isGerenteTerritorial = computed(() => {
+  return (
+    checkPuesto("Gerente Territorial") || checkPuesto("Gerente territorial")
+  );
+});
+
 const activeTab = ref("solicitudes");
 
 const catalogoRef = ref(null);
@@ -422,6 +585,9 @@ const selectedItem = ref(null);
 
 const showVoBoModal = ref(false);
 const selectedVoBoItem = ref(null);
+
+const showGerenciaModal = ref(false);
+const selectedGerenciaItem = ref(null);
 
 const showPagosModal = ref(false);
 const selectedPagosItem = ref(null);
@@ -480,7 +646,14 @@ const columns = [
   {
     name: "vobo_credito",
     label: "VoBo Crédito",
-    field: (row) => row.vo_bo_credito[0]?.estatus?.nombre ?? "",
+    field: (row) => getVoBoEstatus(row) || "Pendiente",
+    sortable: true,
+    align: "center",
+  },
+  {
+    name: "vobo_gerencia",
+    label: "VoBo Gerencia",
+    field: (row) => getVoBoGerenciaEstatus(row) || "Pendiente",
     sortable: true,
     align: "center",
   },
@@ -506,6 +679,22 @@ const columns = [
   },
 ];
 
+const getVoBoEstatus = (row) => {
+  return parseVoBoCredito(row).chipLabel;
+};
+
+const getVoBoTipo = (row) => {
+  return parseVoBoCredito(row).status;
+};
+
+const getVoBoGerenciaEstatus = (row) => {
+  return parseVoBoGerencia(row).chipLabel;
+};
+
+const getVoBoGerenciaTipo = (row) => {
+  return parseVoBoGerencia(row).status;
+};
+
 const verDetalles = (row) => {
   selectedItem.value = row;
   showDetallesModal.value = true;
@@ -514,6 +703,11 @@ const verDetalles = (row) => {
 const verVoBo = (row) => {
   selectedVoBoItem.value = row;
   showVoBoModal.value = true;
+};
+
+const verVoBoGerencia = (row) => {
+  selectedGerenciaItem.value = row;
+  showGerenciaModal.value = true;
 };
 
 const verPagos = (row) => {
@@ -527,6 +721,14 @@ const verHistorial = (row) => {
 };
 
 const onVoBoUpdated = async () => {
+  if (catalogoRef.value?.reload) {
+    await catalogoRef.value.reload();
+  } else {
+    await crud.getPaginatedItems("/api/intranet/creditoInternos");
+  }
+};
+
+const onVoBoGerenciaUpdated = async () => {
   if (catalogoRef.value?.reload) {
     await catalogoRef.value.reload();
   } else {

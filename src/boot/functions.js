@@ -185,6 +185,28 @@ export function checkSucursal(linea) {
   return false;
 }
 
+export function checkPuesto(puesto) {
+  const authStore = useAuthStore();
+  const usuario = authStore.authUser;
+  if (
+    usuario &&
+    usuario.roles &&
+    usuario.roles.some((usuarioRol) => usuarioRol.name === "Admin")
+  ) {
+    // Si el usuario tiene el rol de "admin", devuelve true
+    return true;
+  }
+  if (
+    usuario &&
+    usuario.empleado &&
+    usuario.empleado.puesto &&
+    usuario.empleado.puesto.nombre
+  ) {
+    return usuario.empleado.puesto.nombre === puesto;
+  }
+  return false;
+}
+
 export function checkUserId(userId) {
   const authStore = useAuthStore();
   const usuario = authStore.authUser;

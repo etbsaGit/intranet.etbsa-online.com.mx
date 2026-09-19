@@ -60,11 +60,7 @@
             <q-card flat bordered class="bg-amber-1 q-pa-sm rounded-borders">
               <div class="text-caption text-grey-8">
                 {{
-                  (
-                    credito?.tipo_enganche?.nombre ||
-                    credito?.tipo_anticipo ||
-                    ""
-                  )
+                  (credito?.tipo_enganche?.nombre)
                     .toLowerCase()
                     .includes("a cuenta")
                     ? "Valor Maquinaria"
@@ -76,11 +72,7 @@
                 }}
               </div>
               <div class="text-h6 text-weight-bolder text-amber-9">
-                {{
-                  formatCurrency(
-                    credito?.valor_enganche || credito?.anticipo || 0
-                  )
-                }}
+                {{ formatCurrency(credito?.valor_enganche) }}
               </div>
             </q-card>
           </div>
@@ -136,10 +128,9 @@
               <q-chip
                 dense
                 :color="
-                  props.row.es_anticipo ||
                   props.row.etiqueta === 'Enganche' ||
                   (props.row.n_pago === 1 &&
-                    Number(credito?.valor_enganche || credito?.anticipo) > 0)
+                    Number(credito?.valor_enganche) > 0)
                     ? 'orange-9'
                     : 'dark'
                 "
@@ -157,9 +148,7 @@
               <div class="text-weight-medium flex items-center q-gutter-xs">
                 <q-icon name="event" size="xs" color="teal-8" />
                 <span>
-                  {{
-                    formatFechaLarga(props.row.fecha_a_pagar || props.row.fecha)
-                  }}
+                  {{ formatFechaLarga(props.row.fecha_a_pagar) }}
                 </span>
               </div>
               <div
@@ -196,7 +185,6 @@
               >
                 {{
                   props.row.estatus?.nombre ||
-                  props.row.estatus ||
                   (props.row.fecha_liquidado ? "Liquidado" : "Pendiente")
                 }}
               </q-chip>
@@ -715,7 +703,7 @@
                     .toLowerCase()
                     .includes("enganche")) ||
                 (pagoSeleccionado?.n_pago === 1 &&
-                  Number(credito?.valor_enganche || credito?.anticipo) > 0)
+                  Number(credito?.valor_enganche) > 0)
                   ? "Evidencia enganche"
                   : "Evidencia pago"
               }}
@@ -797,12 +785,7 @@
             <div class="row justify-between q-mb-xs">
               <span class="text-grey-7">Fecha Programada Actual:</span>
               <span class="text-weight-bold text-teal-9">
-                {{
-                  formatFechaLarga(
-                    pagoSeleccionadoAplazo?.fecha_a_pagar ||
-                      pagoSeleccionadoAplazo?.fecha
-                  )
-                }}
+                {{ formatFechaLarga(pagoSeleccionadoAplazo?.fecha_a_pagar) }}
               </span>
             </div>
             <div

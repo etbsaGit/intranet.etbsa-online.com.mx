@@ -476,8 +476,8 @@
                   color="teal-8"
                   @click="verPagos(props.row)"
                 >
-                  <q-tooltip class="bg-teal-8"
-                    >Control y gestión de pagos</q-tooltip
+                  <q-tooltip class="bg-teal-8">
+                    Control y gestión de pagos</q-tooltip
                   >
                 </q-btn>
                 <!-- btn historial -->

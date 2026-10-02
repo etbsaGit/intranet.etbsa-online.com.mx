@@ -159,8 +159,8 @@
 import { formatFechaLarga } from "src/boot/format";
 
 export const parseVoBoCredito = (c) => {
-  // 1. objeto en c.vo_bo_credito
-  let rec = c.vo_bo_credito;
+  // 1. objeto en c?.vo_bo_credito
+  let rec = c?.vo_bo_credito;
 
   let status = "pendiente";
   let fecha = null;
@@ -210,8 +210,8 @@ export const parseVoBoCredito = (c) => {
 };
 
 export const parseVoBoGerencia = (c) => {
-  // 1. objeto en c.vo_bo_gerencia
-  let rec = c.vo_bo_gerencia;
+  // 1. objeto en c?.vo_bo_gerencia
+  let rec = c?.vo_bo_gerencia;
 
   let status = "pendiente";
   let fecha = null;

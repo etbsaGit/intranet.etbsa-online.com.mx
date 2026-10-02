@@ -1,28 +1,53 @@
 <template>
-  <BaseCatalogo title="Asignación de Número de Serie" :columns="columns"
-    url="/api/intranet/trackingAutorizaciones/Para Asignar/Asignado">
-
+  <BaseCatalogo
+    title="Asignación de Número de Serie"
+    :columns="columns"
+    url="/api/intranet/trackingAutorizaciones/Para Asignar/Asignado"
+  >
     <template v-slot:body-cell-detalles="props">
       <q-td :props="props">
         <!-- Historial -->
-        <q-btn flat round dense icon="history" color="blue" class="q-mr-sm" @click="verHistorial(props.row)" />
+        <q-btn
+          flat
+          round
+          dense
+          icon="history"
+          color="blue"
+          class="q-mr-sm"
+          @click="verHistorial(props.row)"
+        />
 
         <!-- Ver detalles -->
-        <q-btn flat round dense icon="visibility" color="primary" class="q-mr-sm" @click="verDetalles(props.row)" />
+        <q-btn
+          flat
+          round
+          dense
+          icon="visibility"
+          color="primary"
+          class="q-mr-sm"
+          @click="verDetalles(props.row)"
+        />
 
         <!-- Descargar PDF -->
-        <q-btn flat round dense icon="download" color="green" @click="descargarPDF(props.row)"
-          :loading="loadingPdfId === props.row.id" />
-
-
-
+        <q-btn
+          flat
+          round
+          dense
+          icon="download"
+          color="green"
+          @click="descargarPDF(props.row)"
+          :loading="loadingPdfId === props.row.id"
+        />
       </q-td>
     </template>
 
     <template #body-cell-asignado="props">
       <q-td :props="props">
-        <q-icon :name="props.value === 'Asignado' ? 'check_circle' : 'cancel'"
-          :color="props.value === 'Asignado' ? 'positive' : 'grey'" size="md" />
+        <q-icon
+          :name="props.value === 'Asignado' ? 'check_circle' : 'cancel'"
+          :color="props.value === 'Asignado' ? 'positive' : 'grey'"
+          size="md"
+        />
       </q-td>
     </template>
   </BaseCatalogo>
@@ -40,14 +65,13 @@
       <HistorialTrackingModal :cotizacion="item" />
     </template>
   </BaseDialog>
-
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
 import { sendRequest } from "src/boot/functions";
-import { api } from "src/boot/axios"
+import { api } from "src/boot/axios";
 import BaseDialog from "src/bases/BaseDialog.vue";
 
 import BaseCatalogo from "src/bases/BaseCatalogo.vue";
@@ -75,55 +99,55 @@ const columns = [
     name: "folio",
     label: "Folio",
     align: "left",
-    field: row => `#${row.folio}`,
+    field: (row) => `#${row.folio}`,
   },
   {
     name: "categoria",
     label: "Categoria",
     align: "left",
-    field: row => row.categoria?.name || "",
+    field: (row) => row.categoria?.name || "",
   },
   {
     name: "condicion",
     label: "Condición de Pago",
     align: "left",
-    field: row => row.condicion_pago?.name || "",
+    field: (row) => row.condicion_pago?.name || "",
   },
   {
     name: "sucursal",
     label: "Sucursal",
     align: "left",
-    field: row => row.sucursal?.nombre || "",
+    field: (row) => row.sucursal?.nombre || "",
   },
   {
     name: "vendedor_depto",
     label: "Vendedor / Departamento",
     align: "left",
-    field: row => row,
-    format: row => {
+    field: (row) => row,
+    format: (row) => {
       const vendedor = row.vendedor?.nombreCompleto;
       const depto = row.depto?.nombre;
 
       return [vendedor, depto].filter(Boolean).join(" - ");
-    }
+    },
   },
   {
     name: "notificado",
     label: "Notificado",
     align: "left",
-    field: row => row.notificado?.nombreCompleto || "",
+    field: (row) => row.notificado?.nombreCompleto || "",
   },
   {
     name: "asignado",
     label: "Asignado",
     align: "left",
-    field: row => row.situacion?.nombre || "",
+    field: (row) => row.situacion?.nombre || "",
   },
   {
     name: "detalles",
     label: "Detalles",
     align: "left",
-    field: row => row.id,
+    field: (row) => row.id,
   },
 ];
 
@@ -143,13 +167,10 @@ const descargarPDF = async (row) => {
     const response = await api.get(
       `/api/intranet/tracking/print-quote/${row.id}`,
       {
-        responseType: "blob"
+        responseType: "blob",
       }
     );
-    const file = new Blob(
-      [response.data],
-      { type: "application/pdf" }
-    );
+    const file = new Blob([response.data], { type: "application/pdf" });
     const fileURL = URL.createObjectURL(file);
     window.open(fileURL, "_blank");
   } catch (error) {
@@ -158,5 +179,4 @@ const descargarPDF = async (row) => {
     loadingPdfId.value = null;
   }
 };
-
 </script>

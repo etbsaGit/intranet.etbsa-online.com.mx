@@ -148,7 +148,7 @@
 </template>
 
 <script setup>
-import { ref, computed, useSlots, onMounted } from "vue";
+import { ref, computed, useSlots, onMounted, onUnmounted } from "vue";
 import { useCrudStore } from "src/stores/crud";
 import BaseDialog from "src/bases/BaseDialog.vue";
 import TableSkeleton from "src/bases/skeletons/TableSkeleton.vue";
@@ -258,7 +258,18 @@ const handleDelete = async () => {
 };
 
 onMounted(() => {
+  crud.paginatedItems = [];
   reload(1);
+});
+
+onUnmounted(() => {
+  crud.paginatedItems = [];
+});
+
+defineExpose({
+  reload,
+  filters,
+  selected,
 });
 </script>
 

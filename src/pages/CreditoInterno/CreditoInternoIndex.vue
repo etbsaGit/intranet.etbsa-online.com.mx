@@ -414,12 +414,21 @@
             <q-td :props="props" align="center">
               <div class="row items-center justify-center q-gutter-xs no-wrap">
                 <!-- btn vobo credito -->
-                <q-btn
+                <!-- <q-btn
                   v-if="
                     isCredito &&
                     props.row.vo_bo_gerencia &&
-                    props.row.estatus.nombre === 'Crédito en Proceso'
+                    props.row.estatus?.nombre === 'Crédito en Proceso'
                   "
+                  flat
+                  round
+                  dense
+                  icon="fact_check"
+                  color="purple-8"
+                  @click="verVoBo(props.row)"
+                > -->
+                <q-btn
+                  v-if="isCredito"
                   flat
                   round
                   dense
@@ -435,9 +444,9 @@
                 <q-btn
                   v-if="
                     (isGerenteTerritorial &&
-                      props.row.estatus.nombre === 'Crédito en Proceso') ||
+                      props.row.estatus?.nombre === 'Crédito en Proceso') ||
                     (isGerenteTerritorial &&
-                      props.row.estatus.nombre === 'Crédito Solicitado')
+                      props.row.estatus?.nombre === 'Crédito Solicitado')
                   "
                   flat
                   round
@@ -466,8 +475,8 @@
                 <!-- btn pagos -->
                 <q-btn
                   v-if="
-                    props.row.estatus.nombre !== 'Crédito Rechazado' &&
-                    props.row.estatus.nombre !== 'Crédito Pagado'
+                    props.row.estatus?.nombre !== 'Crédito Rechazado' &&
+                    props.row.estatus?.nombre !== 'Crédito Pagado'
                   "
                   flat
                   round

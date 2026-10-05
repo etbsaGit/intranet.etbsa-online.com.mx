@@ -156,6 +156,7 @@ import IngresoIndex from "src/components/Ingreso/IngresoIndex.vue";
 import IngresosTab from "src/components/AgricolaInversion/IngresosTab.vue";
 import InversionesTab from "src/components/InversionesAgricolas/InversionesTab.vue";
 import EgresoIndex from "src/components/Egresos/EgresoIndex.vue";
+import ClienteHistoricoDashboard from "src/components/Cliente/ClienteHistoricoDashboard.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -174,6 +175,12 @@ const tabs = [
     label: "Información",
     icon: "person",
     component: ClienteForm,
+  },
+  {
+    name: "radiografiaCliente",
+    label: "Radiografía del Cliente",
+    icon: "insights",
+    component: ClienteHistoricoDashboard,
   },
   {
     name: "docs",

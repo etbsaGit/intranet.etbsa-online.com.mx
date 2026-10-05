@@ -6,7 +6,7 @@
     transition-hide="scale"
   >
     <q-card
-      style="min-width: 650px; max-width: 950px; width: 100%"
+      style="min-width: 750px; max-width: 1250px; width: 95vw"
       class="rounded-borders"
     >
       <!-- Encabezado del Modal -->
@@ -30,26 +30,50 @@
         <q-btn flat round dense icon="close" v-close-popup :disable="saving" />
       </q-card-section>
 
-      <!-- Banner Informativo -->
-      <div
-        class="bg-purple-1 text-purple-10 q-pa-sm text-caption row items-center no-wrap"
-        style="border-bottom: 1px solid #e1bee7"
+      <!-- PESTAÑAS DEL MODAL: DICTAMEN VS RADIOGRAFÍA DEL CLIENTE -->
+      <q-tabs
+        v-model="modalTab"
+        dense
+        class="bg-purple-1 text-purple-10"
+        active-color="purple-10"
+        active-bg-color="purple-2"
+        indicator-color="purple-9"
+        align="left"
       >
-        <q-icon
-          name="verified_user"
-          size="20px"
-          class="q-mr-xs flex-shrink-0"
-        />
-        <div>
-          Este dictamen queda registrado como
-          <strong>evidencia formal</strong> de que el departamento de
-          <strong>Crédito</strong> revisó y evaluó la solicitud.
-        </div>
-      </div>
+        <q-tab name="dictamen" icon="fact_check" label="Dictamen y Condiciones" no-caps />
+        <q-tab name="radiografia" icon="insights" label="Radiografía del Cliente" no-caps>
+          <q-badge color="purple-9" text-color="white" floating rounded v-if="credito?.cliente?.nombre">
+            PBI
+          </q-badge>
+        </q-tab>
+      </q-tabs>
 
-      <!-- Contenido del Modal (Scroll) -->
-      <q-card-section class="q-pa-md scroll" style="max-height: 70vh">
-        <div v-if="credito" class="q-gutter-y-md">
+      <q-separator />
+
+      <!-- PANELES DE CONTENIDO -->
+      <q-tab-panels v-model="modalTab" animated class="bg-transparent">
+        <!-- PESTAÑA 1: DICTAMEN DE VOBO -->
+        <q-tab-panel name="dictamen" class="q-pa-none">
+          <!-- Banner Informativo -->
+          <div
+            class="bg-purple-1 text-purple-10 q-pa-sm text-caption row items-center no-wrap"
+            style="border-bottom: 1px solid #e1bee7"
+          >
+            <q-icon
+              name="verified_user"
+              size="20px"
+              class="q-mr-xs flex-shrink-0"
+            />
+            <div>
+              Este dictamen queda registrado como
+              <strong>evidencia formal</strong> de que el departamento de
+              <strong>Crédito</strong> revisó y evaluó la solicitud.
+            </div>
+          </div>
+
+          <!-- Contenido del Modal (Scroll) -->
+          <q-card-section class="q-pa-md scroll" style="max-height: 70vh">
+            <div v-if="credito" class="q-gutter-y-md">
           <!-- Tarjeta 1: Información del Cliente -->
           <q-card flat bordered class="bg-grey-1">
             <q-card-section class="q-pb-xs">
@@ -394,12 +418,45 @@
             </q-card-section>
           </q-card>
         </div>
-      </q-card-section>
+          </q-card-section>
+        </q-tab-panel>
+
+        <!-- PESTAÑA 2: RADIOGRAFÍA DEL CLIENTE -->
+        <q-tab-panel name="radiografia" class="q-pa-none">
+          <div class="scroll q-pa-sm" style="max-height: 75vh">
+            <ClienteHistoricoDashboard
+              :cliente="credito?.cliente || { id: credito?.cliente_id, nombre: credito?.cliente_nombre }"
+            />
+          </div>
+        </q-tab-panel>
+      </q-tab-panels>
 
       <q-separator />
 
       <!-- Acciones del Modal -->
-      <q-card-actions align="right" class="q-pa-md bg-grey-1">
+      <q-card-actions align="between" class="q-pa-md bg-grey-1">
+        <div>
+          <q-btn
+            v-if="modalTab === 'dictamen'"
+            flat
+            color="purple-9"
+            icon="insights"
+            label="Ver Radiografía del Cliente"
+            no-caps
+            class="text-weight-bold"
+            @click="modalTab = 'radiografia'"
+          />
+          <q-btn
+            v-else
+            flat
+            color="purple-9"
+            icon="fact_check"
+            label="Volver al Dictamen"
+            no-caps
+            class="text-weight-bold"
+            @click="modalTab = 'dictamen'"
+          />
+        </div>
         <q-btn
           flat
           label="Cerrar"
@@ -455,6 +512,7 @@ import { api } from "src/boot/axios";
 import CreditoDocumentacionCard from "./CreditoDocumentacionCard.vue";
 import CreditoVoBoStatusCard from "./CreditoVoBoStatusCard.vue";
 import AnaliticaReport from "src/components/Analitica/AnaliticaReport.vue";
+import ClienteHistoricoDashboard from "src/components/Cliente/ClienteHistoricoDashboard.vue";
 
 const props = defineProps({
   modelValue: {
@@ -469,6 +527,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "updated"]);
 
+const modalTab = ref("dictamen");
 const saving = ref(false);
 const dictamenSeleccionado = ref(null);
 const observaciones = ref("");
@@ -477,6 +536,15 @@ const observaciones = ref("");
 const cargandoAnalitica = ref(false);
 const analiticaVinculada = ref(null);
 const modalReporteAnalitica = ref(false);
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) {
+      modalTab.value = "dictamen";
+    }
+  }
+);
 
 const sonMismoDia = (dateA, dateB) => {
   if (!dateA || !dateB) return false;

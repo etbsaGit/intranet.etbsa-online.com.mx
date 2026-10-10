@@ -378,174 +378,177 @@
         </div>
       </div>
 
-      <!-- BLOQUE 1: BANNERS DE VENTA Y MARGEN (COMO IMAGEN 1) -->
-      <div class="row q-col-gutter-sm q-mb-md">
+      <!-- TARJETAS DE KPIS SUPERIORES (VENTAS, TRACTORES, FECHAS) -->
+      <div class="row q-col-gutter-sm q-mb-sm">
+        <!-- TARJETA: VENTAS REGISTRADAS -->
+        <div class="col-6 col-md-3">
+          <div class="kpi-box text-center">
+            <div class="row items-center justify-center q-gutter-x-xs q-mb-xs">
+              <q-icon name="agriculture" size="20px" color="green-4">
+                <q-tooltip>Tractor / Maquinaria</q-tooltip>
+              </q-icon>
+              <q-icon name="water_drop" size="18px" color="cyan-4">
+                <q-tooltip>Riego</q-tooltip>
+              </q-icon>
+              <q-icon name="hardware" size="18px" color="orange-4">
+                <q-tooltip>Implemento</q-tooltip>
+              </q-icon>
+              <q-icon name="flight" size="18px" color="purple-4">
+                <q-tooltip>Dron</q-tooltip>
+              </q-icon>
+              <q-icon name="gps_fixed" size="18px" color="blue-4">
+                <q-tooltip>GPS</q-tooltip>
+              </q-icon>
+            </div>
+            <div class="text-h6 text-weight-bold text-white q-mt-xs">
+              {{ dashboardData.kpis.total_unidades }}
+            </div>
+            <div class="text-caption text-grey-4">VENTAS REGISTRADAS</div>
+          </div>
+        </div>
+
+        <!-- TARJETA: TRACTORES COMPRADOS -->
+        <div class="col-6 col-md-3">
+          <div class="kpi-box text-center">
+            <q-icon name="agriculture" size="26px" color="lime-4" />
+            <div class="text-h6 text-weight-bold text-white q-mt-xs">
+              {{ totalTractores }}
+            </div>
+            <div class="text-caption text-grey-4">TRACTORES COMPRADOS</div>
+          </div>
+        </div>
+
+        <!-- TARJETA: PRIMERA COMPRA -->
+        <div class="col-6 col-md-3">
+          <div class="kpi-box text-center">
+            <q-icon name="event" size="26px" color="amber-4" />
+            <div class="text-h6 text-weight-bold text-white q-mt-xs">
+              {{ dashboardData.kpis.primera_compra || 'N/A' }}
+            </div>
+            <div class="text-caption text-grey-4">PRIMERA COMPRA</div>
+          </div>
+        </div>
+
+        <!-- TARJETA: ÚLTIMA COMPRA -->
+        <div class="col-6 col-md-3">
+          <div class="kpi-box text-center">
+            <q-icon name="verified" size="26px" color="purple-4" />
+            <div class="text-h6 text-weight-bold text-white q-mt-xs">
+              {{ dashboardData.kpis.ultima_compra || 'N/A' }}
+            </div>
+            <div class="text-caption text-grey-4">ÚLTIMA COMPRA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOQUE 1: BANNERS DE VENTA, MARGEN Y DESGLOSE POR SUCURSAL -->
+      <div class="q-mb-md">
         <!-- BANNER DE VENTA -->
-        <div class="col-12 col-lg-8">
-          <div class="pbi-table-card">
-            <div class="pbi-banner-header text-center">VENTA</div>
-            <div class="q-pa-xs">
-              <div class="row text-center text-caption text-weight-bold pbi-subhdr">
-                <div class="col">MAQUINARIA</div>
-                <div class="col">REFACCIONES</div>
-                <div class="col">SERVICIO</div>
-                <div class="col">RIEGO</div>
-                <div class="col">CHEVRON</div>
-                <div class="col">NUEVAS TEC.</div>
-                <div class="col pbi-col-total">TOTAL VENTA</div>
-              </div>
-              <div class="row text-center text-subtitle2 text-weight-bolder pbi-row-val q-py-sm">
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.maquinaria) }}</div>
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.refacciones) }}</div>
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.servicio) }}</div>
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.riego) }}</div>
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.chevron) }}</div>
-                <div class="col text-white">{{ formatMoney(ventasRadiografia.nuevas_tecnologias) }}</div>
-                <div class="col text-yellow-4 pbi-col-total text-weight-bold">
-                  {{ formatMoney(ventasRadiografia.total_venta) }}
-                </div>
-              </div>
+        <div class="pbi-table-card">
+          <div class="pbi-banner-header text-center">VENTA</div>
+          <div class="q-pa-xs">
+            <div class="row text-center text-caption text-weight-bold pbi-subhdr">
+              <div class="col">MAQUINARIA</div>
+              <div class="col">REFACCIONES</div>
+              <div class="col">SERVICIO</div>
+              <div class="col">RIEGO</div>
+              <div class="col">CHEVRON</div>
+              <div class="col">NUEVAS TEC.</div>
+              <div class="col pbi-col-total">TOTAL VENTA</div>
             </div>
-          </div>
-
-          <!-- BANNER DE MARGEN -->
-          <div class="pbi-table-card q-mt-sm">
-            <div class="pbi-banner-header text-center">MARGEN</div>
-            <div class="q-pa-xs">
-              <div class="row text-center text-caption text-weight-bold pbi-subhdr">
-                <div class="col">MAQUINARIA</div>
-                <div class="col">REFACCIONES</div>
-                <div class="col">SERVICIO</div>
-                <div class="col">RIEGO</div>
-                <div class="col">CHEVRON</div>
-                <div class="col">NUEVAS TEC.</div>
-                <div class="col pbi-col-total">TOTAL MARGEN</div>
+            <div class="row text-center text-subtitle2 text-weight-bolder pbi-row-val q-py-sm">
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.maquinaria) }}</div>
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.refacciones) }}</div>
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.servicio) }}</div>
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.riego) }}</div>
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.chevron) }}</div>
+              <div class="col text-white">{{ formatMoney(ventasRadiografia.nuevas_tecnologias) }}</div>
+              <div class="col text-yellow-4 pbi-col-total text-weight-bold">
+                {{ formatMoney(ventasRadiografia.total_venta) }}
               </div>
-              <div class="row text-center text-subtitle2 text-weight-bolder pbi-row-val q-py-sm">
-                <div class="col text-white">{{ formatMoney(margenRadiografia.maquinaria) }}</div>
-                <div class="col text-white">{{ formatMoney(margenRadiografia.refacciones) }}</div>
-                <div class="col text-white">{{ formatMoney(margenRadiografia.servicio) }}</div>
-                <div class="col text-white">{{ formatMoney(margenRadiografia.riego) }}</div>
-                <div class="col text-white">{{ formatMoney(margenRadiografia.chevron) }}</div>
-                <div class="col text-white">{{ formatMoney(margenRadiografia.nuevas_tecnologias) }}</div>
-                <div class="col text-green-4 pbi-col-total text-weight-bold">
-                  {{ formatMoney(margenRadiografia.total_margen) }}
-                  <span class="text-caption text-grey-4" v-if="ventasRadiografia.total_venta > 0">
-                    ({{ calcMargenPct(margenRadiografia.total_margen, ventasRadiografia.total_venta) }}%)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- TABLA DESGLOSE VENTA POR DEPARTAMENTO / SUCURSAL (DEBAJO DE MARGEN) -->
-          <div class="desglose-depto-card q-mt-sm">
-            <div class="desglose-banner-header text-center text-weight-bold">
-              Desglose Venta por Departamento
-            </div>
-            <div class="pbi-table-wrap">
-              <table class="pbi-desglose-table">
-                <thead>
-                  <tr>
-                    <th class="text-left th-sucursal">SUCURSAL</th>
-                    <th class="text-right">MAQUINARIA</th>
-                    <th class="text-right">REFACCIONES</th>
-                    <th class="text-right">SERVICIO</th>
-                    <th class="text-right">RIEGO</th>
-                    <th class="text-right">CHEVRON</th>
-                    <th class="text-right">NUEVAS TECNOLOGIAS</th>
-                    <th class="text-right th-total">TOTAL VENTA</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, rIdx) in desgloseSucursalDepto" :key="rIdx">
-                    <td class="text-left text-weight-bold sucursal-col">{{ row.sucursal }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_maquinaria) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_refacciones) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_servicio) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_riego) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_chevron) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(row.venta_nuevas_tecnologias) }}</td>
-                    <td class="text-right text-weight-bold total-col">{{ formatMoneyInt(row.total_venta) }}</td>
-                  </tr>
-                  <tr v-if="!desgloseSucursalDepto.length">
-                    <td colspan="8" class="text-center text-grey-5 q-pa-md">
-                      Sin registros de ventas por sucursal
-                    </td>
-                  </tr>
-                </tbody>
-                <tfoot v-if="desgloseSucursalDepto.length">
-                  <tr class="desglose-total-row">
-                    <td class="total-blank-cell"></td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.maquinaria) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.refacciones) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.servicio) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.riego) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.chevron) }}</td>
-                    <td class="text-right">{{ formatMoneyInt(totalDesglose.nuevas_tecnologias) }}</td>
-                    <td class="text-right text-weight-bolder">{{ formatMoneyInt(totalDesglose.total_venta) }}</td>
-                  </tr>
-                </tfoot>
-              </table>
             </div>
           </div>
         </div>
 
-        <!-- TARJETAS LATERALES DE KPIS (CLIENTES, EQUIPOS, AÑOS) -->
-        <div class="col-12 col-lg-4">
-          <div class="row q-col-gutter-xs">
-            <div class="col-6">
-              <div class="kpi-box text-center">
-                <div class="row items-center justify-center q-gutter-x-xs q-mb-xs">
-                  <q-icon name="agriculture" size="20px" color="green-4">
-                    <q-tooltip>Tractor / Maquinaria</q-tooltip>
-                  </q-icon>
-                  <q-icon name="water_drop" size="18px" color="cyan-4">
-                    <q-tooltip>Riego</q-tooltip>
-                  </q-icon>
-                  <q-icon name="hardware" size="18px" color="orange-4">
-                    <q-tooltip>Implemento</q-tooltip>
-                  </q-icon>
-                  <q-icon name="flight" size="18px" color="purple-4">
-                    <q-tooltip>Dron</q-tooltip>
-                  </q-icon>
-                  <q-icon name="gps_fixed" size="18px" color="blue-4">
-                    <q-tooltip>GPS</q-tooltip>
-                  </q-icon>
-                </div>
-                <div class="text-h6 text-weight-bold text-white q-mt-xs">
-                  {{ dashboardData.kpis.total_unidades }}
-                </div>
-                <div class="text-caption text-grey-4">VENTAS REGISTRADAS</div>
+        <!-- BANNER DE MARGEN -->
+        <div class="pbi-table-card q-mt-sm">
+          <div class="pbi-banner-header text-center">MARGEN</div>
+          <div class="q-pa-xs">
+            <div class="row text-center text-caption text-weight-bold pbi-subhdr">
+              <div class="col">MAQUINARIA</div>
+              <div class="col">REFACCIONES</div>
+              <div class="col">SERVICIO</div>
+              <div class="col">RIEGO</div>
+              <div class="col">CHEVRON</div>
+              <div class="col">NUEVAS TEC.</div>
+              <div class="col pbi-col-total">TOTAL MARGEN</div>
+            </div>
+            <div class="row text-center text-subtitle2 text-weight-bolder pbi-row-val q-py-sm">
+              <div class="col text-white">{{ formatMoney(margenRadiografia.maquinaria) }}</div>
+              <div class="col text-white">{{ formatMoney(margenRadiografia.refacciones) }}</div>
+              <div class="col text-white">{{ formatMoney(margenRadiografia.servicio) }}</div>
+              <div class="col text-white">{{ formatMoney(margenRadiografia.riego) }}</div>
+              <div class="col text-white">{{ formatMoney(margenRadiografia.chevron) }}</div>
+              <div class="col text-white">{{ formatMoney(margenRadiografia.nuevas_tecnologias) }}</div>
+              <div class="col text-green-4 pbi-col-total text-weight-bold">
+                {{ formatMoney(margenRadiografia.total_margen) }}
+                <span class="text-caption text-grey-4" v-if="ventasRadiografia.total_venta > 0">
+                  ({{ calcMargenPct(margenRadiografia.total_margen, ventasRadiografia.total_venta) }}%)
+                </span>
               </div>
             </div>
-            <div class="col-6">
-              <div class="kpi-box text-center">
-                <q-icon name="percent" size="28px" color="blue-4" />
-                <div class="text-h6 text-weight-bold text-white q-mt-xs">
-                  {{ dashboardData.kpis.margen_pct }}%
-                </div>
-                <div class="text-caption text-grey-4">% MARGEN GLOBAL</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="kpi-box text-center q-mt-xs">
-                <q-icon name="event" size="28px" color="amber-4" />
-                <div class="text-h6 text-weight-bold text-white q-mt-xs">
-                  {{ dashboardData.kpis.primera_compra || 'N/A' }}
-                </div>
-                <div class="text-caption text-grey-4">PRIMERA COMPRA</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="kpi-box text-center q-mt-xs">
-                <q-icon name="verified" size="28px" color="purple-4" />
-                <div class="text-h6 text-weight-bold text-white q-mt-xs">
-                  {{ dashboardData.kpis.ultima_compra || 'N/A' }}
-                </div>
-                <div class="text-caption text-grey-4">ÚLTIMA COMPRA</div>
-              </div>
-            </div>
+          </div>
+        </div>
+
+        <!-- TABLA DESGLOSE VENTA POR DEPARTAMENTO / SUCURSAL (DEBAJO DE MARGEN) -->
+        <div class="desglose-depto-card q-mt-sm">
+          <div class="desglose-banner-header text-center text-weight-bold">
+            Desglose Venta por Departamento
+          </div>
+          <div class="pbi-table-wrap">
+            <table class="pbi-desglose-table">
+              <thead>
+                <tr>
+                  <th class="text-left th-sucursal">SUCURSAL</th>
+                  <th class="text-right">MAQUINARIA</th>
+                  <th class="text-right">REFACCIONES</th>
+                  <th class="text-right">SERVICIO</th>
+                  <th class="text-right">RIEGO</th>
+                  <th class="text-right">CHEVRON</th>
+                  <th class="text-right">NUEVAS TECNOLOGIAS</th>
+                  <th class="text-right th-total">TOTAL VENTA</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, rIdx) in desgloseSucursalDepto" :key="rIdx">
+                  <td class="text-left text-weight-bold sucursal-col">{{ row.sucursal }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_maquinaria) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_refacciones) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_servicio) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_riego) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_chevron) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(row.venta_nuevas_tecnologias) }}</td>
+                  <td class="text-right text-weight-bold total-col">{{ formatMoneyInt(row.total_venta) }}</td>
+                </tr>
+                <tr v-if="!desgloseSucursalDepto.length">
+                  <td colspan="8" class="text-center text-grey-5 q-pa-md">
+                    Sin registros de ventas por sucursal
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot v-if="desgloseSucursalDepto.length">
+                <tr class="desglose-total-row">
+                  <td class="total-blank-cell"></td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.maquinaria) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.refacciones) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.servicio) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.riego) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.chevron) }}</td>
+                  <td class="text-right">{{ formatMoneyInt(totalDesglose.nuevas_tecnologias) }}</td>
+                  <td class="text-right text-weight-bolder">{{ formatMoneyInt(totalDesglose.total_venta) }}</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
         </div>
       </div>
@@ -1010,6 +1013,13 @@ const totalDesglose = computed(() => {
     nuevas_tecnologias: rows.reduce((acc, r) => acc + (Number(r.venta_nuevas_tecnologias) || 0), 0),
     total_venta: rows.reduce((acc, r) => acc + (Number(r.total_venta) || 0), 0),
   };
+});
+
+const totalTractores = computed(() => {
+  if (dashboardData.value?.kpis?.total_tractores !== undefined) {
+    return dashboardData.value.kpis.total_tractores;
+  }
+  return sumCol(dashboardData.value?.tractores_familia, 'unidades') || 0;
 });
 
 const formatMoney = (val) => {

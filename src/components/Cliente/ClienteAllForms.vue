@@ -157,6 +157,7 @@ import IngresosTab from "src/components/AgricolaInversion/IngresosTab.vue";
 import InversionesTab from "src/components/InversionesAgricolas/InversionesTab.vue";
 import EgresoIndex from "src/components/Egresos/EgresoIndex.vue";
 import ClienteHistoricoDashboard from "src/components/Cliente/ClienteHistoricoDashboard.vue";
+import ClienteCarteraVencidaDashboard from "src/components/Cliente/ClienteCarteraVencidaDashboard.vue";
 
 const { cliente } = defineProps(["cliente"]);
 
@@ -181,6 +182,12 @@ const tabs = [
     label: "Radiografía del Cliente",
     icon: "insights",
     component: ClienteHistoricoDashboard,
+  },
+  {
+    name: "carteraVencida",
+    label: "Cartera Vencida",
+    icon: "account_balance_wallet",
+    component: ClienteCarteraVencidaDashboard,
   },
   {
     name: "docs",

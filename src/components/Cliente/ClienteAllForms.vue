@@ -1,5 +1,5 @@
 <template>
-  <q-splitter v-model="splitterModel" unit="px" style="height: 90vh" disable>
+  <q-splitter v-model="splitterModel" unit="px" style="height: calc(100vh - 85px)" disable>
     <template v-slot:before>
       <div class="q-pa-none">
         <q-tabs
@@ -42,9 +42,10 @@
         vertical
         transition-prev="jump-up"
         transition-next="jump-up"
+        class="custom-tab-panels"
       >
         <template v-for="item in tabs" :key="item.name">
-          <q-tab-panel :name="item.name">
+          <q-tab-panel :name="item.name" class="custom-tab-panel">
             <div class="panel-header">
               <q-item dense>
                 <q-item-section>
@@ -432,5 +433,22 @@ onMounted(() => {
     transform: scale(1);
     box-shadow: 0 0 12px rgba(33, 150, 243, 0.4);
   }
+}
+
+/* Permitir que elementos con position: sticky dentro de los tab panels (ej. filtro de cartera vencida)
+   se mantengan fijos al hacer scroll en el panel del splitter */
+:deep(.q-splitter__after) {
+  overflow-y: auto !important;
+}
+
+.custom-tab-panels,
+:deep(.custom-tab-panels),
+:deep(.custom-tab-panels.q-tab-panels),
+:deep(.q-tab-panels),
+:deep(.q-panel),
+:deep(.q-panel-parent),
+:deep(.custom-tab-panel),
+:deep(.q-tab-panel) {
+  overflow: visible !important;
 }
 </style>
